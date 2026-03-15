@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getBookings, getPhotos, updateBookingStatus, uploadPhoto, deletePhoto } from '../actions'
 
 export default async function AdminDashboard() {
@@ -25,7 +27,7 @@ export default async function AdminDashboard() {
                     <td className="py-3">{b.childAge} лет</td>
                     <td className="py-3 font-mono text-sm">{b.phone}</td>
                     <td className="py-3">
-                      <form action={async () => { 'use server'; await updateBookingStatus(b.id, b.status === "Новая" ? "Обработана" : "Новая") }}>
+                      <form action={updateBookingStatus.bind(null, b.id, b.status === "Новая" ? "Обработана" : "Новая")}>
                         <button className={`px-3 py-1 text-xs rounded-full ${b.status === 'Новая' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
                           {b.status}
                         </button>
@@ -51,7 +53,7 @@ export default async function AdminDashboard() {
             {photos.map((p: any) => (
               <div key={p.id} className="relative group rounded overflow-hidden aspect-square border">
                 <img src={p.url} className="w-full h-full object-cover" alt="" />
-                <form action={async () => { 'use server'; await deletePhoto(p.id, p.url) }} className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                <form action={deletePhoto.bind(null, p.id, p.url)} className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                   <button type="submit" className="bg-red-500 text-white px-3 py-1 rounded text-sm font-bold">Удалить</button>
                 </form>
               </div>
