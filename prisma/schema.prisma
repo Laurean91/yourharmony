@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model Booking {
+  id         String   @id @default(uuid())
+  parentName String
+  childAge   Int
+  phone      String
+  status     String   @default("Новая") // "Новая" или "Обработана"
+  createdAt  DateTime @default(now())
+}
+
+model Photo {
+  id        String   @id @default(uuid())
+  url       String
+  createdAt DateTime @default(now())
+}
