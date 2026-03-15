@@ -32,14 +32,15 @@ export default function PostForm({ categories, post, action, submitLabel }: Post
   const [content, setContent] = useState(post?.content ?? '')
   const [slug, setSlug] = useState(post?.slug ?? '')
   const [coverPreview, setCoverPreview] = useState<string | null>(post?.coverImage ?? null)
-  const [loading, setLoading] = useState(false)
   const [isPublished, setIsPublished] = useState(post?.isPublished ?? false)
+  const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
     try {
       const fd = new FormData(e.currentTarget)
+      // Поля, управляемые стейтом, передаём явно
       fd.set('content', content)
       fd.set('slug', slug)
       fd.set('isPublished', String(isPublished))
@@ -50,7 +51,6 @@ export default function PostForm({ categories, post, action, submitLabel }: Post
     } catch (err) {
       console.error(err)
       alert('Ошибка при сохранении. Попробуйте ещё раз.')
-    } finally {
       setLoading(false)
     }
   }

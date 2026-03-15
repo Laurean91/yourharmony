@@ -3,6 +3,12 @@
 import { PrismaClient } from '@prisma/client'
 import { put, del } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
+
+/** Возвращает true, если Vercel Blob настроен (есть токен) */
+function isBlobEnabled() {
+  return !!process.env.BLOB_READ_WRITE_TOKEN
+}
 
 let prisma: PrismaClient
 
@@ -113,7 +119,7 @@ export async function createPost(formData: FormData) {
 
   let coverImage: string | undefined
   const coverFile = formData.get('coverFile') as File | null
-  if (coverFile && coverFile.size > 0) {
+  if (coverFile && coverFile.size > 0 && isBlobEnabled()) {
     const blob = await put(`covers/${Date.now()}-${coverFile.name}`, coverFile, { access: 'public' })
     coverImage = blob.url
   }
@@ -146,7 +152,7 @@ export async function updatePost(id: string, formData: FormData) {
 
   let coverImage: string | null = existingCoverImage
   const coverFile = formData.get('coverFile') as File | null
-  if (coverFile && coverFile.size > 0) {
+  if (coverFile && coverFile.size > 0 && isBlobEnabled()) {
     const blob = await put(`covers/${Date.now()}-${coverFile.name}`, coverFile, { access: 'public' })
     coverImage = blob.url
   }
@@ -185,6 +191,7 @@ export async function togglePostStatus(id: string, currentValue: boolean) {
   revalidatePath('/blog')
   revalidatePath(`/blog/${post.slug}`)
   revalidatePath('/admin/blog')
+  redirect('/admin/blog')
 }
 
 // 13. Список категорий

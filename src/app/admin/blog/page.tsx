@@ -1,8 +1,9 @@
 export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
-import { getAllPostsAdmin, deletePost, togglePostStatus, getCategories } from '../../actions'
-import { Pencil, Trash2, PlusCircle, Eye, EyeOff } from 'lucide-react'
+import { getAllPostsAdmin, togglePostStatus, getCategories } from '../../actions'
+import { Pencil, Eye, EyeOff, PlusCircle } from 'lucide-react'
+import DeletePostButton from '../../../components/DeletePostButton'
 
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('ru-RU', { dateStyle: 'medium' }).format(new Date(date))
@@ -100,18 +101,7 @@ export default async function AdminBlogPage() {
                           >
                             <Pencil size={16} />
                           </Link>
-                          <form action={deletePost.bind(null, post.id)}>
-                            <button
-                              type="submit"
-                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                              title="Удалить"
-                              onClick={(e) => {
-                                if (!confirm(`Удалить статью "${post.title}"?`)) e.preventDefault()
-                              }}
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </form>
+                          <DeletePostButton id={post.id} title={post.title} />
                           {post.isPublished && (
                             <Link
                               href={`/blog/${post.slug}`}
