@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { getCategories, createPost } from '../../../actions'
+
+export const dynamic = 'force-dynamic'
 import PostForm from '../../../../components/PostForm'
 
 export default async function NewPostPage() {

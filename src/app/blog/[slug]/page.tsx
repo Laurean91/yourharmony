@@ -10,9 +10,14 @@ interface Props {
 
 // Pre-generate paths for published posts at build time (ISR)
 export async function generateStaticParams() {
-  const { posts } = await getPosts(1)
-  // Only statically generate first page for build speed; others rendered on-demand
-  return posts.map((p) => ({ slug: p.slug }))
+  try {
+    const { posts } = await getPosts(1)
+    return posts.map((p) => ({ slug: p.slug }))
+  } catch (error) {
+    // If the database is unreachable during the build phase on Vercel,
+    // gracefully fallback to an empty array. Pages will be generated on-demand at runtime.
+    return []
+  }
 }
 
 // Dynamic SEO metadata per article

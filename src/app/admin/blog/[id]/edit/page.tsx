@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getAllPostsAdmin, getCategories, updatePost } from '../../../../actions'
+
+export const dynamic = 'force-dynamic'
 import PostForm from '../../../../../components/PostForm'
 
 interface Props {
