@@ -1,14 +1,25 @@
 export const dynamic = 'force-dynamic'
 
-import { getBookings, getPhotos, updateBookingStatus, uploadPhoto, deletePhoto } from '../actions'
+import Link from 'next/link'
+import { getBookings, getPhotos, updateBookingStatus, uploadPhoto, deletePhoto, getAllPostsAdmin } from '../actions'
 
 export default async function AdminDashboard() {
-  const bookings = await getBookings()
-  const photos = await getPhotos()
+  const [bookings, photos, posts] = await Promise.all([getBookings(), getPhotos(), getAllPostsAdmin()])
 
   return (
     <div className="min-h-screen bg-gray-50 p-8 font-sans text-gray-800">
       <h1 className="text-3xl font-bold mb-8">Панель управления клуба</h1>
+
+      {/* БЛОГ */}
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 rounded-2xl shadow-sm mb-8 text-white flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold mb-1">Блог и Новости</h2>
+          <p className="text-purple-100 text-sm">{posts.length} {posts.length === 1 ? 'статья' : 'статей'} · {posts.filter((p: any) => p.isPublished).length} опубликовано</p>
+        </div>
+        <Link href="/admin/blog" className="bg-white text-purple-700 font-semibold px-5 py-2.5 rounded-xl hover:bg-purple-50 transition-colors text-sm">
+          Управление блогом →
+        </Link>
+      </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
