@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getPosts } from '../actions'
 import BookingButton from '../../components/BookingButton'
+import { formatDate } from '../../lib/utils'
 
 export const metadata: Metadata = {
   title: 'Блог | YourHarmony',
@@ -18,8 +19,6 @@ interface Props {
   searchParams: Promise<{ page?: string }>
 }
 
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' }).format(new Date(date))
 
 export default async function BlogPage({ searchParams }: Props) {
   const { page } = await searchParams
@@ -106,7 +105,7 @@ export default async function BlogPage({ searchParams }: Props) {
                   {/* Контент */}
                   <div className="flex flex-col flex-1 p-6">
                     <time className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-2">
-                      {formatDate(post.createdAt)}
+                      {formatDate(post.createdAt, false)}
                     </time>
                     <h2 className="text-lg font-extrabold text-gray-900 mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-orange-500 transition-all line-clamp-2 leading-snug">
                       {post.title}

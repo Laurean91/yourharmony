@@ -1,9 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPosts } from '../app/actions'
-
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' }).format(new Date(date))
+import { formatDate } from '../lib/utils'
 
 export default async function BlogPreview() {
   const { posts } = await getPosts(1)
@@ -66,7 +64,7 @@ export default async function BlogPreview() {
               {/* Content */}
               <div className="flex flex-col flex-1 p-5">
                 <time className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-2">
-                  {formatDate(post.createdAt)}
+                  {formatDate(post.createdAt, false)}
                 </time>
                 <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors line-clamp-2">
                   {post.title}

@@ -1,6 +1,6 @@
 'use server'
 
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '../lib/prisma'
 import { put, del } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -10,36 +10,31 @@ function isBlobEnabled() {
   return !!process.env.BLOB_READ_WRITE_TOKEN
 }
 
-let prisma: PrismaClient
-
-function getPrisma() {
-  if (!prisma) {
-    prisma = new PrismaClient()
-  }
-  return prisma
-}
-
 // 1. Создание заявки с лендинга
 export async function createBooking(formData: FormData) {
-  const parentName = formData.get('parentName') as string
+  const parentName = (formData.get('parentName') as string)?.trim()
   const childAge = Number(formData.get('childAge'))
-  const phone = formData.get('phone') as string
+  const phone = (formData.get('phone') as string)?.trim()
 
-  await getPrisma().booking.create({
+  if (!parentName || parentName.length > 100) throw new Error('Некорректное имя')
+  if (isNaN(childAge) || childAge < 1 || childAge > 18) throw new Error('Некорректный возраст')
+  if (!phone || phone.length > 30) throw new Error('Некорректный телефон')
+
+  await prisma.booking.create({
     data: { parentName, childAge, phone }
   })
-  
+
   revalidatePath('/admin')
 }
 
 // 2. Получение списка заявок (для админки)
 export async function getBookings() {
-  return await getPrisma().booking.findMany({ orderBy: { createdAt: 'desc' } })
+  return await prisma.booking.findMany({ orderBy: { createdAt: 'desc' } })
 }
 
 // 3. Обновление статуса заявки
 export async function updateBookingStatus(id: string, newStatus: string) {
-  await getPrisma().booking.update({
+  await prisma.booking.update({
     where: { id },
     data: { status: newStatus }
   })
@@ -52,7 +47,7 @@ export async function uploadPhoto(formData: FormData) {
   if (!file) return
 
   const blob = await put(file.name, file, { access: 'public' })
-  await getPrisma().photo.create({
+  await prisma.photo.create({
     data: { url: blob.url }
   })
   
@@ -62,11 +57,11 @@ export async function uploadPhoto(formData: FormData) {
 
 // 5. Получение и удаление фото (Галерея)
 export async function getPhotos() {
-  return await getPrisma().photo.findMany({ orderBy: { createdAt: 'desc' } })
+  return await prisma.photo.findMany({ orderBy: { createdAt: 'desc' } })
 }
 
 export async function deletePhoto(id: string, url: string) {
-  await getPrisma().photo.delete({ where: { id } })
+  await prisma.photo.delete({ where: { id } })
   await del(url)
   revalidatePath('/')
   revalidatePath('/admin')
@@ -79,22 +74,20 @@ const POST_PAGE_SIZE = 6
 // 6. Список опубликованных постов (с пагинацией, для читателей)
 export async function getPosts(page = 1) {
   const skip = (page - 1) * POST_PAGE_SIZE
-  const [posts, total] = await Promise.all([
-    getPrisma().post.findMany({
-      where: { isPublished: true },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: POST_PAGE_SIZE,
-      include: { category: true },
-    }),
-    getPrisma().post.count({ where: { isPublished: true } }),
-  ])
+  const posts = await prisma.post.findMany({
+    where: { isPublished: true },
+    orderBy: { createdAt: 'desc' },
+    skip,
+    take: POST_PAGE_SIZE,
+    include: { category: true },
+  })
+  const total = await prisma.post.count({ where: { isPublished: true } })
   return { posts, total, totalPages: Math.ceil(total / POST_PAGE_SIZE) }
 }
 
 // 7. Пост по slug (для страницы статьи)
 export async function getPostBySlug(slug: string) {
-  return await getPrisma().post.findUnique({
+  return await prisma.post.findUnique({
     where: { slug },
     include: { category: true },
   })
@@ -102,7 +95,7 @@ export async function getPostBySlug(slug: string) {
 
 // 8. Все посты для административной таблицы
 export async function getAllPostsAdmin() {
-  return await getPrisma().post.findMany({
+  return await prisma.post.findMany({
     orderBy: { createdAt: 'desc' },
     include: { category: true },
   })
@@ -124,7 +117,7 @@ export async function createPost(formData: FormData) {
     coverImage = blob.url
   }
 
-  await getPrisma().post.create({
+  await prisma.post.create({
     data: {
       title,
       slug,
@@ -154,10 +147,14 @@ export async function updatePost(id: string, formData: FormData) {
   const coverFile = formData.get('coverFile') as File | null
   if (coverFile && coverFile.size > 0 && isBlobEnabled()) {
     const blob = await put(`covers/${Date.now()}-${coverFile.name}`, coverFile, { access: 'public' })
+    // Удаляем старую обложку из Vercel Blob, если она была
+    if (existingCoverImage) {
+      await del(existingCoverImage).catch(() => null)
+    }
     coverImage = blob.url
   }
 
-  const post = await getPrisma().post.update({
+  const post = await prisma.post.update({
     where: { id },
     data: {
       title,
@@ -177,14 +174,18 @@ export async function updatePost(id: string, formData: FormData) {
 
 // 11. Удаление поста
 export async function deletePost(id: string) {
-  await getPrisma().post.delete({ where: { id } })
+  const post = await prisma.post.findUnique({ where: { id }, select: { coverImage: true } })
+  await prisma.post.delete({ where: { id } })
+  if (post?.coverImage && isBlobEnabled()) {
+    await del(post.coverImage).catch(() => null)
+  }
   revalidatePath('/blog')
   revalidatePath('/admin/blog')
 }
 
 // 12. Переключение статуса публикации
 export async function togglePostStatus(id: string, currentValue: boolean) {
-  const post = await getPrisma().post.update({
+  const post = await prisma.post.update({
     where: { id },
     data: { isPublished: !currentValue },
   })
@@ -196,10 +197,10 @@ export async function togglePostStatus(id: string, currentValue: boolean) {
 
 // 13. Список категорий
 export async function getCategories() {
-  return await getPrisma().category.findMany({ orderBy: { name: 'asc' } })
+  return await prisma.category.findMany({ orderBy: { name: 'asc' } })
 }
 
 // 14. Создание категории
 export async function createCategory(name: string, slug: string) {
-  return await getPrisma().category.create({ data: { name, slug } })
+  return await prisma.category.create({ data: { name, slug } })
 }

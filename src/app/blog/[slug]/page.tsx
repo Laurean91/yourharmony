@@ -3,7 +3,9 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPostBySlug, getPosts } from '../../actions'
+import sanitizeHtml from 'sanitize-html'
 import BookingButton from '../../../components/BookingButton'
+import { formatDate } from '../../../lib/utils'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -42,10 +44,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }).format(
-    new Date(date)
-  )
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params
@@ -145,7 +143,16 @@ export default async function BlogPostPage({ params }: Props) {
               prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-2xl
               prose-ul:list-disc prose-ol:list-decimal
               prose-li:text-gray-700"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtml(post.content, {
+                allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'figure', 'figcaption']),
+                allowedAttributes: {
+                  ...sanitizeHtml.defaults.allowedAttributes,
+                  img: ['src', 'alt', 'width', 'height', 'class'],
+                  '*': ['class'],
+                },
+              }),
+            }}
           />
         </div>
 

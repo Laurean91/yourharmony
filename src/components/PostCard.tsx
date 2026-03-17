@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { formatDate } from '../lib/utils'
 
 interface PostCardProps {
   post: {
@@ -13,10 +14,6 @@ interface PostCardProps {
   }
 }
 
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }).format(
-    new Date(date)
-  )
 
 export default function PostCard({ post }: PostCardProps) {
   return (
