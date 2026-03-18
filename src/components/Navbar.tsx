@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import '../app/nav-footer.css'
 import { scrollToSection } from '../lib/utils'
 
@@ -17,6 +18,7 @@ const navItems = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,8 +30,16 @@ export default function Navbar() {
 
   const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault()
-    scrollToSection(href)
     setIsOpen(false)
+
+    if (pathname !== '/') {
+      // На других страницах — переходим на главную с якорем
+      window.location.href = `/${href}`
+      return
+    }
+
+    // Небольшая задержка чтобы анимация закрытия меню не мешала скроллу
+    setTimeout(() => scrollToSection(href), 50)
   }
 
   return (

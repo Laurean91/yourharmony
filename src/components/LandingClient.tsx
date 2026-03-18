@@ -1,12 +1,23 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { motion, AnimatePresence, useMotionValue, useTransform, useInView } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
 import { Star, BookOpen, Smile, Camera, X, MessageCircle, Send } from 'lucide-react'
 import { getPhotos } from '../app/actions'
 import BookingModal from './BookingModal'
 
+/* ───────── Variants ───────── */
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } }
+
+const staggerContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.15 } },
+}
+
+const staggerContainerFast = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12 } },
+}
 
 const modalBackdrop = {
   hidden: { opacity: 0 },
@@ -14,15 +25,63 @@ const modalBackdrop = {
   exit: { opacity: 0, transition: { duration: 0.2 } },
 }
 
+/* ───────── useCounter ───────── */
+function useCounter(target: number, duration = 1.5) {
+  const [count, setCount] = useState(0)
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true })
+
+  useEffect(() => {
+    if (!inView) return
+    let start = 0
+    const step = target / (duration * 60)
+    const timer = setInterval(() => {
+      start += step
+      if (start >= target) { setCount(target); clearInterval(timer) }
+      else setCount(Math.floor(start))
+    }, 1000 / 60)
+    return () => clearInterval(timer)
+  }, [inView, target, duration])
+
+  return { count, ref }
+}
+
 /* ───────── Hero ───────── */
 export function LandingHero() {
   const [showModal, setShowModal] = useState(false)
 
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+  const blobLeftX  = useTransform(mouseX, [-600, 600], [-20, 20])
+  const blobLeftY  = useTransform(mouseY, [-400, 400], [-15, 15])
+  const blobRightX = useTransform(mouseX, [-600, 600], [20, -20])
+  const blobRightY = useTransform(mouseY, [-400, 400], [15, -15])
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    mouseX.set(e.clientX - rect.left - rect.width / 2)
+    mouseY.set(e.clientY - rect.top - rect.height / 2)
+  }
+
+  const students = useCounter(50)
+  const years    = useCounter(3)
+  const rating   = useCounter(50, 1.2) // 0→50 → display as "5.0"
+
   return (
     <>
-      <section id="home" className="relative overflow-hidden pt-24 pb-32 flex flex-col items-center text-center px-4">
-        <div className="absolute top-[-10rem] left-[-10rem] w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob" />
-        <div className="absolute top-[-10rem] right-[-10rem] w-96 h-96 bg-orange-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000" />
+      <section
+        id="home"
+        className="relative overflow-hidden pt-24 pb-32 flex flex-col items-center text-center px-4"
+        onMouseMove={handleMouseMove}
+      >
+        <motion.div
+          className="absolute top-[-10rem] left-[-10rem] w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"
+          style={{ x: blobLeftX, y: blobLeftY }}
+        />
+        <motion.div
+          className="absolute top-[-10rem] right-[-10rem] w-96 h-96 bg-orange-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"
+          style={{ x: blobRightX, y: blobRightY }}
+        />
 
         <motion.h1 initial="hidden" animate="visible" variants={fadeUp}
           className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-orange-500 mb-6">
@@ -36,23 +95,26 @@ export function LandingHero() {
           onClick={() => setShowModal(true)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="px-8 py-4 bg-gradient-to-r from-purple-500 to-orange-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow ring-2 ring-white/30"
+          className="px-8 py-4 bg-gradient-to-r from-purple-500 to-orange-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow ring-2 ring-white/30 animate-glow-pulse"
         >
           Записаться на пробное занятие
         </motion.button>
 
+        {/* Stats bar with counter */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp}
           className="flex flex-wrap justify-center gap-8 mt-10">
-          {[
-            { value: '50+', label: 'учеников', color: 'text-purple-600' },
-            { value: '3 года', label: 'работаем', color: 'text-orange-500' },
-            { value: '★ 5.0', label: 'средняя оценка', color: 'text-yellow-500' },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <p className={`text-2xl font-extrabold ${stat.color}`}>{stat.value}</p>
-              <p className="text-sm text-gray-500">{stat.label}</p>
-            </div>
-          ))}
+          <div className="text-center" ref={students.ref}>
+            <p className="text-2xl font-extrabold text-purple-600">{students.count}+</p>
+            <p className="text-sm text-gray-500">учеников</p>
+          </div>
+          <div className="text-center" ref={years.ref}>
+            <p className="text-2xl font-extrabold text-orange-500">{years.count} года</p>
+            <p className="text-sm text-gray-500">работаем</p>
+          </div>
+          <div className="text-center" ref={rating.ref}>
+            <p className="text-2xl font-extrabold text-yellow-500">★ {(rating.count / 10).toFixed(1)}</p>
+            <p className="text-sm text-gray-500">средняя оценка</p>
+          </div>
         </motion.div>
       </section>
 
@@ -87,29 +149,38 @@ export function LandingTop() {
           </p>
         </motion.div>
 
-        {/* Карточки */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Карточки со stagger */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
           {[
             { icon: <Smile className="w-10 h-10 text-purple-500" />, title: 'Игровая форма', text: 'Уроки построены на играх, песнях и сценках. Дети учатся незаметно для себя — без стресса и зубрёжки.' },
             { icon: <BookOpen className="w-10 h-10 text-orange-500" />, title: 'Живое общение', text: 'Разговорная практика с первого занятия. Дети говорят, слушают и понимают — не только читают тексты.' },
             { icon: <Star className="w-10 h-10 text-yellow-500" />, title: 'Уютная атмосфера', text: 'Маленькие группы, внимательный преподаватель, поддержка на каждом шагу. Каждый ребёнок чувствует себя уверенно.' },
           ].map((item, idx) => (
-            <motion.div key={idx} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-              className="p-8 pb-10 rounded-3xl bg-white/40 backdrop-blur-lg border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] hover:-translate-y-2 transition-transform">
+            <motion.div key={idx} variants={fadeUp}
+              whileHover={{ y: -8, transition: { duration: 0.2 } }}
+              className="p-8 pb-10 rounded-3xl bg-white/40 backdrop-blur-lg border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] transition-shadow hover:shadow-xl">
               <div className="mb-4">{item.icon}</div>
               <h3 className="text-xl font-bold mb-2">{item.title}</h3>
               <p className="text-gray-600 leading-relaxed">{item.text}</p>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* ГАЛЕРЕЯ */}
       <section id="lessons" className="py-20 px-4 bg-white/30 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12">
+          <motion.h2
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
+            className="text-4xl font-bold text-center mb-12">
             <Camera className="inline mr-3" />Как проходят занятия
-          </h2>
+          </motion.h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {photos.map((photo, idx) => (
               <motion.div key={photo.id} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
@@ -147,15 +218,28 @@ export function LandingTop() {
 /* ───────── Contacts ───────── */
 export function LandingContacts() {
   return (
-    <section id="contacts" className="py-20 px-4 max-w-6xl mx-auto">
+    <motion.section
+      id="contacts"
+      className="py-20 px-4 max-w-6xl mx-auto"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      variants={fadeUp}
+    >
       <div className="bg-white/50 backdrop-blur-xl rounded-3xl p-8 md:p-12 shadow-xl border border-white flex flex-col md:flex-row gap-12 items-center">
         <div className="flex-1">
           <h2 className="text-4xl font-bold mb-6">Ждем вас в гости!</h2>
           <p className="text-gray-600 mb-8 text-lg">
             Мы находимся в самом центре города. Приходите на пробное занятие, познакомьтесь с преподавателями и атмосферой нашего клуба.
           </p>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4 text-gray-700">
+          <motion.div
+            className="space-y-4"
+            variants={staggerContainerFast}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            <motion.div variants={fadeUp} className="flex items-center gap-4 text-gray-700">
               <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -166,8 +250,8 @@ export function LandingContacts() {
                 <p className="font-bold">Адрес</p>
                 <p>ул. Мира, д. 15, офис 302</p>
               </div>
-            </div>
-            <div className="flex items-center gap-4 text-gray-700">
+            </motion.div>
+            <motion.div variants={fadeUp} className="flex items-center gap-4 text-gray-700">
               <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -177,8 +261,8 @@ export function LandingContacts() {
                 <p className="font-bold">Телефон</p>
                 <p>+7 (999) 123-45-67</p>
               </div>
-            </div>
-            <div className="flex gap-3 pt-2">
+            </motion.div>
+            <motion.div variants={fadeUp} className="flex gap-3 pt-2">
               <a href="https://t.me/yourharmony_club" target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 rounded-full bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 transition-colors">
                 <Send className="w-4 h-4" />Telegram
@@ -187,8 +271,8 @@ export function LandingContacts() {
                 className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-500 text-white text-sm font-semibold hover:bg-green-600 transition-colors">
                 <MessageCircle className="w-4 h-4" />WhatsApp
               </a>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
         <div className="w-full md:w-1/2 h-80 rounded-2xl overflow-hidden shadow-inner">
           <iframe
@@ -201,7 +285,7 @@ export function LandingContacts() {
           />
         </div>
       </div>
-    </section>
+    </motion.section>
   )
 }
 
