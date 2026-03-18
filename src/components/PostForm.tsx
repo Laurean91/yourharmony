@@ -46,7 +46,7 @@ export default function PostForm({ categories, post, action, submitLabel }: Post
       fd.set('isPublished', String(isPublished))
       if (post?.coverImage) fd.set('existingCoverImage', post.coverImage)
       await action(fd)
-      router.push('/admin/blog')
+      router.push('/bigbos/blog')
       router.refresh()
     } catch (err) {
       console.error(err)

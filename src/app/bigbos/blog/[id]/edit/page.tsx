@@ -24,7 +24,7 @@ export default async function EditPostPage({ params }: Props) {
         {/* Header */}
         <div className="mb-8">
           <div className="text-sm text-gray-400 mb-1">
-            <Link href="/admin/blog" className="hover:text-purple-600">← К списку статей</Link>
+            <Link href="/bigbos/blog" className="hover:text-purple-600">← К списку статей</Link>
           </div>
           <h1 className="text-3xl font-bold">Редактирование статьи</h1>
           <p className="text-gray-500 mt-1 text-sm">{post.title}</p>

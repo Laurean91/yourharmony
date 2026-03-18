@@ -18,13 +18,13 @@ export default async function AdminBlogPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <div className="text-sm text-gray-400 mb-1">
-              <Link href="/admin" className="hover:text-purple-600">← Панель управления</Link>
+              <Link href="/bigbos" className="hover:text-purple-600">← Панель управления</Link>
             </div>
             <h1 className="text-3xl font-bold">Управление блогом</h1>
             <p className="text-gray-500 mt-1">{posts.length} {posts.length === 1 ? 'статья' : 'статей'} · {categories.length} категорий</p>
           </div>
           <Link
-            href="/admin/blog/new"
+            href="/bigbos/blog/new"
             className="flex items-center gap-2 bg-purple-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-purple-700 transition-colors shadow-sm"
           >
             <PlusCircle size={18} />
@@ -39,7 +39,7 @@ export default async function AdminBlogPage() {
               <p className="text-5xl mb-4">📝</p>
               <p className="text-lg font-medium">Статей пока нет</p>
               <p className="text-sm mt-1">
-                <Link href="/admin/blog/new" className="text-purple-600 hover:underline">
+                <Link href="/bigbos/blog/new" className="text-purple-600 hover:underline">
                   Создайте первую статью →
                 </Link>
               </p>
@@ -95,7 +95,7 @@ export default async function AdminBlogPage() {
                       <td className="px-4 py-4">
                         <div className="flex items-center justify-end gap-2">
                           <Link
-                            href={`/admin/blog/${post.id}/edit`}
+                            href={`/bigbos/blog/${post.id}/edit`}
                             className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
                             title="Редактировать"
                           >

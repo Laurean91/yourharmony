@@ -26,7 +26,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   pages: {
-    signIn: '/admin/login',
+    signIn: '/bigbos/login',
   },
   session: {
     strategy: 'jwt',

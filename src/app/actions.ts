@@ -24,7 +24,7 @@ export async function createBooking(formData: FormData) {
     data: { parentName, childAge, phone }
   })
 
-  revalidatePath('/admin')
+  revalidatePath('/bigbos')
 }
 
 // 2. Получение списка заявок (для админки)
@@ -38,10 +38,16 @@ export async function updateBookingStatus(id: string, newStatus: string) {
     where: { id },
     data: { status: newStatus }
   })
-  revalidatePath('/admin')
+  revalidatePath('/bigbos')
 }
 
-// 4. Загрузка фото в Vercel Blob и сохранение ссылки в БД
+// 4. Удаление заявки
+export async function deleteBooking(id: string) {
+  await prisma.booking.delete({ where: { id } })
+  revalidatePath('/bigbos')
+}
+
+// 5. Загрузка фото в Vercel Blob и сохранение ссылки в БД
 export async function uploadPhoto(formData: FormData) {
   const file = formData.get('file') as File
   if (!file) return
@@ -52,7 +58,7 @@ export async function uploadPhoto(formData: FormData) {
   })
   
   revalidatePath('/')
-  revalidatePath('/admin')
+  revalidatePath('/bigbos')
 }
 
 // 5. Получение и удаление фото (Галерея)
@@ -64,7 +70,49 @@ export async function deletePhoto(id: string, url: string) {
   await prisma.photo.delete({ where: { id } })
   await del(url)
   revalidatePath('/')
-  revalidatePath('/admin')
+  revalidatePath('/bigbos')
+}
+
+// ─── TEACHER PROFILE ─────────────────────────────────────────────────────────
+
+const DEFAULT_TEACHER = {
+  id: 'singleton',
+  name: 'Анна Сергеевна',
+  bio: 'Сертифицированный преподаватель английского языка с опытом 7 лет. Специализируется на обучении детей от 6 до 14 лет — в игровой форме, без скучной зубрёжки. Каждый ребёнок уходит с занятия с улыбкой и новыми знаниями.',
+  photoUrl: null as string | null,
+  badges: 'Сертификат CELTA,Опыт 7 лет,IELTS 8.0,Дети 6–14 лет',
+}
+
+export async function getTeacherProfile() {
+  return await prisma.teacherProfile.upsert({
+    where: { id: 'singleton' },
+    update: {},
+    create: DEFAULT_TEACHER,
+  })
+}
+
+export async function updateTeacherProfile(formData: FormData) {
+  const name = (formData.get('name') as string)?.trim()
+  const bio = (formData.get('bio') as string)?.trim()
+  const badges = (formData.get('badges') as string)?.trim()
+  const existingPhotoUrl = formData.get('existingPhotoUrl') as string | null
+
+  let photoUrl: string | null = existingPhotoUrl || null
+  const photoFile = formData.get('photoFile') as File | null
+  if (photoFile && photoFile.size > 0 && isBlobEnabled()) {
+    if (photoUrl) await del(photoUrl).catch(() => null)
+    const blob = await put(`teacher/${Date.now()}-${photoFile.name}`, photoFile, { access: 'public' })
+    photoUrl = blob.url
+  }
+
+  await prisma.teacherProfile.upsert({
+    where: { id: 'singleton' },
+    update: { name, bio, badges, photoUrl },
+    create: { id: 'singleton', name, bio, badges, photoUrl },
+  })
+
+  revalidatePath('/')
+  revalidatePath('/bigbos')
 }
 
 // ─── BLOG ────────────────────────────────────────────────────────────────────
@@ -130,7 +178,7 @@ export async function createPost(formData: FormData) {
   })
 
   revalidatePath('/blog')
-  revalidatePath('/admin/blog')
+  revalidatePath('/bigbos/blog')
 }
 
 // 10. Обновление поста
@@ -169,7 +217,7 @@ export async function updatePost(id: string, formData: FormData) {
 
   revalidatePath('/blog')
   revalidatePath(`/blog/${post.slug}`)
-  revalidatePath('/admin/blog')
+  revalidatePath('/bigbos/blog')
 }
 
 // 11. Удаление поста
@@ -180,7 +228,7 @@ export async function deletePost(id: string) {
     await del(post.coverImage).catch(() => null)
   }
   revalidatePath('/blog')
-  revalidatePath('/admin/blog')
+  revalidatePath('/bigbos/blog')
 }
 
 // 12. Переключение статуса публикации
@@ -191,8 +239,8 @@ export async function togglePostStatus(id: string, currentValue: boolean) {
   })
   revalidatePath('/blog')
   revalidatePath(`/blog/${post.slug}`)
-  revalidatePath('/admin/blog')
-  redirect('/admin/blog')
+  revalidatePath('/bigbos/blog')
+  redirect('/bigbos/blog')
 }
 
 // 13. Список категорий

@@ -37,7 +37,7 @@ describe('LoginPage', () => {
     })
   })
 
-  it('redirects to /admin on successful login', async () => {
+  it('redirects to /bigbos on successful login', async () => {
     mockSignIn.mockResolvedValueOnce({ error: null })
     render(<LoginPage />)
 
@@ -46,7 +46,7 @@ describe('LoginPage', () => {
     fireEvent.submit(screen.getByRole('button').closest('form')!)
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/admin')
+      expect(mockPush).toHaveBeenCalledWith('/bigbos')
     })
   })
 

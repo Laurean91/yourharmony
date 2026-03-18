@@ -26,7 +26,7 @@ export default function LoginPage() {
     if (result?.error) {
       setError('Неверный логин или пароль')
     } else {
-      router.push('/admin')
+      router.push('/bigbos')
       router.refresh()
     }
   }
