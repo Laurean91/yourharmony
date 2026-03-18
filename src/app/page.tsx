@@ -1,5 +1,6 @@
-import { LandingHero, LandingTop } from '../components/LandingClient'
+import { LandingHero, LandingTop, LandingContacts } from '../components/LandingClient'
 import BlogPreview from '../components/BlogPreview'
+import TeacherSection from '../components/TeacherSection'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
@@ -11,6 +12,8 @@ export default function HomePage() {
         <LandingHero />
         <BlogPreview />
         <LandingTop />
+        <TeacherSection />
+        <LandingContacts />
       </main>
       <Footer />
     </div>

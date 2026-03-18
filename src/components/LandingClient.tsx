@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
-import { Star, BookOpen, Smile, Camera, X } from 'lucide-react'
+import { Star, BookOpen, Smile, Camera, X, MessageCircle, Send } from 'lucide-react'
 import { getPhotos } from '../app/actions'
 import BookingModal from './BookingModal'
 
@@ -26,7 +26,7 @@ export function LandingHero() {
 
         <motion.h1 initial="hidden" animate="visible" variants={fadeUp}
           className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-orange-500 mb-6">
-          Клуб &quot;Гармония&quot;
+          Языковой клуб &quot;Гармония&quot;
         </motion.h1>
         <motion.p initial="hidden" animate="visible" variants={fadeUp}
           className="text-xl md:text-2xl text-gray-600 mb-10 max-w-2xl">
@@ -36,11 +36,24 @@ export function LandingHero() {
           onClick={() => setShowModal(true)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="px-8 py-4 bg-gradient-to-r from-purple-500 to-orange-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow relative"
+          className="px-8 py-4 bg-gradient-to-r from-purple-500 to-orange-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow ring-2 ring-white/30"
         >
-          <span className="relative z-10">Записаться на пробное занятие</span>
-          <div className="absolute inset-0 bg-white rounded-full opacity-20 animate-ping" />
+          Записаться на пробное занятие
         </motion.button>
+
+        <motion.div initial="hidden" animate="visible" variants={fadeUp}
+          className="flex flex-wrap justify-center gap-8 mt-10">
+          {[
+            { value: '50+', label: 'учеников', color: 'text-purple-600' },
+            { value: '3 года', label: 'работаем', color: 'text-orange-500' },
+            { value: '★ 5.0', label: 'средняя оценка', color: 'text-yellow-500' },
+          ].map((stat) => (
+            <div key={stat.label} className="text-center">
+              <p className={`text-2xl font-extrabold ${stat.color}`}>{stat.value}</p>
+              <p className="text-sm text-gray-500">{stat.label}</p>
+            </div>
+          ))}
+        </motion.div>
       </section>
 
       <AnimatePresence>
@@ -62,19 +75,33 @@ export function LandingTop() {
   return (
     <>
       {/* ПРЕИМУЩЕСТВА */}
-      <section id="about" className="py-20 px-4 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-        {[
-          { icon: <Smile className="w-10 h-10 text-purple-500" />, title: 'Игровая форма', text: 'Никакой скучной зубрежки.' },
-          { icon: <BookOpen className="w-10 h-10 text-orange-500" />, title: 'Живое общение', text: 'Разговорная практика с первого урока.' },
-          { icon: <Star className="w-10 h-10 text-yellow-500" />, title: 'Уютная атмосфера', text: 'Комфорт и поддержка преподавателей.' },
-        ].map((item, idx) => (
-          <motion.div key={idx} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-            className="p-8 pb-10 rounded-3xl bg-white/40 backdrop-blur-lg border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] hover:-translate-y-2 transition-transform">
-            <div className="mb-4">{item.icon}</div>
-            <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-            <p className="text-gray-600">{item.text}</p>
-          </motion.div>
-        ))}
+      <section id="about" className="py-20 px-4 max-w-6xl mx-auto">
+        {/* Описание клуба */}
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
+          className="mb-12 text-center max-w-3xl mx-auto">
+          <p className="text-sm font-bold uppercase tracking-widest text-purple-500 mb-3">О клубе</p>
+          <h2 className="text-4xl font-extrabold text-gray-900 mb-4">Почему выбирают нас</h2>
+          <p className="text-gray-500 text-lg leading-relaxed">
+            «Гармония» — это языковой клуб для детей от 6 лет, где английский изучают через игру, диалог и творчество.
+            Маленькие группы до 8 человек, занятия 2 раза в неделю, прогресс уже после первого месяца.
+          </p>
+        </motion.div>
+
+        {/* Карточки */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            { icon: <Smile className="w-10 h-10 text-purple-500" />, title: 'Игровая форма', text: 'Уроки построены на играх, песнях и сценках. Дети учатся незаметно для себя — без стресса и зубрёжки.' },
+            { icon: <BookOpen className="w-10 h-10 text-orange-500" />, title: 'Живое общение', text: 'Разговорная практика с первого занятия. Дети говорят, слушают и понимают — не только читают тексты.' },
+            { icon: <Star className="w-10 h-10 text-yellow-500" />, title: 'Уютная атмосфера', text: 'Маленькие группы, внимательный преподаватель, поддержка на каждом шагу. Каждый ребёнок чувствует себя уверенно.' },
+          ].map((item, idx) => (
+            <motion.div key={idx} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
+              className="p-8 pb-10 rounded-3xl bg-white/40 backdrop-blur-lg border border-white/50 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] hover:-translate-y-2 transition-transform">
+              <div className="mb-4">{item.icon}</div>
+              <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+              <p className="text-gray-600 leading-relaxed">{item.text}</p>
+            </motion.div>
+          ))}
+        </div>
       </section>
 
       {/* ГАЛЕРЕЯ */}
@@ -97,50 +124,6 @@ export function LandingTop() {
         </div>
       </section>
 
-      {/* КОНТАКТЫ */}
-      <section id="contacts" className="py-20 px-4 max-w-6xl mx-auto">
-        <div className="bg-white/50 backdrop-blur-xl rounded-3xl p-8 md:p-12 shadow-xl border border-white flex flex-col md:flex-row gap-12 items-center">
-          <div className="flex-1">
-            <h2 className="text-4xl font-bold mb-6">Ждем вас в гости!</h2>
-            <p className="text-gray-600 mb-8 text-lg">
-              Мы находимся в самом центре города. Приходите на пробное занятие, познакомьтесь с преподавателями и атмосферой нашего клуба.
-            </p>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4 text-gray-700">
-                <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="font-bold">Адрес</p>
-                  <p>ул. Мира, д. 15, офис 302</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 text-gray-700">
-                <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="font-bold">Телефон</p>
-                  <p>+7 (999) 123-45-67</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="w-full md:w-1/2 h-80 rounded-2xl overflow-hidden bg-gray-200 shadow-inner">
-             {/* Заглушка для карты */}
-             <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-100 to-gray-200 relative">
-               <span className="z-10 bg-white/80 px-4 py-2 rounded-full shadow-sm">Карта скоро появится</span>
-               <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-             </div>
-          </div>
-        </div>
-      </section>
-
       {/* Модальное окно галереи */}
       <AnimatePresence>
         {selectedImage && (
@@ -158,6 +141,67 @@ export function LandingTop() {
         )}
       </AnimatePresence>
     </>
+  )
+}
+
+/* ───────── Contacts ───────── */
+export function LandingContacts() {
+  return (
+    <section id="contacts" className="py-20 px-4 max-w-6xl mx-auto">
+      <div className="bg-white/50 backdrop-blur-xl rounded-3xl p-8 md:p-12 shadow-xl border border-white flex flex-col md:flex-row gap-12 items-center">
+        <div className="flex-1">
+          <h2 className="text-4xl font-bold mb-6">Ждем вас в гости!</h2>
+          <p className="text-gray-600 mb-8 text-lg">
+            Мы находимся в самом центре города. Приходите на пробное занятие, познакомьтесь с преподавателями и атмосферой нашего клуба.
+          </p>
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 text-gray-700">
+              <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-bold">Адрес</p>
+                <p>ул. Мира, д. 15, офис 302</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-gray-700">
+              <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-bold">Телефон</p>
+                <p>+7 (999) 123-45-67</p>
+              </div>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <a href="https://t.me/yourharmony_club" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 transition-colors">
+                <Send className="w-4 h-4" />Telegram
+              </a>
+              <a href="https://wa.me/79991234567" target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-500 text-white text-sm font-semibold hover:bg-green-600 transition-colors">
+                <MessageCircle className="w-4 h-4" />WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+        <div className="w-full md:w-1/2 h-80 rounded-2xl overflow-hidden shadow-inner">
+          <iframe
+            src="https://yandex.ru/map-widget/v1/?text=%D1%83%D0%BB.%20%D0%9C%D0%B8%D1%80%D0%B0%2C%20%D0%B4.%2015&z=16&l=map"
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            title="Карта"
+          />
+        </div>
+      </div>
+    </section>
   )
 }
 

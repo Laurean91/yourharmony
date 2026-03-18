@@ -13,7 +13,7 @@ const customJestConfig = {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   // Playwright tests live in /tests — run them with `npx playwright test`, not Jest
-  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/tests/'],
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/tests/', '<rootDir>/.claude/'],
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
