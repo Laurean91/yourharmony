@@ -2,48 +2,58 @@ import { render, screen } from '@testing-library/react'
 import AdminDashboard from './page'
 import '@testing-library/jest-dom'
 
-// Mock the actions
 jest.mock('../actions', () => ({
   getBookings: jest.fn().mockResolvedValue([
-    {
-      id: '1',
-      parentName: 'Test Parent',
-      childAge: 7,
-      phone: '1234567890',
-      status: 'Новая',
-      createdAt: new Date()
-    }
+    { id: '1', parentName: 'Тест Иванов', childAge: 7, phone: '+7-999-000-00-00', status: 'Новая', createdAt: new Date() },
   ]),
   getPhotos: jest.fn().mockResolvedValue([
-    {
-      id: '1',
-      url: 'http://example.com/photo1.jpg',
-      createdAt: new Date()
-    }
+    { id: '1', url: 'https://blob.example.com/photo1.jpg', createdAt: new Date() },
+  ]),
+  getAllPostsAdmin: jest.fn().mockResolvedValue([
+    { id: '1', title: 'Статья 1', isPublished: true },
+    { id: '2', title: 'Черновик', isPublished: false },
   ]),
   updateBookingStatus: jest.fn(),
   uploadPhoto: jest.fn(),
-  deletePhoto: jest.fn()
+  deletePhoto: jest.fn(),
 }))
 
-// We need to support async Server Components testing in React 18+ by awaited rendering or minimal mocking.
-// Since AdminDashboard is an async component, standard render() normally requires experimental approaches in RTL.
-// We'll wrap it in a test helper to resolve it.
-const renderAsyncComponent = async (Component: any, props: any = {}) => {
+// SignOutButton is a client component with next-auth — mock it
+jest.mock('@/components/SignOutButton', () => () => <button>Выйти</button>)
+
+const renderAsync = async (Component: any, props: any = {}) => {
   const jsx = await Component(props)
   return render(jsx)
 }
 
-describe('Admin Dashboard', () => {
-  it('renders the dashboard with bookings and photos', async () => {
-    await renderAsyncComponent(AdminDashboard)
-
+describe('AdminDashboard', () => {
+  it('renders main sections', async () => {
+    await renderAsync(AdminDashboard)
     expect(screen.getByText('Панель управления клуба')).toBeInTheDocument()
     expect(screen.getByText('Новые заявки')).toBeInTheDocument()
     expect(screen.getByText('Управление галереей')).toBeInTheDocument()
+  })
 
-    // check if mocked booking data is present
-    expect(screen.getByText('Test Parent')).toBeInTheDocument()
-    expect(screen.getByText('1234567890')).toBeInTheDocument()
+  it('shows booking data from mock', async () => {
+    await renderAsync(AdminDashboard)
+    expect(screen.getByText('Тест Иванов')).toBeInTheDocument()
+    expect(screen.getByText('+7-999-000-00-00')).toBeInTheDocument()
+    expect(screen.getByText('Новая')).toBeInTheDocument()
+  })
+
+  it('shows blog post count', async () => {
+    await renderAsync(AdminDashboard)
+    // 2 posts total, 1 published
+    expect(screen.getByText(/2.*статей|статей.*2/i)).toBeInTheDocument()
+  })
+
+  it('renders sign out button', async () => {
+    await renderAsync(AdminDashboard)
+    expect(screen.getByRole('button', { name: 'Выйти' })).toBeInTheDocument()
+  })
+
+  it('renders link to blog management', async () => {
+    await renderAsync(AdminDashboard)
+    expect(screen.getByRole('link', { name: /управление блогом/i })).toBeInTheDocument()
   })
 })

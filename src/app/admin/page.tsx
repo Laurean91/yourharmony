@@ -2,13 +2,17 @@ export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
 import { getBookings, getPhotos, updateBookingStatus, uploadPhoto, deletePhoto, getAllPostsAdmin } from '../actions'
+import SignOutButton from '@/components/SignOutButton'
 
 export default async function AdminDashboard() {
   const [bookings, photos, posts] = await Promise.all([getBookings(), getPhotos(), getAllPostsAdmin()])
 
   return (
     <div className="min-h-screen bg-gray-50 p-8 font-sans text-gray-800">
-      <h1 className="text-3xl font-bold mb-8">Панель управления клуба</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold">Панель управления клуба</h1>
+        <SignOutButton />
+      </div>
 
       {/* БЛОГ */}
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 rounded-2xl shadow-sm mb-8 text-white flex items-center justify-between">
