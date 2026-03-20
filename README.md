@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Гармония — Языковой клуб
 
-## Getting Started
+Сайт и панель управления для языкового клуба. Публичная часть — лендинг с формой записи и блогом. Административная часть — полноценная CRM для преподавателя.
 
-First, run the development server:
+## Стек
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Next.js 14** (App Router, Server Components, Server Actions)
+- **Prisma** + **PostgreSQL** (Prisma Accelerate)
+- **Tailwind CSS**
+- **NextAuth.js** — аутентификация по логину/паролю
+- **Vercel Blob** — хранение изображений
+- **Resend** — email-уведомления о новых заявках
+- **Recharts** — графики аналитики
+
+## Структура проекта
+
+```
+src/
+├── app/
+│   ├── page.tsx              # Лендинг (публичный)
+│   ├── blog/                 # Блог (публичный)
+│   ├── bigbos/               # Административная панель
+│   │   ├── layout.tsx        # Лейаут с сайдбаром
+│   │   ├── page.tsx          # Дашборд
+│   │   ├── students/         # Управление учениками
+│   │   ├── blog/             # Управление блогом
+│   │   ├── landing/          # Управление сайтом
+│   │   └── login/            # Страница входа
+│   └── actions.ts            # Все server actions
+├── components/
+│   ├── AdminSidebar.tsx      # Боковое меню (сворачивается на мобильном)
+│   ├── LessonCalendar.tsx    # Календарь занятий с посещаемостью
+│   ├── StudentCard.tsx       # Карточка ученика (клик → модальное окно)
+│   ├── StudentModal.tsx      # Модальная карточка ученика
+│   ├── DashboardStats.tsx    # Графики аналитики на дашборде
+│   ├── DashboardStudentGrid.tsx # Сетка учеников на дашборде
+│   ├── AddStudentModal.tsx   # Форма добавления ученика
+│   ├── LandingEditor.tsx     # Редактор лендинга (вкладки)
+│   └── ...
+└── lib/
+    ├── prisma.ts
+    └── landingTypes.ts
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Административная панель `/bigbos`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Дашборд
+- Аналитика: график заявок за 6 месяцев, занятий за неделю/месяц, новых учеников
+- Календарь занятий с посещаемостью
+- Таблица новых заявок с изменением статуса и удалением
+- Краткий список учеников — клик открывает карточку
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Мои ученики `/bigbos/students`
+- CRUD учеников: имя, возраст, телефон родителя, тег (Индивидуальное/Группа), заметки
+- Фильтрация по тегу
+- Клик на ученика → модальное окно с полной информацией, редактированием и удалением
+- Статистика посещаемости в карточке
 
-## Learn More
+### Календарь занятий
+- Месячный вид с навигацией
+- Добавление занятия: время, тип, тема, поиск учеников (combobox), заметки
+- Отметка посещаемости на каждом занятии
+- Адаптивный: вертикальная раскладка на мобильном
 
-To learn more about Next.js, take a look at the following resources:
+### Блог `/bigbos/blog`
+- Создание и редактирование статей (заголовок, slug, обложка, контент, категория)
+- Публикация / черновик
+- Управление категориями
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Управление сайтом `/bigbos/landing`
+- Редактирование всех секций лендинга (Hero, Контакты, CTA, Форматы, Отзывы, FAQ и др.)
+- Профиль преподавателя (фото, имя, биография, достижения)
+- Галерея фотографий
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## База данных (Prisma)
 
-## Deploy on Vercel
+| Модель | Описание |
+|---|---|
+| `Booking` | Заявки с лендинга |
+| `Student` | Ученики |
+| `Lesson` | Занятия |
+| `LessonStudent` | Связь занятий и учеников + посещаемость |
+| `Post` | Статьи блога |
+| `Category` | Категории блога |
+| `TeacherProfile` | Профиль преподавателя (singleton) |
+| `Photo` | Галерея |
+| `SiteSettings` | Настройки секций лендинга (JSON) |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Запуск локально
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm install
+```
+
+Создать `.env`:
+```env
+DATABASE_URL=...
+NEXTAUTH_SECRET=...
+NEXTAUTH_URL=http://localhost:3000
+ADMIN_USERNAME=...
+ADMIN_PASSWORD=...
+BLOB_READ_WRITE_TOKEN=...       # Vercel Blob (опционально)
+RESEND_API_KEY=...              # Email-уведомления (опционально)
+NOTIFICATION_EMAIL=...
+```
+
+Применить схему БД:
+```bash
+npx prisma db push
+```
+
+Запустить сервер разработки:
+```bash
+npm run dev
+```
+
+Открыть [http://localhost:3000](http://localhost:3000)
+
+## Деплой
+
+Проект задеплоен на [Vercel](https://vercel.com). При пуше в `main` деплой происходит автоматически.
