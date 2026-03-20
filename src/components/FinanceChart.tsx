@@ -48,7 +48,7 @@ export default function FinanceChart({ data }: { data: MonthlyRevenue[] }) {
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis dataKey="month" tick={{ fontSize: 12 }} />
           <YAxis tick={{ fontSize: 12 }} tickFormatter={v => `${v / 1000}к`} />
-          <Tooltip formatter={(v: number) => `${v.toLocaleString('ru-RU')} ₽`} />
+          <Tooltip formatter={(v: number | string) => `${Number(v).toLocaleString('ru-RU')} ₽`} />
           <Legend />
           <Bar dataKey="individual" name="Индивидуальные" fill="#7c3aed" radius={[4, 4, 0, 0]} />
           <Bar dataKey="group" name="Групповые" fill="#f97316" radius={[4, 4, 0, 0]} />
