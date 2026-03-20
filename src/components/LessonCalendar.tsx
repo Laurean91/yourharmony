@@ -58,6 +58,7 @@ export default function LessonCalendar({
   const [showAddForm, setShowAddForm] = useState(false)
   const [lessons, setLessons] = useState<Lesson[]>(initialLessons)
   const [addLoading, setAddLoading] = useState(false)
+  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([])
 
   const lessonsByDate = lessons.reduce<Record<string, Lesson[]>>((acc, l) => {
     const key = toLocalDateString(l.date)
@@ -89,6 +90,12 @@ export default function LessonCalendar({
 
   const selectedLessons = selectedDay ? (lessonsByDate[selectedDay] ?? []) : []
 
+  function toggleStudent(id: string) {
+    setSelectedStudentIds(prev =>
+      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
+    )
+  }
+
   async function handleAddLesson(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!selectedDay) return
@@ -96,8 +103,11 @@ export default function LessonCalendar({
     const formData = new FormData(e.currentTarget)
     const time = formData.get('time') as string
     formData.set('date', `${selectedDay}T${time || '09:00'}:00`)
+    // Append selected students manually (replaced checkboxes)
+    selectedStudentIds.forEach(id => formData.append('studentIds', id))
     await createLesson(formData)
     setShowAddForm(false)
+    setSelectedStudentIds([])
     setAddLoading(false)
     window.location.reload()
   }
@@ -144,7 +154,7 @@ export default function LessonCalendar({
             return (
               <button
                 key={i}
-                onClick={() => { setSelectedDay(isSelected ? null : dateStr); setShowAddForm(false) }}
+                onClick={() => { setSelectedDay(isSelected ? null : dateStr); setShowAddForm(false); setSelectedStudentIds([]) }}
                 className={`h-8 flex flex-col items-center justify-center rounded-lg text-xs transition-all ${
                   isSelected
                     ? 'bg-purple-600 text-white shadow-sm'
@@ -209,14 +219,25 @@ export default function LessonCalendar({
                 </div>
                 {students.length > 0 && (
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Ученики</label>
-                    <div className="flex flex-wrap gap-2">
-                      {students.map(s => (
-                        <label key={s.id} className="flex items-center gap-1.5 text-xs cursor-pointer">
-                          <input type="checkbox" name="studentIds" value={s.id} className="accent-purple-600" />
-                          {s.name}
-                        </label>
-                      ))}
+                    <label className="block text-xs font-medium text-gray-600 mb-1.5">Ученики</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {students.map(s => {
+                        const selected = selectedStudentIds.includes(s.id)
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => toggleStudent(s.id)}
+                            className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                              selected
+                                ? 'bg-purple-600 text-white border-purple-600'
+                                : 'bg-white text-gray-600 border-gray-200 hover:border-purple-400 hover:text-purple-600'
+                            }`}
+                          >
+                            {s.name}
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
@@ -228,7 +249,7 @@ export default function LessonCalendar({
                   <button type="submit" disabled={addLoading} className="px-4 py-1.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-60">
                     {addLoading ? 'Сохранение...' : 'Добавить'}
                   </button>
-                  <button type="button" onClick={() => setShowAddForm(false)} className="px-4 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50">
+                  <button type="button" onClick={() => { setShowAddForm(false); setSelectedStudentIds([]) }} className="px-4 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50">
                     Отмена
                   </button>
                 </div>
