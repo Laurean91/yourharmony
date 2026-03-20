@@ -399,5 +399,119 @@ export async function markAttendance(lessonId: string, studentId: string, attend
     data: { attended },
   })
   revalidatePath('/bigbos')
+  revalidatePath('/bigbos/finance')
   revalidatePath('/bigbos/students')
+}
+
+// ─── Finance ──────────────────────────────────────────────────────────────────
+
+const DEFAULT_PRICE_INDIVIDUAL = 1500
+const DEFAULT_PRICE_GROUP = 800
+
+export async function getFinancePrices(): Promise<{ individual: number; group: number }> {
+  const rows = await prisma.siteSettings.findMany({
+    where: { key: { in: ['price_individual', 'price_group'] } },
+  })
+  const map = Object.fromEntries(rows.map(r => [r.key, r.value]))
+  return {
+    individual: map['price_individual'] ? Number(map['price_individual']) : DEFAULT_PRICE_INDIVIDUAL,
+    group: map['price_group'] ? Number(map['price_group']) : DEFAULT_PRICE_GROUP,
+  }
+}
+
+export async function updateFinancePrices(individual: number, group: number) {
+  await prisma.siteSettings.upsert({
+    where: { key: 'price_individual' },
+    create: { key: 'price_individual', value: String(individual) },
+    update: { value: String(individual) },
+  })
+  await prisma.siteSettings.upsert({
+    where: { key: 'price_group' },
+    create: { key: 'price_group', value: String(group) },
+    update: { value: String(group) },
+  })
+  revalidatePath('/bigbos/finance')
+  revalidatePath('/bigbos')
+}
+
+export type MonthlyRevenue = { month: string; individual: number; group: number }
+export type StudentRevenue = { studentId: string; name: string; tag: string; attended: number; total: number }
+export type FinanceStats = {
+  monthlyRevenue: MonthlyRevenue[]
+  studentRevenue: StudentRevenue[]
+  totalThisMonth: number
+  totalIndividual: number
+  totalGroup: number
+}
+
+export async function getFinanceStats(): Promise<FinanceStats> {
+  const prices = await getFinancePrices()
+
+  const lessonStudents = await prisma.lessonStudent.findMany({
+    where: { attended: true },
+    include: { lesson: true, student: true },
+  })
+
+  // Monthly revenue (last 12 months)
+  const now = new Date()
+  const months: MonthlyRevenue[] = []
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    months.push({
+      month: d.toLocaleDateString('ru-RU', { month: 'short', year: '2-digit' }),
+      individual: 0,
+      group: 0,
+    })
+  }
+
+  const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  let totalThisMonth = 0
+  let totalIndividual = 0
+  let totalGroup = 0
+
+  const studentMap = new Map<string, StudentRevenue>()
+
+  for (const ls of lessonStudents) {
+    const lessonDate = new Date(ls.lesson.date)
+    const tag = ls.lesson.tag
+    const price = ls.lesson.price ?? (tag === 'Групповое' ? prices.group : prices.individual)
+
+    // Monthly bucket
+    const mIdx = months.findIndex(m => {
+      const [mName, mYear] = m.month.split(' ')
+      const d = new Date(ls.lesson.date)
+      const label = d.toLocaleDateString('ru-RU', { month: 'short', year: '2-digit' })
+      return label === m.month
+    })
+    if (mIdx !== -1) {
+      if (tag === 'Групповое') months[mIdx].group += price
+      else months[mIdx].individual += price
+    }
+
+    // This month totals
+    if (lessonDate >= thisMonth) {
+      totalThisMonth += price
+      if (tag === 'Групповое') totalGroup += price
+      else totalIndividual += price
+    }
+
+    // Student revenue
+    const existing = studentMap.get(ls.studentId)
+    if (existing) {
+      existing.attended += 1
+      existing.total += price
+    } else {
+      studentMap.set(ls.studentId, {
+        studentId: ls.studentId,
+        name: ls.student.name,
+        tag: ls.student.tag,
+        attended: 1,
+        total: price,
+      })
+    }
+  }
+
+  const studentRevenue = Array.from(studentMap.values()).sort((a, b) => b.total - a.total)
+
+  return { monthlyRevenue: months, studentRevenue, totalThisMonth, totalIndividual, totalGroup }
 }

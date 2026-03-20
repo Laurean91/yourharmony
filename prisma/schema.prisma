@@ -44,6 +44,7 @@ model Lesson {
   title     String?
   tag       String          @default("Индивидуальное")
   notes     String?
+  price     Float?
   students  LessonStudent[]
   createdAt DateTime        @default(now())
 

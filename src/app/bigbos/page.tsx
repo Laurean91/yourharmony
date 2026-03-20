@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { getBookings, getLessons, getStudents, getAllPostsAdmin, updateBookingStatus } from '../actions'
+import { getBookings, getLessons, getStudents, getAllPostsAdmin, updateBookingStatus, getFinanceStats } from '../actions'
 import LessonCalendar from '@/components/LessonCalendar'
 import DeleteBookingButton from '@/components/DeleteBookingButton'
 import DashboardStats from '@/components/DashboardStats'
@@ -8,11 +8,12 @@ import DashboardStudentGrid from '@/components/DashboardStudentGrid'
 import Link from 'next/link'
 
 export default async function AdminDashboard() {
-  const [bookings, lessons, students, posts] = await Promise.all([
+  const [bookings, lessons, students, posts, financeStats] = await Promise.all([
     getBookings(),
     getLessons(),
     getStudents(),
     getAllPostsAdmin(),
+    getFinanceStats(),
   ])
 
   const newBookings = bookings.filter((b: any) => b.status === 'Новая')
@@ -29,6 +30,26 @@ export default async function AdminDashboard() {
 
       {/* Stats */}
       <DashboardStats bookings={bookings as any} lessons={lessons as any} students={students as any} />
+
+      {/* Finance mini-block */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex-1">
+          <p className="text-sm text-gray-500">Доход в этом месяце</p>
+          <p className="text-3xl font-bold text-purple-700 mt-0.5">
+            {financeStats.totalThisMonth.toLocaleString('ru-RU')} ₽
+          </p>
+          <div className="flex gap-4 mt-2 text-sm text-gray-500">
+            <span>Инд.: <span className="font-medium text-gray-700">{financeStats.totalIndividual.toLocaleString('ru-RU')} ₽</span></span>
+            <span>Групп.: <span className="font-medium text-gray-700">{financeStats.totalGroup.toLocaleString('ru-RU')} ₽</span></span>
+          </div>
+        </div>
+        <Link
+          href="/bigbos/finance"
+          className="text-sm text-purple-600 hover:text-purple-700 font-medium whitespace-nowrap"
+        >
+          Подробная аналитика →
+        </Link>
+      </div>
 
       {/* Top row: Calendar + Bookings */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
