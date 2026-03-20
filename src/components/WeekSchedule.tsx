@@ -31,7 +31,7 @@ const MONTHS_GEN = [
 ]
 
 const START_HOUR = 8
-const END_HOUR = 21
+const END_HOUR = 23
 const TOTAL_MINUTES = (END_HOUR - START_HOUR) * 60
 const PX_PER_MIN = 1.2 // px per minute → 1 hour = 72px
 const LESSON_DURATION = 60 // minutes
