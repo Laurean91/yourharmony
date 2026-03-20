@@ -59,6 +59,8 @@ export default function LessonCalendar({
   const [lessons, setLessons] = useState<Lesson[]>(initialLessons)
   const [addLoading, setAddLoading] = useState(false)
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([])
+  const [studentSearch, setStudentSearch] = useState('')
+  const [showStudentDropdown, setShowStudentDropdown] = useState(false)
 
   const lessonsByDate = lessons.reduce<Record<string, Lesson[]>>((acc, l) => {
     const key = toLocalDateString(l.date)
@@ -108,6 +110,7 @@ export default function LessonCalendar({
     await createLesson(formData)
     setShowAddForm(false)
     setSelectedStudentIds([])
+    setStudentSearch('')
     setAddLoading(false)
     window.location.reload()
   }
@@ -154,7 +157,7 @@ export default function LessonCalendar({
             return (
               <button
                 key={i}
-                onClick={() => { setSelectedDay(isSelected ? null : dateStr); setShowAddForm(false); setSelectedStudentIds([]) }}
+                onClick={() => { setSelectedDay(isSelected ? null : dateStr); setShowAddForm(false); setSelectedStudentIds([]); setStudentSearch('') }}
                 className={`h-9 sm:h-8 flex flex-col items-center justify-center rounded-lg text-xs transition-all ${
                   isSelected
                     ? 'bg-purple-600 text-white shadow-sm'
@@ -220,24 +223,58 @@ export default function LessonCalendar({
                 {students.length > 0 && (
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1.5">Ученики</label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {students.map(s => {
-                        const selected = selectedStudentIds.includes(s.id)
-                        return (
-                          <button
-                            key={s.id}
-                            type="button"
-                            onClick={() => toggleStudent(s.id)}
-                            className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                              selected
-                                ? 'bg-purple-600 text-white border-purple-600'
-                                : 'bg-white text-gray-600 border-gray-200 hover:border-purple-400 hover:text-purple-600'
-                            }`}
-                          >
-                            {s.name}
-                          </button>
-                        )
-                      })}
+
+                    {/* Selected tags */}
+                    {selectedStudentIds.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        {selectedStudentIds.map(id => {
+                          const s = students.find(s => s.id === id)
+                          if (!s) return null
+                          return (
+                            <span key={id} className="flex items-center gap-1 px-2.5 py-1 bg-purple-600 text-white rounded-full text-xs font-medium">
+                              {s.name}
+                              <button type="button" onClick={() => toggleStudent(id)} className="ml-0.5 opacity-70 hover:opacity-100 leading-none">×</button>
+                            </span>
+                          )
+                        })}
+                      </div>
+                    )}
+
+                    {/* Search input */}
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Поиск ученика..."
+                        value={studentSearch}
+                        onChange={e => { setStudentSearch(e.target.value); setShowStudentDropdown(true) }}
+                        onFocus={() => setShowStudentDropdown(true)}
+                        onBlur={() => setShowStudentDropdown(false)}
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white"
+                      />
+                      {showStudentDropdown && (
+                        <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-44 overflow-y-auto">
+                          {students
+                            .filter(s =>
+                              !selectedStudentIds.includes(s.id) &&
+                              s.name.toLowerCase().includes(studentSearch.toLowerCase())
+                            )
+                            .map(s => (
+                              <button
+                                key={s.id}
+                                type="button"
+                                onMouseDown={e => e.preventDefault()}
+                                onClick={() => { toggleStudent(s.id); setStudentSearch(''); setShowStudentDropdown(false) }}
+                                className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors"
+                              >
+                                {s.name}
+                              </button>
+                            ))
+                          }
+                          {students.filter(s => !selectedStudentIds.includes(s.id) && s.name.toLowerCase().includes(studentSearch.toLowerCase())).length === 0 && (
+                            <p className="px-4 py-3 text-sm text-gray-400">Не найдено</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -249,7 +286,7 @@ export default function LessonCalendar({
                   <button type="submit" disabled={addLoading} className="px-4 py-1.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-60">
                     {addLoading ? 'Сохранение...' : 'Добавить'}
                   </button>
-                  <button type="button" onClick={() => { setShowAddForm(false); setSelectedStudentIds([]) }} className="px-4 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50">
+                  <button type="button" onClick={() => { setShowAddForm(false); setSelectedStudentIds([]); setStudentSearch('') }} className="px-4 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50">
                     Отмена
                   </button>
                 </div>
