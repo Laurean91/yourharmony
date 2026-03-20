@@ -4,6 +4,7 @@ import { prisma } from '../lib/prisma'
 import { put, del } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { Resend } from 'resend'
 
 /** Возвращает true, если Vercel Blob настроен (есть токен) */
 function isBlobEnabled() {
@@ -23,6 +24,41 @@ export async function createBooking(formData: FormData) {
   await prisma.booking.create({
     data: { parentName, childAge, phone }
   })
+
+  // Отправляем email-уведомление если настроен Resend
+  if (process.env.RESEND_API_KEY && process.env.NOTIFICATION_EMAIL) {
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY)
+      await resend.emails.send({
+        from: 'YourHarmony <onboarding@resend.dev>',
+        to: process.env.NOTIFICATION_EMAIL,
+        subject: '📩 Новая заявка на занятие',
+        html: `
+          <h2>Новая заявка на занятие</h2>
+          <table style="border-collapse:collapse;width:100%;max-width:400px">
+            <tr>
+              <td style="padding:8px 12px;border:1px solid #e5e7eb;background:#f9fafb;font-weight:600">Имя родителя</td>
+              <td style="padding:8px 12px;border:1px solid #e5e7eb">${parentName}</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 12px;border:1px solid #e5e7eb;background:#f9fafb;font-weight:600">Возраст ребёнка</td>
+              <td style="padding:8px 12px;border:1px solid #e5e7eb">${childAge} лет</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 12px;border:1px solid #e5e7eb;background:#f9fafb;font-weight:600">Телефон</td>
+              <td style="padding:8px 12px;border:1px solid #e5e7eb">${phone}</td>
+            </tr>
+          </table>
+          <p style="margin-top:16px;color:#6b7280;font-size:14px">
+            Просмотреть все заявки: <a href="${process.env.NEXTAUTH_URL ?? ''}/bigbos">/bigbos</a>
+          </p>
+        `,
+      })
+    } catch (e) {
+      // Не блокируем сохранение заявки из-за ошибки email
+      console.error('Ошибка отправки email:', e)
+    }
+  }
 
   revalidatePath('/bigbos')
 }
@@ -251,4 +287,29 @@ export async function getCategories() {
 // 14. Создание категории
 export async function createCategory(name: string, slug: string) {
   return await prisma.category.create({ data: { name, slug } })
+}
+
+// ─── LANDING SETTINGS ────────────────────────────────────────────────────────
+
+import type { SectionKey } from '../lib/landingTypes'
+import { SECTION_DEFAULTS } from '../lib/landingTypes'
+
+export async function getSectionSettings<K extends SectionKey>(key: K): Promise<typeof SECTION_DEFAULTS[K]> {
+  const row = await prisma.siteSettings.findUnique({ where: { key } })
+  if (!row) return SECTION_DEFAULTS[key]
+  try {
+    return JSON.parse(row.value) as typeof SECTION_DEFAULTS[K]
+  } catch {
+    return SECTION_DEFAULTS[key]
+  }
+}
+
+export async function updateSectionSettings(key: SectionKey, data: unknown) {
+  await prisma.siteSettings.upsert({
+    where: { key },
+    update: { value: JSON.stringify(data) },
+    create: { key, value: JSON.stringify(data) },
+  })
+  revalidatePath('/')
+  revalidatePath('/bigbos/landing')
 }

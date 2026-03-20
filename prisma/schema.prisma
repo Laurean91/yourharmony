@@ -41,6 +41,12 @@ model TeacherProfile {
   badges   String  @default("Сертификат CELTA,Опыт 7 лет,IELTS 8.0,Дети 6–14 лет")
 }
 
+model SiteSettings {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 model Post {
   id          String    @id @default(uuid())
   title       String

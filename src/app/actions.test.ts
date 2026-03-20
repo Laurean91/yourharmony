@@ -45,6 +45,14 @@ jest.mock('@vercel/blob', () => ({
   del: jest.fn().mockResolvedValue(undefined),
 }))
 
+const mockSendEmail = jest.fn().mockResolvedValue({ id: 'email-id-123' })
+jest.mock('resend', () => ({
+  Resend: jest.fn().mockImplementation(() => ({
+    emails: { send: mockSendEmail },
+  })),
+}))
+import { Resend } from 'resend'
+
 beforeEach(() => jest.clearAllMocks())
 
 // ─── createBooking ────────────────────────────────────────────────────────────
@@ -115,6 +123,67 @@ describe('createBooking', () => {
     fd.append('childAge', '8')
     fd.append('phone', '1'.repeat(31))
     await expect(createBooking(fd)).rejects.toThrow('Некорректный телефон')
+  })
+
+  it('sends email notification when RESEND_API_KEY and NOTIFICATION_EMAIL are set', async () => {
+    process.env.RESEND_API_KEY = 're_test_key'
+    process.env.NOTIFICATION_EMAIL = 'admin@test.com'
+    const fd = new FormData()
+    fd.append('parentName', 'Мария Петрова')
+    fd.append('childAge', '7')
+    fd.append('phone', '+7-900-000-00-00')
+    await createBooking(fd)
+    expect(Resend).toHaveBeenCalledWith('re_test_key')
+    expect(mockSendEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'admin@test.com',
+        subject: '📩 Новая заявка на занятие',
+      })
+    )
+    const html: string = mockSendEmail.mock.calls[0][0].html
+    expect(html).toContain('Мария Петрова')
+    expect(html).toContain('7')
+    expect(html).toContain('+7-900-000-00-00')
+    delete process.env.RESEND_API_KEY
+    delete process.env.NOTIFICATION_EMAIL
+  })
+
+  it('does not send email when RESEND_API_KEY is missing', async () => {
+    delete process.env.RESEND_API_KEY
+    process.env.NOTIFICATION_EMAIL = 'admin@test.com'
+    const fd = new FormData()
+    fd.append('parentName', 'John')
+    fd.append('childAge', '8')
+    fd.append('phone', '555')
+    await createBooking(fd)
+    expect(mockSendEmail).not.toHaveBeenCalled()
+    delete process.env.NOTIFICATION_EMAIL
+  })
+
+  it('does not send email when NOTIFICATION_EMAIL is missing', async () => {
+    process.env.RESEND_API_KEY = 're_test_key'
+    delete process.env.NOTIFICATION_EMAIL
+    const fd = new FormData()
+    fd.append('parentName', 'John')
+    fd.append('childAge', '8')
+    fd.append('phone', '555')
+    await createBooking(fd)
+    expect(mockSendEmail).not.toHaveBeenCalled()
+    delete process.env.RESEND_API_KEY
+  })
+
+  it('still saves booking if email sending fails', async () => {
+    process.env.RESEND_API_KEY = 're_test_key'
+    process.env.NOTIFICATION_EMAIL = 'admin@test.com'
+    mockSendEmail.mockRejectedValueOnce(new Error('SMTP error'))
+    const fd = new FormData()
+    fd.append('parentName', 'John')
+    fd.append('childAge', '8')
+    fd.append('phone', '555')
+    await expect(createBooking(fd)).resolves.toBeUndefined()
+    expect(db().booking.create).toHaveBeenCalled()
+    delete process.env.RESEND_API_KEY
+    delete process.env.NOTIFICATION_EMAIL
   })
 })
 

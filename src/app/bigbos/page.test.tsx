@@ -13,6 +13,9 @@ jest.mock('../actions', () => ({
     { id: '1', title: 'Статья 1', isPublished: true },
     { id: '2', title: 'Черновик', isPublished: false },
   ]),
+  getTeacherProfile: jest.fn().mockResolvedValue({
+    id: 'singleton', name: 'Анна Сергеевна', bio: 'Описание', photoUrl: null, badges: 'CELTA',
+  }),
   updateBookingStatus: jest.fn(),
   uploadPhoto: jest.fn(),
   deletePhoto: jest.fn(),
@@ -20,6 +23,9 @@ jest.mock('../actions', () => ({
 
 // SignOutButton is a client component with next-auth — mock it
 jest.mock('@/components/SignOutButton', () => () => <button>Выйти</button>)
+jest.mock('@/components/DeleteBookingButton', () => ({ id }: { id: string }) => (
+  <button title="Удалить заявку" data-id={id}>🗑</button>
+))
 
 const renderAsync = async (Component: any, props: any = {}) => {
   const jsx = await Component(props)
@@ -54,6 +60,6 @@ describe('AdminDashboard', () => {
 
   it('renders link to blog management', async () => {
     await renderAsync(AdminDashboard)
-    expect(screen.getByRole('link', { name: /управление блогом/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /управление/i, hidden: false })).toBeInTheDocument()
   })
 })

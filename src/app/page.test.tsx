@@ -1,6 +1,18 @@
 import { render, screen } from '@testing-library/react'
 import LandingPage from './page'
 import '@testing-library/jest-dom'
+import { DEFAULT_HERO, DEFAULT_FEATURES, DEFAULT_FORMATS, DEFAULT_CONTACTS, DEFAULT_HOW_IT_WORKS, DEFAULT_TESTIMONIALS, DEFAULT_CTA, DEFAULT_FAQ } from '../lib/landingTypes'
+
+jest.mock('./actions', () => ({
+  getSectionSettings: jest.fn((key: string) => {
+    const defaults: Record<string, unknown> = {
+      hero: DEFAULT_HERO, features: DEFAULT_FEATURES, formats: DEFAULT_FORMATS,
+      contacts: DEFAULT_CONTACTS, howItWorks: DEFAULT_HOW_IT_WORKS,
+      testimonials: DEFAULT_TESTIMONIALS, cta: DEFAULT_CTA, faq: DEFAULT_FAQ,
+    }
+    return Promise.resolve(defaults[key])
+  }),
+}))
 
 // Mock complex client components — tested separately
 jest.mock('../components/Navbar', () => () => <nav data-testid="navbar" />)
@@ -32,11 +44,20 @@ jest.mock('../components/LandingClient', () => ({
       <a href="https://wa.me/79991234567">WhatsApp</a>
     </section>
   ),
+  HowItWorksSection: () => <section data-testid="how-it-works" />,
+  TestimonialsSection: () => <section data-testid="testimonials" />,
+  CtaSection: () => <section data-testid="cta" />,
+  FAQSection: () => <section data-testid="faq" />,
 }))
 
+const renderAsync = async (Component: any) => {
+  const jsx = await Component()
+  return render(jsx)
+}
+
 describe('Landing Page', () => {
-  it('renders all main sections', () => {
-    render(<LandingPage />)
+  it('renders all main sections', async () => {
+    await renderAsync(LandingPage)
     expect(screen.getByTestId('navbar')).toBeInTheDocument()
     expect(screen.getByTestId('landing-hero')).toBeInTheDocument()
     expect(screen.getByTestId('blog-preview')).toBeInTheDocument()
@@ -46,36 +67,36 @@ describe('Landing Page', () => {
     expect(screen.getByTestId('footer')).toBeInTheDocument()
   })
 
-  it('renders hero with updated club name', () => {
-    render(<LandingPage />)
+  it('renders hero with updated club name', async () => {
+    await renderAsync(LandingPage)
     expect(screen.getByText('Языковой клуб "Гармония"')).toBeInTheDocument()
     expect(screen.getByText(/Английский для детей от 6 лет/i)).toBeInTheDocument()
     expect(screen.getByText('Записаться на пробное занятие')).toBeInTheDocument()
   })
 
-  it('renders stats bar in hero', () => {
-    render(<LandingPage />)
+  it('renders stats bar in hero', async () => {
+    await renderAsync(LandingPage)
     expect(screen.getByText('50+ учеников')).toBeInTheDocument()
     expect(screen.getByText('3 года работаем')).toBeInTheDocument()
     expect(screen.getByText(/средняя оценка/i)).toBeInTheDocument()
   })
 
-  it('renders advantages section', () => {
-    render(<LandingPage />)
+  it('renders advantages section', async () => {
+    await renderAsync(LandingPage)
     expect(screen.getByText('Игровая форма')).toBeInTheDocument()
     expect(screen.getByText('Живое общение')).toBeInTheDocument()
     expect(screen.getByText('Уютная атмосфера')).toBeInTheDocument()
   })
 
-  it('renders contacts with messengers', () => {
-    render(<LandingPage />)
+  it('renders contacts with messengers', async () => {
+    await renderAsync(LandingPage)
     expect(screen.getByText('ул. Мира, д. 15, офис 302')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Telegram' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'WhatsApp' })).toBeInTheDocument()
   })
 
-  it('renders sections in correct order', () => {
-    render(<LandingPage />)
+  it('renders sections in correct order', async () => {
+    await renderAsync(LandingPage)
     const sections = [
       screen.getByTestId('landing-hero'),
       screen.getByTestId('blog-preview'),

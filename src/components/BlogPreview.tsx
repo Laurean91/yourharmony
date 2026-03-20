@@ -14,11 +14,8 @@ export default async function BlogPreview() {
         {/* Header */}
         <div className="flex items-end justify-between mb-12">
           <div>
-            <p className="text-sm font-bold uppercase tracking-widest text-purple-500 mb-2">
-              Блог
-            </p>
             <h2 className="text-4xl font-extrabold text-gray-800">
-              Последние статьи
+              Полезные статьи
             </h2>
           </div>
           <Link

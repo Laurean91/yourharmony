@@ -56,13 +56,8 @@ export default function Footer() {
             <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Документы</h4>
             <ul className="flex flex-col gap-4">
               <li>
-                <Link href="/privacy" className="footer-link">
-                  Политика конфиденциальности
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="footer-link">
-                  Пользовательское соглашение
+                <Link href="/documents" className="footer-link">
+                  Правовые документы
                 </Link>
               </li>
             </ul>

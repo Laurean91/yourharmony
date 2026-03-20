@@ -16,7 +16,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Баннеры быстрого доступа */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {/* БЛОГ */}
         <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 rounded-2xl shadow-sm text-white flex items-center justify-between">
           <div>
@@ -25,6 +25,17 @@ export default async function AdminDashboard() {
           </div>
           <Link href="/bigbos/blog" className="bg-white text-purple-700 font-semibold px-5 py-2.5 rounded-xl hover:bg-purple-50 transition-colors text-sm whitespace-nowrap">
             Управление →
+          </Link>
+        </div>
+
+        {/* ГЛАВНАЯ СТРАНИЦА */}
+        <div className="bg-gradient-to-r from-teal-500 to-cyan-500 p-6 rounded-2xl shadow-sm text-white flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold mb-1">Главная страница</h2>
+            <p className="text-teal-100 text-sm">Hero, контакты, CTA, FAQ, отзывы...</p>
+          </div>
+          <Link href="/bigbos/landing" className="bg-white text-teal-700 font-semibold px-5 py-2.5 rounded-xl hover:bg-teal-50 transition-colors text-sm whitespace-nowrap">
+            Редактировать →
           </Link>
         </div>
 
