@@ -317,7 +317,14 @@ export async function updateSectionSettings(key: SectionKey, data: unknown) {
 // ─── STUDENTS ────────────────────────────────────────────────────────────────
 
 export async function getStudents() {
-  return await prisma.student.findMany({ orderBy: { name: 'asc' } })
+  return await prisma.student.findMany({
+    orderBy: { name: 'asc' },
+    include: {
+      lessons: {
+        include: { lesson: true },
+      },
+    },
+  })
 }
 
 export async function createStudent(formData: FormData) {
@@ -384,4 +391,13 @@ export async function createLesson(formData: FormData) {
 export async function deleteLesson(id: string) {
   await prisma.lesson.delete({ where: { id } })
   revalidatePath('/bigbos')
+}
+
+export async function markAttendance(lessonId: string, studentId: string, attended: boolean) {
+  await prisma.lessonStudent.update({
+    where: { lessonId_studentId: { lessonId, studentId } },
+    data: { attended },
+  })
+  revalidatePath('/bigbos')
+  revalidatePath('/bigbos/students')
 }

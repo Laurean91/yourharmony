@@ -53,6 +53,7 @@ model Lesson {
 model LessonStudent {
   lessonId  String
   studentId String
+  attended  Boolean @default(false)
   lesson    Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 

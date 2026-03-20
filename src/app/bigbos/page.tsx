@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { getBookings, getLessons, getStudents, getAllPostsAdmin, updateBookingStatus } from '../actions'
 import LessonCalendar from '@/components/LessonCalendar'
 import DeleteBookingButton from '@/components/DeleteBookingButton'
+import DashboardStats from '@/components/DashboardStats'
 import Link from 'next/link'
 
 const TAG_COLORS: Record<string, string> = {
@@ -29,6 +30,9 @@ export default async function AdminDashboard() {
           {posts.filter((p: any) => p.isPublished).length} статей · {students.length} учеников · {newBookings.length} новых заявок
         </p>
       </div>
+
+      {/* Stats */}
+      <DashboardStats bookings={bookings as any} lessons={lessons as any} students={students as any} />
 
       {/* Top row: Calendar + Bookings */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">

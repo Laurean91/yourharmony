@@ -4,6 +4,11 @@ import { useState } from 'react'
 import DeleteStudentButton from './DeleteStudentButton'
 import StudentEditForm from './StudentEditForm'
 
+interface LessonEntry {
+  attended: boolean
+  lesson: { id: string; date: Date }
+}
+
 interface Student {
   id: string
   name: string
@@ -11,6 +16,7 @@ interface Student {
   phone: string | null
   tag: string
   notes: string | null
+  lessons?: LessonEntry[]
 }
 
 export default function StudentCard({
@@ -21,6 +27,10 @@ export default function StudentCard({
   tagColors: Record<string, string>
 }) {
   const [editing, setEditing] = useState(false)
+
+  const totalLessons = student.lessons?.length ?? 0
+  const attendedLessons = student.lessons?.filter(l => l.attended).length ?? 0
+  const attendancePct = totalLessons > 0 ? Math.round((attendedLessons / totalLessons) * 100) : null
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -34,6 +44,11 @@ export default function StudentCard({
             <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5 flex-wrap">
               {student.age && <span>{student.age} лет</span>}
               {student.phone && <span>{student.phone}</span>}
+              {attendancePct !== null && (
+                <span className={`${attendancePct >= 75 ? 'text-green-600' : attendancePct >= 50 ? 'text-orange-500' : 'text-red-500'}`}>
+                  Посещ. {attendedLessons}/{totalLessons} ({attendancePct}%)
+                </span>
+              )}
             </div>
           </div>
         </div>

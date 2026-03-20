@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createLesson, deleteLesson } from '@/app/actions'
+import { createLesson, deleteLesson, markAttendance } from '@/app/actions'
 
 interface Student {
   id: string
@@ -10,6 +10,8 @@ interface Student {
 }
 
 interface LessonStudent {
+  studentId: string
+  attended: boolean
   student: Student
 }
 
@@ -103,6 +105,15 @@ export default function LessonCalendar({
   async function handleDeleteLesson(id: string) {
     await deleteLesson(id)
     setLessons(ls => ls.filter(l => l.id !== id))
+  }
+
+  async function handleAttendance(lessonId: string, studentId: string, attended: boolean) {
+    await markAttendance(lessonId, studentId, attended)
+    setLessons(ls => ls.map(l =>
+      l.id === lessonId
+        ? { ...l, students: l.students.map(ls => ls.studentId === studentId ? { ...ls, attended } : ls) }
+        : l
+    ))
   }
 
   return (
@@ -229,26 +240,52 @@ export default function LessonCalendar({
               <p className="text-sm text-gray-400 py-4 text-center">Занятий нет</p>
             )}
             {selectedLessons.map(l => (
-              <div key={l.id} className="flex items-start justify-between bg-purple-50 rounded-xl px-4 py-3 border border-purple-100">
-                <div>
-                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                    <span className="text-sm font-medium text-gray-800">
-                      {new Date(l.date).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-                      {l.title ? ` — ${l.title}` : ''}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">{l.tag}</span>
+              <div key={l.id} className="bg-purple-50 rounded-xl border border-purple-100 p-4 space-y-2">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <span className="text-sm font-medium text-gray-800">
+                        {new Date(l.date).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                        {l.title ? ` — ${l.title}` : ''}
+                      </span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">{l.tag}</span>
+                    </div>
+                    {l.notes && <p className="text-xs text-gray-400">{l.notes}</p>}
                   </div>
-                  {l.students.length > 0 && (
-                    <p className="text-xs text-gray-500">{l.students.map(ls => ls.student.name).join(', ')}</p>
-                  )}
-                  {l.notes && <p className="text-xs text-gray-400 mt-0.5">{l.notes}</p>}
+                  <button
+                    onClick={() => handleDeleteLesson(l.id)}
+                    className="text-red-400 hover:text-red-600 text-xs px-2 py-1 rounded hover:bg-red-50 transition-colors shrink-0 ml-2"
+                  >
+                    Удалить
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleDeleteLesson(l.id)}
-                  className="text-red-400 hover:text-red-600 text-xs px-2 py-1 rounded hover:bg-red-50 transition-colors shrink-0 ml-2"
-                >
-                  Удалить
-                </button>
+
+                {/* Attendance checkboxes */}
+                {l.students.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wide mb-1.5">Посещаемость</p>
+                    <div className="flex flex-wrap gap-2">
+                      {l.students.map(ls => (
+                        <label
+                          key={ls.studentId}
+                          className={`flex items-center gap-1.5 text-xs cursor-pointer px-2.5 py-1 rounded-lg border transition-colors ${
+                            ls.attended
+                              ? 'bg-green-50 border-green-200 text-green-700'
+                              : 'bg-white border-gray-200 text-gray-500'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={ls.attended}
+                            onChange={e => handleAttendance(l.id, ls.studentId, e.target.checked)}
+                            className="accent-green-600"
+                          />
+                          {ls.student.name}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
