@@ -51,7 +51,7 @@ export default function Footer() {
                    style={{ fontFamily: 'var(--font-nunito), sans-serif' }}>
                   Гармония
                 </p>
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mt-0.5">Языковой клуб</p>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-purple-300/60 leading-tight mt-0.5">Языковой клуб</p>
               </div>
             </Link>
             <p className="text-gray-400 max-w-sm mb-6">

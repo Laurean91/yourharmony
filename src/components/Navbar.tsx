@@ -71,10 +71,15 @@ export default function Navbar() {
             <path d="M50 28 L51.1 24.9 L54 23.8 L51.1 22.7 L50 19.6 L48.9 22.7 L46 23.8 L48.9 24.9Z" fill="white" opacity="0.75"/>
             <path d="M50 70 Q65 80 80 70" stroke="white" strokeWidth="2.8" fill="none" strokeLinecap="round" opacity="0.85"/>
           </svg>
-          <span className="text-xl font-extrabold bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent"
-                style={{ fontFamily: 'var(--font-nunito), sans-serif' }}>
-            Гармония
-          </span>
+          <div>
+            <p className="text-xl font-extrabold bg-gradient-to-r from-purple-600 to-orange-500 bg-clip-text text-transparent leading-tight"
+               style={{ fontFamily: 'var(--font-nunito), sans-serif' }}>
+              Гармония
+            </p>
+            <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-purple-400/80 leading-tight">
+              Языковой клуб
+            </p>
+          </div>
         </Link>
 
         {/* Desktop Menu */}
@@ -138,7 +143,7 @@ export default function Navbar() {
                      style={{ fontFamily: 'var(--font-nunito), sans-serif' }}>
                     Гармония
                   </p>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Языковой клуб</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-purple-400/80 leading-tight">Языковой клуб</p>
                 </div>
               </Link>
 
