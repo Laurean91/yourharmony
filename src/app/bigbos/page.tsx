@@ -83,9 +83,9 @@ export default async function AdminDashboard() {
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
           <h2 className="text-xl font-bold mb-4">Управление галереей</h2>
 
-          <form action={uploadPhoto} className="flex gap-2 mb-6">
+          <form action={uploadPhoto} className="flex flex-col sm:flex-row gap-2 mb-6">
             <input type="file" name="file" accept="image/*" required className="border p-2 rounded flex-1 text-sm bg-gray-50" />
-            <button type="submit" className="bg-purple-600 text-white px-4 rounded font-medium hover:bg-purple-700">Загрузить</button>
+            <button type="submit" className="bg-purple-600 text-white px-4 py-2 rounded font-medium hover:bg-purple-700 whitespace-nowrap">Загрузить</button>
           </form>
 
           <div className="grid grid-cols-3 gap-3">
