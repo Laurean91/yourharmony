@@ -7,6 +7,7 @@ import type {
   HowItWorksSettings, TestimonialsSettings, CtaSettings, FaqSettings,
   Testimonial, FaqItem,
 } from '../lib/landingTypes'
+import TeacherForm from './TeacherForm'
 
 /* ───────── Shared UI ───────── */
 const inputCls = 'w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white'
@@ -19,6 +20,31 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div>
       <label className={labelCls}>{label}</label>
       {children}
+    </div>
+  )
+}
+
+function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label className="flex items-center gap-3 cursor-pointer select-none">
+      <span className={`text-sm font-medium ${enabled ? 'text-gray-800' : 'text-gray-400'}`}>
+        {enabled ? 'Блок включён' : 'Блок выключен'}
+      </span>
+      <div
+        onClick={() => onChange(!enabled)}
+        className={`relative w-11 h-6 rounded-full transition-colors ${enabled ? 'bg-purple-600' : 'bg-gray-300'}`}
+      >
+        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-6' : 'translate-x-1'}`} />
+      </div>
+    </label>
+  )
+}
+
+function EnabledBanner({ enabled }: { enabled: boolean }) {
+  if (enabled) return null
+  return (
+    <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
+      Этот блок скрыт на сайте. Включите его выше, чтобы он отображался посетителям.
     </div>
   )
 }
@@ -84,12 +110,21 @@ function HeroForm({ initial }: { initial: HeroSettings }) {
 }
 
 /* ───────── Tab: Contacts ───────── */
-function ContactsForm({ initial }: { initial: ContactsSettings }) {
-  const [d, setD] = useState(initial)
+function ContactsForm({ initial, onEnabledChange }: { initial: ContactsSettings; onEnabledChange: (v: boolean) => void }) {
+  const [d, setD] = useState({ enabled: true, ...initial })
   const { saving, saved, save } = useSave()
+  const enabled = d.enabled !== false
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+        <div>
+          <p className="font-semibold text-gray-900">Контакты</p>
+          <p className="text-sm text-gray-500">Адрес, телефон, Telegram</p>
+        </div>
+        <Toggle enabled={enabled} onChange={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
+      </div>
+      <EnabledBanner enabled={enabled} />
       <Field label="Описание">
         <textarea className={textareaCls} value={d.description} onChange={e => setD({ ...d, description: e.target.value })} />
       </Field>
@@ -108,12 +143,21 @@ function ContactsForm({ initial }: { initial: ContactsSettings }) {
 }
 
 /* ───────── Tab: CTA ───────── */
-function CtaForm({ initial }: { initial: CtaSettings }) {
-  const [d, setD] = useState(initial)
+function CtaForm({ initial, onEnabledChange }: { initial: CtaSettings; onEnabledChange: (v: boolean) => void }) {
+  const [d, setD] = useState({ enabled: true, ...initial })
   const { saving, saved, save } = useSave()
+  const enabled = d.enabled !== false
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+        <div>
+          <p className="font-semibold text-gray-900">CTA — призыв к действию</p>
+          <p className="text-sm text-gray-500">Баннер с кнопкой записи</p>
+        </div>
+        <Toggle enabled={enabled} onChange={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
+      </div>
+      <EnabledBanner enabled={enabled} />
       <Field label="Заголовок">
         <input className={inputCls} value={d.headline} onChange={e => setD({ ...d, headline: e.target.value })} />
       </Field>
@@ -132,9 +176,10 @@ function CtaForm({ initial }: { initial: CtaSettings }) {
 }
 
 /* ───────── Tab: Features ───────── */
-function FeaturesForm({ initial }: { initial: FeaturesSettings }) {
-  const [d, setD] = useState(initial)
+function FeaturesForm({ initial, onEnabledChange }: { initial: FeaturesSettings; onEnabledChange: (v: boolean) => void }) {
+  const [d, setD] = useState({ enabled: true, ...initial })
   const { saving, saved, save } = useSave()
+  const enabled = d.enabled !== false
 
   const updateItem = (i: number, field: 'title' | 'text', val: string) => {
     const items = d.items.map((it, idx) => idx === i ? { ...it, [field]: val } : it)
@@ -143,6 +188,14 @@ function FeaturesForm({ initial }: { initial: FeaturesSettings }) {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+        <div>
+          <p className="font-semibold text-gray-900">Преимущества</p>
+          <p className="text-sm text-gray-500">«Почему выбирают нас» — карточки</p>
+        </div>
+        <Toggle enabled={enabled} onChange={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
+      </div>
+      <EnabledBanner enabled={enabled} />
       <Field label="Описание клуба (абзац над карточками)">
         <textarea className={textareaCls} value={d.description} onChange={e => setD({ ...d, description: e.target.value })} />
       </Field>
@@ -163,9 +216,10 @@ function FeaturesForm({ initial }: { initial: FeaturesSettings }) {
 }
 
 /* ───────── Tab: Formats ───────── */
-function FormatsForm({ initial }: { initial: FormatsSettings }) {
-  const [d, setD] = useState(initial)
+function FormatsForm({ initial, onEnabledChange }: { initial: FormatsSettings; onEnabledChange: (v: boolean) => void }) {
+  const [d, setD] = useState({ enabled: true, ...initial })
   const { saving, saved, save } = useSave()
+  const enabled = d.enabled !== false
 
   const updateBullet = (type: 'group' | 'individual', i: number, val: string) => {
     if (type === 'group') {
@@ -189,6 +243,14 @@ function FormatsForm({ initial }: { initial: FormatsSettings }) {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+        <div>
+          <p className="font-semibold text-gray-900">Форматы занятий</p>
+          <p className="text-sm text-gray-500">Групповые и индивидуальные</p>
+        </div>
+        <Toggle enabled={enabled} onChange={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
+      </div>
+      <EnabledBanner enabled={enabled} />
       <Field label="Подзаголовок раздела">
         <textarea className={textareaCls} value={d.subtitle} onChange={e => setD({ ...d, subtitle: e.target.value })} />
       </Field>
@@ -237,9 +299,10 @@ function FormatsForm({ initial }: { initial: FormatsSettings }) {
 }
 
 /* ───────── Tab: How it works ───────── */
-function HowItWorksForm({ initial }: { initial: HowItWorksSettings }) {
-  const [d, setD] = useState(initial)
+function HowItWorksForm({ initial, onEnabledChange }: { initial: HowItWorksSettings; onEnabledChange: (v: boolean) => void }) {
+  const [d, setD] = useState({ enabled: true, ...initial })
   const { saving, saved, save } = useSave()
+  const enabled = d.enabled !== false
 
   const updateItem = (i: number, field: 'title' | 'text', val: string) => {
     const items = d.items.map((it, idx) => idx === i ? { ...it, [field]: val } : it)
@@ -248,6 +311,14 @@ function HowItWorksForm({ initial }: { initial: HowItWorksSettings }) {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+        <div>
+          <p className="font-semibold text-gray-900">Как начать</p>
+          <p className="text-sm text-gray-500">Шаги от заявки до занятий</p>
+        </div>
+        <Toggle enabled={enabled} onChange={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
+      </div>
+      <EnabledBanner enabled={enabled} />
       {d.items.map((item, i) => (
         <div key={i} className={`${sectionCls} space-y-3`}>
           <p className="text-xs font-bold uppercase tracking-wider text-purple-500">Шаг {i + 1}</p>
@@ -265,9 +336,10 @@ function HowItWorksForm({ initial }: { initial: HowItWorksSettings }) {
 }
 
 /* ───────── Tab: Testimonials ───────── */
-function TestimonialsForm({ initial }: { initial: TestimonialsSettings }) {
-  const [d, setD] = useState(initial)
+function TestimonialsForm({ initial, onEnabledChange }: { initial: TestimonialsSettings; onEnabledChange: (v: boolean) => void }) {
+  const [d, setD] = useState({ enabled: true, ...initial })
   const { saving, saved, save } = useSave()
+  const enabled = d.enabled !== false
 
   const update = (i: number, field: keyof Testimonial, val: string) => {
     const items = d.items.map((it, idx) => idx === i ? { ...it, [field]: val } : it)
@@ -279,6 +351,14 @@ function TestimonialsForm({ initial }: { initial: TestimonialsSettings }) {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+        <div>
+          <p className="font-semibold text-gray-900">Отзывы</p>
+          <p className="text-sm text-gray-500">Карусель отзывов родителей</p>
+        </div>
+        <Toggle enabled={enabled} onChange={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
+      </div>
+      <EnabledBanner enabled={enabled} />
       {d.items.map((item, i) => (
         <div key={i} className={`${sectionCls} space-y-3`}>
           <div className="flex items-center justify-between">
@@ -310,9 +390,10 @@ function TestimonialsForm({ initial }: { initial: TestimonialsSettings }) {
 }
 
 /* ───────── Tab: FAQ ───────── */
-function FaqForm({ initial }: { initial: FaqSettings }) {
-  const [d, setD] = useState(initial)
+function FaqForm({ initial, onEnabledChange }: { initial: FaqSettings; onEnabledChange: (v: boolean) => void }) {
+  const [d, setD] = useState({ enabled: true, ...initial })
   const { saving, saved, save } = useSave()
+  const enabled = d.enabled !== false
 
   const update = (i: number, field: keyof FaqItem, val: string) => {
     const items = d.items.map((it, idx) => idx === i ? { ...it, [field]: val } : it)
@@ -324,6 +405,14 @@ function FaqForm({ initial }: { initial: FaqSettings }) {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+        <div>
+          <p className="font-semibold text-gray-900">FAQ</p>
+          <p className="text-sm text-gray-500">Часто задаваемые вопросы</p>
+        </div>
+        <Toggle enabled={enabled} onChange={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
+      </div>
+      <EnabledBanner enabled={enabled} />
       {d.items.map((item, i) => (
         <div key={i} className={`${sectionCls} space-y-3`}>
           <div className="flex items-center justify-between">
@@ -356,7 +445,13 @@ const TABS = [
   { label: 'Как начать', key: 'howItWorks' },
   { label: 'Отзывы', key: 'testimonials' },
   { label: 'FAQ', key: 'faq' },
-]
+  { label: 'Преподаватель', key: 'teacher' },
+] as const
+
+type TabKey = typeof TABS[number]['key']
+type EnabledTabKey = Exclude<TabKey, 'hero' | 'teacher'>
+
+interface TeacherProfile { name: string; bio: string; photoUrl: string | null; badges: string }
 
 type Props = {
   hero: HeroSettings
@@ -367,40 +462,60 @@ type Props = {
   howItWorks: HowItWorksSettings
   testimonials: TestimonialsSettings
   faq: FaqSettings
+  teacher: TeacherProfile
 }
 
 export default function LandingEditor(props: Props) {
   const [tab, setTab] = useState(0)
+  const [enabledMap, setEnabledMap] = useState<Record<EnabledTabKey, boolean>>({
+    contacts: props.contacts.enabled !== false,
+    cta: props.cta.enabled !== false,
+    features: props.features.enabled !== false,
+    formats: props.formats.enabled !== false,
+    howItWorks: props.howItWorks.enabled !== false,
+    testimonials: props.testimonials.enabled !== false,
+    faq: props.faq.enabled !== false,
+  })
+
+  const toggle = (key: EnabledTabKey) => (v: boolean) =>
+    setEnabledMap(m => ({ ...m, [key]: v }))
 
   return (
     <div>
       {/* Tab nav */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {TABS.map((t, i) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(i)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-              tab === i
-                ? 'bg-purple-600 text-white shadow-sm'
-                : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+        {TABS.map((t, i) => {
+          const isEnabled = t.key in enabledMap ? enabledMap[t.key as EnabledTabKey] : true
+          return (
+            <button
+              key={t.key}
+              onClick={() => setTab(i)}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                tab === i
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600'
+              }`}
+            >
+              {t.label}
+              {!isEnabled && (
+                <span className={`w-1.5 h-1.5 rounded-full ${tab === i ? 'bg-white/60' : 'bg-amber-400'}`} />
+              )}
+            </button>
+          )
+        })}
       </div>
 
       {/* Tab content */}
       <div>
         {tab === 0 && <HeroForm initial={props.hero} />}
-        {tab === 1 && <ContactsForm initial={props.contacts} />}
-        {tab === 2 && <CtaForm initial={props.cta} />}
-        {tab === 3 && <FeaturesForm initial={props.features} />}
-        {tab === 4 && <FormatsForm initial={props.formats} />}
-        {tab === 5 && <HowItWorksForm initial={props.howItWorks} />}
-        {tab === 6 && <TestimonialsForm initial={props.testimonials} />}
-        {tab === 7 && <FaqForm initial={props.faq} />}
+        {tab === 1 && <ContactsForm initial={props.contacts} onEnabledChange={toggle('contacts')} />}
+        {tab === 2 && <CtaForm initial={props.cta} onEnabledChange={toggle('cta')} />}
+        {tab === 3 && <FeaturesForm initial={props.features} onEnabledChange={toggle('features')} />}
+        {tab === 4 && <FormatsForm initial={props.formats} onEnabledChange={toggle('formats')} />}
+        {tab === 5 && <HowItWorksForm initial={props.howItWorks} onEnabledChange={toggle('howItWorks')} />}
+        {tab === 6 && <TestimonialsForm initial={props.testimonials} onEnabledChange={toggle('testimonials')} />}
+        {tab === 7 && <FaqForm initial={props.faq} onEnabledChange={toggle('faq')} />}
+        {tab === 8 && <TeacherForm teacher={props.teacher} />}
       </div>
     </div>
   )

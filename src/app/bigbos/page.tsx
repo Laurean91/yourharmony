@@ -1,12 +1,12 @@
 export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
-import { getBookings, getPhotos, updateBookingStatus, uploadPhoto, deletePhoto, getAllPostsAdmin, getTeacherProfile } from '../actions'
+import { getBookings, getPhotos, updateBookingStatus, uploadPhoto, deletePhoto, getAllPostsAdmin } from '../actions'
 import SignOutButton from '@/components/SignOutButton'
 import DeleteBookingButton from '@/components/DeleteBookingButton'
 
 export default async function AdminDashboard() {
-  const [bookings, photos, posts, teacher] = await Promise.all([getBookings(), getPhotos(), getAllPostsAdmin(), getTeacherProfile()])
+  const [bookings, photos, posts] = await Promise.all([getBookings(), getPhotos(), getAllPostsAdmin()])
 
   return (
     <div className="min-h-screen bg-gray-50 p-8 font-sans text-gray-800">
@@ -16,7 +16,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Баннеры быстрого доступа */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         {/* БЛОГ */}
         <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 rounded-2xl shadow-sm text-white flex items-center justify-between">
           <div>
@@ -28,33 +28,13 @@ export default async function AdminDashboard() {
           </Link>
         </div>
 
-        {/* ГЛАВНАЯ СТРАНИЦА */}
+        {/* УПРАВЛЕНИЕ САЙТОМ */}
         <div className="bg-gradient-to-r from-teal-500 to-cyan-500 p-6 rounded-2xl shadow-sm text-white flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold mb-1">Главная страница</h2>
-            <p className="text-teal-100 text-sm">Hero, контакты, CTA, FAQ, отзывы...</p>
+            <h2 className="text-xl font-bold mb-1">Управление сайтом</h2>
+            <p className="text-teal-100 text-sm">Hero, контакты, CTA, FAQ, преподаватель...</p>
           </div>
           <Link href="/bigbos/landing" className="bg-white text-teal-700 font-semibold px-5 py-2.5 rounded-xl hover:bg-teal-50 transition-colors text-sm whitespace-nowrap">
-            Редактировать →
-          </Link>
-        </div>
-
-        {/* ПРЕПОДАВАТЕЛЬ */}
-        <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-6 rounded-2xl shadow-sm text-white flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {teacher.photoUrl ? (
-              <img src={teacher.photoUrl} alt={teacher.name} className="w-12 h-12 rounded-full object-cover border-2 border-white/50 flex-shrink-0" />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center font-bold text-lg flex-shrink-0">
-                {teacher.name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()}
-              </div>
-            )}
-            <div>
-              <h2 className="text-xl font-bold mb-0.5">Преподаватель</h2>
-              <p className="text-orange-100 text-sm">{teacher.name}</p>
-            </div>
-          </div>
-          <Link href="/bigbos/teacher" className="bg-white text-orange-600 font-semibold px-5 py-2.5 rounded-xl hover:bg-orange-50 transition-colors text-sm whitespace-nowrap">
             Редактировать →
           </Link>
         </div>

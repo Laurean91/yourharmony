@@ -21,15 +21,17 @@ export default async function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-orange-50 font-sans text-gray-800">
       <Navbar />
       <main>
-        <LandingHero data={hero} />
+        {hero.enabled !== false && <LandingHero data={hero} />}
         <BlogPreview />
-        <LandingTop features={features} formats={formats} />
+        {(features.enabled !== false || formats.enabled !== false) && (
+          <LandingTop features={features} formats={formats} />
+        )}
         <TeacherSection />
-        <HowItWorksSection data={howItWorks} />
-        <TestimonialsSection data={testimonials} />
-        <CtaSection data={cta} />
-        <FAQSection data={faq} />
-        <LandingContacts data={contacts} />
+        {howItWorks.enabled !== false && <HowItWorksSection data={howItWorks} />}
+        {testimonials.enabled !== false && <TestimonialsSection data={testimonials} />}
+        {cta.enabled !== false && <CtaSection data={cta} />}
+        {faq.enabled !== false && <FAQSection data={faq} />}
+        {contacts.enabled !== false && <LandingContacts data={contacts} />}
       </main>
       <Footer />
     </div>

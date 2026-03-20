@@ -1,6 +1,7 @@
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 export type HeroSettings = {
+  enabled?: boolean
   title: string
   subtitle: string
   studentsCount: number
@@ -9,11 +10,13 @@ export type HeroSettings = {
 }
 
 export type FeaturesSettings = {
+  enabled?: boolean
   description: string
   items: Array<{ title: string; text: string }>
 }
 
 export type FormatsSettings = {
+  enabled?: boolean
   subtitle: string
   groupTitle: string
   groupDescription: string
@@ -24,6 +27,7 @@ export type FormatsSettings = {
 }
 
 export type ContactsSettings = {
+  enabled?: boolean
   description: string
   address: string
   phone: string
@@ -31,6 +35,7 @@ export type ContactsSettings = {
 }
 
 export type HowItWorksSettings = {
+  enabled?: boolean
   items: Array<{ title: string; text: string }>
 }
 
@@ -42,10 +47,12 @@ export type Testimonial = {
 }
 
 export type TestimonialsSettings = {
+  enabled?: boolean
   items: Testimonial[]
 }
 
 export type CtaSettings = {
+  enabled?: boolean
   headline: string
   subtext: string
   telegramUrl: string
@@ -55,6 +62,7 @@ export type CtaSettings = {
 export type FaqItem = { q: string; a: string }
 
 export type FaqSettings = {
+  enabled?: boolean
   items: FaqItem[]
 }
 

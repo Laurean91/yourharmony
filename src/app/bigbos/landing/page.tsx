@@ -1,9 +1,9 @@
 import Link from 'next/link'
-import { getSectionSettings } from '../../actions'
+import { getSectionSettings, getTeacherProfile } from '../../actions'
 import LandingEditor from '@/components/LandingEditor'
 
 export default async function LandingSettingsPage() {
-  const [hero, contacts, cta, features, formats, howItWorks, testimonials, faq] = await Promise.all([
+  const [hero, contacts, cta, features, formats, howItWorks, testimonials, faq, teacher] = await Promise.all([
     getSectionSettings('hero'),
     getSectionSettings('contacts'),
     getSectionSettings('cta'),
@@ -12,6 +12,7 @@ export default async function LandingSettingsPage() {
     getSectionSettings('howItWorks'),
     getSectionSettings('testimonials'),
     getSectionSettings('faq'),
+    getTeacherProfile(),
   ])
 
   return (
@@ -22,7 +23,7 @@ export default async function LandingSettingsPage() {
             ← Панель управления
           </Link>
           <span className="text-gray-300">/</span>
-          <h1 className="text-2xl font-bold text-gray-900">Редактор главной страницы</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Управление сайтом</h1>
         </div>
 
         <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-3 mb-8 text-sm text-amber-800">
@@ -38,6 +39,7 @@ export default async function LandingSettingsPage() {
           howItWorks={howItWorks}
           testimonials={testimonials}
           faq={faq}
+          teacher={teacher}
         />
       </div>
     </div>
