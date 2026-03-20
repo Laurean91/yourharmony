@@ -127,10 +127,10 @@ export default function LessonCalendar({
   }
 
   return (
-    <div className="flex gap-6 items-start">
+    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
 
       {/* ── Compact calendar ── */}
-      <div className="w-[260px] shrink-0">
+      <div className="w-full sm:w-[260px] sm:shrink-0">
         <div className="flex items-center justify-between mb-2">
           <button onClick={prevMonth} className="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 text-sm transition-colors">←</button>
           <span className="text-sm font-semibold text-gray-800">{MONTHS[month]} {year}</span>
@@ -155,7 +155,7 @@ export default function LessonCalendar({
               <button
                 key={i}
                 onClick={() => { setSelectedDay(isSelected ? null : dateStr); setShowAddForm(false); setSelectedStudentIds([]) }}
-                className={`h-8 flex flex-col items-center justify-center rounded-lg text-xs transition-all ${
+                className={`h-9 sm:h-8 flex flex-col items-center justify-center rounded-lg text-xs transition-all ${
                   isSelected
                     ? 'bg-purple-600 text-white shadow-sm'
                     : isToday
