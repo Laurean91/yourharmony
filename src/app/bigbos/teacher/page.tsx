@@ -9,16 +9,13 @@ export default async function TeacherPage() {
   const teacher = await getTeacherProfile()
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8 font-sans text-gray-800">
+    <div className="p-8 font-sans text-gray-800">
       <div className="max-w-3xl mx-auto">
 
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <div className="text-sm text-gray-400 mb-1">
-              <Link href="/bigbos" className="hover:text-purple-600">← Панель управления</Link>
-            </div>
-            <h1 className="text-3xl font-bold">Профиль преподавателя</h1>
+            <h1 className="text-2xl font-bold">Профиль преподавателя</h1>
             <p className="text-gray-500 mt-1">Информация отображается в секции «Ваш преподаватель» на главной странице</p>
           </div>
           <Link

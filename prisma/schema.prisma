@@ -25,6 +25,40 @@ model Photo {
   createdAt DateTime @default(now())
 }
 
+model Student {
+  id        String          @id @default(uuid())
+  name      String
+  age       Int?
+  phone     String?
+  tag       String          @default("Индивидуальное")
+  notes     String?
+  createdAt DateTime        @default(now())
+  lessons   LessonStudent[]
+
+  @@index([tag])
+}
+
+model Lesson {
+  id        String          @id @default(uuid())
+  date      DateTime
+  title     String?
+  tag       String          @default("Индивидуальное")
+  notes     String?
+  students  LessonStudent[]
+  createdAt DateTime        @default(now())
+
+  @@index([date])
+}
+
+model LessonStudent {
+  lessonId  String
+  studentId String
+  lesson    Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([lessonId, studentId])
+}
+
 model Category {
   id        String   @id @default(uuid())
   name      String   @unique

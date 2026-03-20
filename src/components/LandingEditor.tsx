@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { updateSectionSettings } from '../app/actions'
+import { updateSectionSettings, uploadPhoto, deletePhoto } from '../app/actions'
 import type {
   HeroSettings, FeaturesSettings, FormatsSettings, ContactsSettings,
   HowItWorksSettings, TestimonialsSettings, CtaSettings, FaqSettings,
@@ -435,6 +435,37 @@ function FaqForm({ initial, onEnabledChange }: { initial: FaqSettings; onEnabled
   )
 }
 
+/* ───────── Tab: Gallery ───────── */
+interface Photo { id: string; url: string }
+
+function GalleryForm({ photos }: { photos: Photo[] }) {
+  return (
+    <div className="space-y-6">
+      <form action={uploadPhoto} className="flex flex-col sm:flex-row gap-2">
+        <input type="file" name="file" accept="image/*" required className="border border-gray-200 p-2 rounded-xl flex-1 text-sm bg-gray-50" />
+        <button type="submit" className="bg-purple-600 text-white px-5 py-2 rounded-xl font-medium hover:bg-purple-700 whitespace-nowrap text-sm">
+          Загрузить
+        </button>
+      </form>
+      {photos.length === 0 && (
+        <p className="text-sm text-gray-400 text-center py-6">Фотографий пока нет</p>
+      )}
+      <div className="grid grid-cols-3 gap-3">
+        {photos.map((p) => (
+          <div key={p.id} className="relative group rounded-xl overflow-hidden aspect-square border border-gray-100">
+            <img src={p.url} className="w-full h-full object-cover" alt="" />
+            <form action={deletePhoto.bind(null, p.id, p.url)} className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+              <button type="submit" className="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-bold">
+                Удалить
+              </button>
+            </form>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 /* ───────── Main Editor ───────── */
 const TABS = [
   { label: 'Hero', key: 'hero' },
@@ -446,10 +477,11 @@ const TABS = [
   { label: 'Отзывы', key: 'testimonials' },
   { label: 'FAQ', key: 'faq' },
   { label: 'Преподаватель', key: 'teacher' },
+  { label: 'Галерея', key: 'gallery' },
 ] as const
 
 type TabKey = typeof TABS[number]['key']
-type EnabledTabKey = Exclude<TabKey, 'hero' | 'teacher'>
+type EnabledTabKey = Exclude<TabKey, 'hero' | 'teacher' | 'gallery'>
 
 interface TeacherProfile { name: string; bio: string; photoUrl: string | null; badges: string }
 
@@ -463,6 +495,7 @@ type Props = {
   testimonials: TestimonialsSettings
   faq: FaqSettings
   teacher: TeacherProfile
+  photos: Photo[]
 }
 
 export default function LandingEditor(props: Props) {
@@ -516,6 +549,7 @@ export default function LandingEditor(props: Props) {
         {tab === 6 && <TestimonialsForm initial={props.testimonials} onEnabledChange={toggle('testimonials')} />}
         {tab === 7 && <FaqForm initial={props.faq} onEnabledChange={toggle('faq')} />}
         {tab === 8 && <TeacherForm teacher={props.teacher} />}
+        {tab === 9 && <GalleryForm photos={props.photos} />}
       </div>
     </div>
   )

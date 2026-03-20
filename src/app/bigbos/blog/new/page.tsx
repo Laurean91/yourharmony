@@ -8,7 +8,7 @@ export default async function NewPostPage() {
   const categories = await getCategories()
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
+    <div className="font-sans text-gray-800">
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-8">
         {/* Header */}
         <div className="mb-8">

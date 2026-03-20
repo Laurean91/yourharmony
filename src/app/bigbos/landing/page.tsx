@@ -1,9 +1,9 @@
 import Link from 'next/link'
-import { getSectionSettings, getTeacherProfile } from '../../actions'
+import { getSectionSettings, getTeacherProfile, getPhotos } from '../../actions'
 import LandingEditor from '@/components/LandingEditor'
 
 export default async function LandingSettingsPage() {
-  const [hero, contacts, cta, features, formats, howItWorks, testimonials, faq, teacher] = await Promise.all([
+  const [hero, contacts, cta, features, formats, howItWorks, testimonials, faq, teacher, photos] = await Promise.all([
     getSectionSettings('hero'),
     getSectionSettings('contacts'),
     getSectionSettings('cta'),
@@ -13,16 +13,13 @@ export default async function LandingSettingsPage() {
     getSectionSettings('testimonials'),
     getSectionSettings('faq'),
     getTeacherProfile(),
+    getPhotos(),
   ])
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8 font-sans text-gray-800">
+    <div className="p-8 font-sans text-gray-800">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
-          <Link href="/bigbos" className="text-gray-400 hover:text-gray-600 transition-colors text-sm">
-            ← Панель управления
-          </Link>
-          <span className="text-gray-300">/</span>
+        <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Управление сайтом</h1>
         </div>
 
@@ -40,6 +37,7 @@ export default async function LandingSettingsPage() {
           testimonials={testimonials}
           faq={faq}
           teacher={teacher}
+          photos={photos}
         />
       </div>
     </div>

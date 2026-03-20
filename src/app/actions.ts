@@ -313,3 +313,75 @@ export async function updateSectionSettings(key: SectionKey, data: unknown) {
   revalidatePath('/')
   revalidatePath('/bigbos/landing')
 }
+
+// ─── STUDENTS ────────────────────────────────────────────────────────────────
+
+export async function getStudents() {
+  return await prisma.student.findMany({ orderBy: { name: 'asc' } })
+}
+
+export async function createStudent(formData: FormData) {
+  const name = (formData.get('name') as string)?.trim()
+  const age = formData.get('age') ? Number(formData.get('age')) : null
+  const phone = (formData.get('phone') as string)?.trim() || null
+  const tag = (formData.get('tag') as string) || 'Индивидуальное'
+  const notes = (formData.get('notes') as string)?.trim() || null
+
+  if (!name) throw new Error('Имя обязательно')
+  await prisma.student.create({ data: { name, age, phone, tag, notes } })
+  revalidatePath('/bigbos/students')
+}
+
+export async function updateStudent(id: string, formData: FormData) {
+  const name = (formData.get('name') as string)?.trim()
+  const age = formData.get('age') ? Number(formData.get('age')) : null
+  const phone = (formData.get('phone') as string)?.trim() || null
+  const tag = (formData.get('tag') as string) || 'Индивидуальное'
+  const notes = (formData.get('notes') as string)?.trim() || null
+
+  if (!name) throw new Error('Имя обязательно')
+  await prisma.student.update({ where: { id }, data: { name, age, phone, tag, notes } })
+  revalidatePath('/bigbos/students')
+}
+
+export async function deleteStudent(id: string) {
+  await prisma.student.delete({ where: { id } })
+  revalidatePath('/bigbos/students')
+  revalidatePath('/bigbos')
+}
+
+// ─── LESSONS ─────────────────────────────────────────────────────────────────
+
+export async function getLessons() {
+  return await prisma.lesson.findMany({
+    orderBy: { date: 'asc' },
+    include: { students: { include: { student: true } } },
+  })
+}
+
+export async function createLesson(formData: FormData) {
+  const date = new Date(formData.get('date') as string)
+  const title = (formData.get('title') as string)?.trim() || null
+  const tag = (formData.get('tag') as string) || 'Индивидуальное'
+  const notes = (formData.get('notes') as string)?.trim() || null
+  const studentIds = formData.getAll('studentIds') as string[]
+
+  const lesson = await prisma.lesson.create({
+    data: {
+      date,
+      title,
+      tag,
+      notes,
+      students: {
+        create: studentIds.map(studentId => ({ studentId })),
+      },
+    },
+  })
+  revalidatePath('/bigbos')
+  return lesson
+}
+
+export async function deleteLesson(id: string) {
+  await prisma.lesson.delete({ where: { id } })
+  revalidatePath('/bigbos')
+}

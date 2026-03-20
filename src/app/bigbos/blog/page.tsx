@@ -12,15 +12,12 @@ export default async function AdminBlogPage() {
   const [posts, categories] = await Promise.all([getAllPostsAdmin(), getCategories()])
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8 font-sans text-gray-800">
+    <div className="p-8 font-sans text-gray-800">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <div className="text-sm text-gray-400 mb-1">
-              <Link href="/bigbos" className="hover:text-purple-600">← Панель управления</Link>
-            </div>
-            <h1 className="text-3xl font-bold">Управление блогом</h1>
+            <h1 className="text-2xl font-bold">Блог и новости</h1>
             <p className="text-gray-500 mt-1">{posts.length} {posts.length === 1 ? 'статья' : 'статей'} · {categories.length} категорий</p>
           </div>
           <Link
