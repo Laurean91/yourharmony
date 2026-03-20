@@ -228,9 +228,9 @@ export function LandingContacts() {
     >
       <div className="bg-white/50 backdrop-blur-xl rounded-3xl p-8 md:p-12 shadow-xl border border-white flex flex-col md:flex-row gap-12 items-center">
         <div className="flex-1">
-          <h2 className="text-4xl font-bold mb-6">Ждем вас в гости!</h2>
+          <h2 className="text-4xl font-bold mb-6">Как нас найти</h2>
           <p className="text-gray-600 mb-8 text-lg">
-            Мы находимся в самом центре города. Приходите на пробное занятие, познакомьтесь с преподавателями и атмосферой нашего клуба.
+            Мы находимся в Москве у станции метро Люблино. Приходите на пробное занятие — познакомьтесь с преподавателем и атмосферой клуба.
           </p>
           <motion.div
             className="space-y-4"
@@ -248,7 +248,7 @@ export function LandingContacts() {
               </div>
               <div>
                 <p className="font-bold">Адрес</p>
-                <p>ул. Мира, д. 15, офис 302</p>
+                <p>г. Москва, м. Люблино, Армавирская ул., 1/20</p>
               </div>
             </motion.div>
             <motion.div variants={fadeUp} className="flex items-center gap-4 text-gray-700">
@@ -259,29 +259,25 @@ export function LandingContacts() {
               </div>
               <div>
                 <p className="font-bold">Телефон</p>
-                <p>+7 (999) 123-45-67</p>
+                <p>+7 (985) 150-83-00</p>
               </div>
             </motion.div>
             <motion.div variants={fadeUp} className="flex gap-3 pt-2">
-              <a href="https://t.me/yourharmony_club" target="_blank" rel="noopener noreferrer"
+              <a href="https://t.me/harmonyEnglish" target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 rounded-full bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 transition-colors">
                 <Send className="w-4 h-4" />Telegram
-              </a>
-              <a href="https://wa.me/79991234567" target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-500 text-white text-sm font-semibold hover:bg-green-600 transition-colors">
-                <MessageCircle className="w-4 h-4" />WhatsApp
               </a>
             </motion.div>
           </motion.div>
         </div>
         <div className="w-full md:w-1/2 h-80 rounded-2xl overflow-hidden shadow-inner">
           <iframe
-            src="https://yandex.ru/map-widget/v1/?text=%D1%83%D0%BB.%20%D0%9C%D0%B8%D1%80%D0%B0%2C%20%D0%B4.%2015&z=16&l=map"
+            src="https://yandex.ru/map-widget/v1/?text=%D0%90%D1%80%D0%BC%D0%B0%D0%B2%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F+%D1%83%D0%BB%D0%B8%D1%86%D0%B0+1%2F20%2C+%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0&z=16&l=map"
             width="100%"
             height="100%"
             style={{ border: 0 }}
             allowFullScreen
-            title="Карта"
+            title="Языковой клуб Гармония на карте"
           />
         </div>
       </div>
