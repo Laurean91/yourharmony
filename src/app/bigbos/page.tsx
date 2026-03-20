@@ -4,12 +4,8 @@ import { getBookings, getLessons, getStudents, getAllPostsAdmin, updateBookingSt
 import LessonCalendar from '@/components/LessonCalendar'
 import DeleteBookingButton from '@/components/DeleteBookingButton'
 import DashboardStats from '@/components/DashboardStats'
+import DashboardStudentGrid from '@/components/DashboardStudentGrid'
 import Link from 'next/link'
-
-const TAG_COLORS: Record<string, string> = {
-  'Индивидуальное': 'bg-purple-100 text-purple-700',
-  'Группа': 'bg-blue-100 text-blue-700',
-}
 
 export default async function AdminDashboard() {
   const [bookings, lessons, students, posts] = await Promise.all([
@@ -111,26 +107,7 @@ export default async function AdminDashboard() {
             <Link href="/bigbos/students" className="text-purple-600 hover:underline">Добавить →</Link>
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {students.slice(0, 8).map((s: any) => (
-              <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/60 hover:bg-gray-100/60 transition-colors">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-violet-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
-                  {s.name.charAt(0).toUpperCase()}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{s.name}</p>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${TAG_COLORS[s.tag] ?? 'bg-gray-100 text-gray-500'}`}>
-                    {s.tag}
-                  </span>
-                </div>
-              </div>
-            ))}
-            {students.length > 8 && (
-              <Link href="/bigbos/students" className="flex items-center justify-center p-3 rounded-xl border border-dashed border-gray-200 text-sm text-gray-400 hover:border-purple-300 hover:text-purple-600 transition-colors">
-                +{students.length - 8} ещё
-              </Link>
-            )}
-          </div>
+          <DashboardStudentGrid students={students as any} />
         )}
       </div>
     </div>
