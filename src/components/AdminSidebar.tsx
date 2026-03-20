@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, FileText, Globe, TrendingUp, X } from 'lucide-react'
+import { LayoutDashboard, Users, CalendarDays, FileText, Globe, TrendingUp, X } from 'lucide-react'
 import SignOutButton from './SignOutButton'
 
 const navItems = [
   { label: 'Дашборд', href: '/bigbos', icon: LayoutDashboard, exact: true },
   { label: 'Мои ученики', href: '/bigbos/students', icon: Users, exact: false },
+  { label: 'Расписание', href: '/bigbos/schedule', icon: CalendarDays, exact: false },
   { label: 'Финансы', href: '/bigbos/finance', icon: TrendingUp, exact: false },
   { label: 'Блог', href: '/bigbos/blog', icon: FileText, exact: false },
   { label: 'Управление сайтом', href: '/bigbos/landing', icon: Globe, exact: false },

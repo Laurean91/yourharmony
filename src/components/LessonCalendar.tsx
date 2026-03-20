@@ -47,9 +47,11 @@ function getFirstDayOfWeek(year: number, month: number) {
 export default function LessonCalendar({
   lessons: initialLessons,
   students,
+  readonly = false,
 }: {
   lessons: Lesson[]
   students: Student[]
+  readonly?: boolean
 }) {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
@@ -192,16 +194,18 @@ export default function LessonCalendar({
               <span className="font-semibold text-gray-800 text-sm">
                 {new Date(selectedDay + 'T12:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}
               </span>
-              <button
-                onClick={() => setShowAddForm(v => !v)}
-                className="text-xs bg-purple-600 text-white px-3 py-1.5 rounded-xl hover:bg-purple-700 transition-colors"
-              >
-                + Занятие
-              </button>
+              {!readonly && (
+                <button
+                  onClick={() => setShowAddForm(v => !v)}
+                  className="text-xs bg-purple-600 text-white px-3 py-1.5 rounded-xl hover:bg-purple-700 transition-colors"
+                >
+                  + Занятие
+                </button>
+              )}
             </div>
 
             {/* Add lesson form */}
-            {showAddForm && (
+            {!readonly && showAddForm && (
               <form onSubmit={handleAddLesson} className="bg-purple-50 rounded-2xl border border-purple-100 p-4 space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -310,16 +314,29 @@ export default function LessonCalendar({
                     </div>
                     {l.notes && <p className="text-xs text-gray-400">{l.notes}</p>}
                   </div>
-                  <button
-                    onClick={() => handleDeleteLesson(l.id)}
-                    className="text-red-400 hover:text-red-600 text-xs px-2 py-1 rounded hover:bg-red-50 transition-colors shrink-0 ml-2"
-                  >
-                    Удалить
-                  </button>
+                  {!readonly && (
+                    <button
+                      onClick={() => handleDeleteLesson(l.id)}
+                      className="text-red-400 hover:text-red-600 text-xs px-2 py-1 rounded hover:bg-red-50 transition-colors shrink-0 ml-2"
+                    >
+                      Удалить
+                    </button>
+                  )}
                 </div>
 
+                {/* Readonly: student names only */}
+                {readonly && l.students.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {l.students.map(ls => (
+                      <span key={ls.studentId} className="text-xs px-2 py-0.5 rounded-full bg-white border border-purple-100 text-gray-600">
+                        {ls.student.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
                 {/* Attendance checkboxes */}
-                {l.students.length > 0 && (
+                {!readonly && l.students.length > 0 && (
                   <div>
                     <p className="text-[10px] font-medium text-gray-500 uppercase tracking-wide mb-1.5">Посещаемость</p>
                     <div className="flex flex-wrap gap-2">

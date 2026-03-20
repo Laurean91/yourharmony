@@ -64,8 +64,13 @@ export default async function AdminDashboard() {
 
         {/* Calendar */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-          <h2 className="text-base font-semibold text-gray-800 mb-4">Расписание занятий</h2>
-          <LessonCalendar lessons={lessons as any} students={students} />
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-semibold text-gray-800">Расписание занятий</h2>
+            <Link href="/bigbos/schedule" className="text-xs text-purple-600 hover:text-purple-700 font-medium">
+              Открыть расписание →
+            </Link>
+          </div>
+          <LessonCalendar lessons={lessons as any} students={students} readonly />
         </div>
 
         {/* Bookings */}
