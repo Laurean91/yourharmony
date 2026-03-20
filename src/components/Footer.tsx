@@ -25,8 +25,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
-            <Link href="/" className="flex items-center gap-2.5 mb-6 w-fit">
-              <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <Link href="/" className="flex items-center gap-3 mb-6 w-fit">
+              <svg width="44" height="44" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <linearGradient id="ftgA" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#A78BFA"/>
@@ -46,10 +46,13 @@ export default function Footer() {
                 <path d="M50 28 L51.1 24.9 L54 23.8 L51.1 22.7 L50 19.6 L48.9 22.7 L46 23.8 L48.9 24.9Z" fill="white" opacity="0.75"/>
                 <path d="M50 70 Q65 80 80 70" stroke="white" strokeWidth="2.8" fill="none" strokeLinecap="round" opacity="0.85"/>
               </svg>
-              <span className="text-2xl font-extrabold bg-gradient-to-r from-purple-400 to-orange-400 bg-clip-text text-transparent"
-                    style={{ fontFamily: 'var(--font-nunito), sans-serif' }}>
-                Гармония
-              </span>
+              <div>
+                <p className="text-2xl font-extrabold bg-gradient-to-r from-purple-400 to-orange-400 bg-clip-text text-transparent leading-tight"
+                   style={{ fontFamily: 'var(--font-nunito), sans-serif' }}>
+                  Гармония
+                </p>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500 mt-0.5">Языковой клуб</p>
+              </div>
             </Link>
             <p className="text-gray-400 max-w-sm mb-6">
               Мы создаем пространство, где каждый ребенок может раскрыть свой потенциал, играя и общаясь на английском языке.
