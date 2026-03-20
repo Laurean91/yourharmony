@@ -22,10 +22,11 @@ export default async function AdminBlogPage() {
           </div>
           <Link
             href="/bigbos/blog/new"
-            className="flex items-center gap-2 bg-purple-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-purple-700 transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-purple-700 transition-colors shadow-sm text-sm"
           >
-            <PlusCircle size={18} />
-            Новая статья
+            <PlusCircle size={16} />
+            <span className="hidden sm:inline">Новая статья</span>
+            <span className="sm:hidden">Создать</span>
           </Link>
         </div>
 
@@ -42,80 +43,138 @@ export default async function AdminBlogPage() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50">
-                    <th className="px-6 py-4 font-semibold text-gray-600">Заголовок</th>
-                    <th className="px-4 py-4 font-semibold text-gray-600">Категория</th>
-                    <th className="px-4 py-4 font-semibold text-gray-600">Статус</th>
-                    <th className="px-4 py-4 font-semibold text-gray-600">Дата</th>
-                    <th className="px-4 py-4 font-semibold text-gray-600 text-right">Действия</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {posts.map((post) => (
-                    <tr key={post.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div>
-                          <p className="font-medium text-gray-900 line-clamp-1">{post.title}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">/blog/{post.slug}</p>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        {post.category ? (
-                          <span className="bg-indigo-50 text-indigo-700 text-xs font-medium px-2.5 py-1 rounded-full">
-                            {post.category.name}
-                          </span>
-                        ) : (
-                          <span className="text-gray-300 text-xs">—</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-4">
+            <>
+              {/* Mobile: cards */}
+              <div className="sm:hidden divide-y divide-gray-100">
+                {posts.map((post) => (
+                  <div key={post.id} className="p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-900 leading-snug">{post.title}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">/blog/{post.slug}</p>
+                      </div>
+                      {post.category && (
+                        <span className="shrink-0 bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                          {post.category.name}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
                         <form action={togglePostStatus.bind(null, post.id, post.isPublished)}>
                           <button
                             type="submit"
-                            className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors cursor-pointer ${
+                            className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
                               post.isPublished
-                                ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-amber-100 text-amber-700'
                             }`}
                           >
                             {post.isPublished ? <Eye size={12} /> : <EyeOff size={12} />}
                             {post.isPublished ? 'Опубликовано' : 'Черновик'}
                           </button>
                         </form>
-                      </td>
-                      <td className="px-4 py-4 text-gray-400 text-xs whitespace-nowrap">
-                        {formatDate(post.createdAt)}
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center justify-end gap-2">
+                        <span className="text-xs text-gray-400">{formatDate(post.createdAt)}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Link
+                          href={`/bigbos/blog/${post.id}/edit`}
+                          className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                        >
+                          <Pencil size={16} />
+                        </Link>
+                        <DeletePostButton id={post.id} title={post.title} />
+                        {post.isPublished && (
                           <Link
-                            href={`/bigbos/blog/${post.id}/edit`}
-                            className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                            title="Редактировать"
+                            href={`/blog/${post.slug}`}
+                            target="_blank"
+                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           >
-                            <Pencil size={16} />
+                            <Eye size={16} />
                           </Link>
-                          <DeletePostButton id={post.id} title={post.title} />
-                          {post.isPublished && (
-                            <Link
-                              href={`/blog/${post.slug}`}
-                              target="_blank"
-                              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                              title="Открыть на сайте"
-                            >
-                              <Eye size={16} />
-                            </Link>
-                          )}
-                        </div>
-                      </td>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop: table */}
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-gray-50">
+                      <th className="px-6 py-4 font-semibold text-gray-600">Заголовок</th>
+                      <th className="px-4 py-4 font-semibold text-gray-600">Категория</th>
+                      <th className="px-4 py-4 font-semibold text-gray-600">Статус</th>
+                      <th className="px-4 py-4 font-semibold text-gray-600">Дата</th>
+                      <th className="px-4 py-4 font-semibold text-gray-600 text-right">Действия</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {posts.map((post) => (
+                      <tr key={post.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="font-medium text-gray-900 line-clamp-1">{post.title}</p>
+                            <p className="text-xs text-gray-400 mt-0.5">/blog/{post.slug}</p>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4">
+                          {post.category ? (
+                            <span className="bg-indigo-50 text-indigo-700 text-xs font-medium px-2.5 py-1 rounded-full">
+                              {post.category.name}
+                            </span>
+                          ) : (
+                            <span className="text-gray-300 text-xs">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-4">
+                          <form action={togglePostStatus.bind(null, post.id, post.isPublished)}>
+                            <button
+                              type="submit"
+                              className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors cursor-pointer ${
+                                post.isPublished
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                  : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                              }`}
+                            >
+                              {post.isPublished ? <Eye size={12} /> : <EyeOff size={12} />}
+                              {post.isPublished ? 'Опубликовано' : 'Черновик'}
+                            </button>
+                          </form>
+                        </td>
+                        <td className="px-4 py-4 text-gray-400 text-xs whitespace-nowrap">
+                          {formatDate(post.createdAt)}
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <Link
+                              href={`/bigbos/blog/${post.id}/edit`}
+                              className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                              title="Редактировать"
+                            >
+                              <Pencil size={16} />
+                            </Link>
+                            <DeletePostButton id={post.id} title={post.title} />
+                            {post.isPublished && (
+                              <Link
+                                href={`/blog/${post.slug}`}
+                                target="_blank"
+                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="Открыть на сайте"
+                              >
+                                <Eye size={16} />
+                              </Link>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
       </div>
