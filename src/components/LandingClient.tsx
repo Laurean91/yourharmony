@@ -451,25 +451,26 @@ export function HowItWorksSection({ data = DEFAULT_HOW_IT_WORKS }: { data?: HowI
 }
 
 /* ───────── Testimonials ───────── */
-const VISIBLE = 3
-const GAP = 24 // px, соответствует gap-6
+const GAP = 24 // px
 
 export function TestimonialsSection({ data = DEFAULT_TESTIMONIALS }: { data?: TestimonialsSettings }) {
   const reviews = data.items
   const trackRef = useRef<HTMLDivElement>(null)
   const [cardWidth, setCardWidth] = useState(0)
+  const [visibleCount, setVisibleCount] = useState(3)
   const [current, setCurrent] = useState(0)
   const [dragging, setDragging] = useState(false)
   const total = reviews.length
   const x = useMotionValue(0)
 
-  // Вычисляем ширину одной карточки по ширине трека
+  // Вычисляем ширину карточки и кол-во видимых в зависимости от экрана
   useEffect(() => {
     const calc = () => {
-      if (trackRef.current) {
-        const w = trackRef.current.offsetWidth
-        setCardWidth((w - GAP * (VISIBLE - 1)) / VISIBLE)
-      }
+      if (!trackRef.current) return
+      const v = window.innerWidth < 640 ? 1 : 3
+      setVisibleCount(v)
+      const w = trackRef.current.offsetWidth
+      setCardWidth((w - GAP * (v - 1)) / v)
     }
     calc()
     window.addEventListener('resize', calc)
@@ -479,7 +480,7 @@ export function TestimonialsSection({ data = DEFAULT_TESTIMONIALS }: { data?: Te
   const stepPx = cardWidth + GAP
 
   const goTo = (idx: number) => {
-    const clamped = Math.max(0, Math.min(idx, total - VISIBLE))
+    const clamped = Math.max(0, Math.min(idx, total - visibleCount))
     setCurrent(clamped)
     x.set(-(clamped * stepPx))
   }
@@ -492,13 +493,13 @@ export function TestimonialsSection({ data = DEFAULT_TESTIMONIALS }: { data?: Te
     if (!stepPx) return
     const id = setInterval(() => {
       setCurrent(c => {
-        const next = c >= total - VISIBLE ? 0 : c + 1
+        const next = c >= total - visibleCount ? 0 : c + 1
         x.set(-(next * stepPx))
         return next
       })
     }, 4000)
     return () => clearInterval(id)
-  }, [stepPx, total, x])
+  }, [stepPx, total, visibleCount, x])
 
   const handleDragEnd = (_: unknown, info: { offset: { x: number } }) => {
     setDragging(false)
@@ -508,7 +509,7 @@ export function TestimonialsSection({ data = DEFAULT_TESTIMONIALS }: { data?: Te
     else x.set(-(current * stepPx))
   }
 
-  const maxIdx = total - VISIBLE
+  const maxIdx = total - visibleCount
 
   return (
     <section className="py-20 px-4 bg-white/30 backdrop-blur-sm">
@@ -540,7 +541,7 @@ export function TestimonialsSection({ data = DEFAULT_TESTIMONIALS }: { data?: Te
             {reviews.map((r, idx) => (
               <motion.div
                 key={idx}
-                style={{ minWidth: cardWidth || `calc((100% - ${GAP * (VISIBLE - 1)}px) / ${VISIBLE})` }}
+                style={{ minWidth: cardWidth || `calc((100% - ${GAP * (visibleCount - 1)}px) / ${visibleCount})` }}
                 whileHover={dragging ? {} : { y: -4, transition: { duration: 0.2 } }}
                 className="p-6 rounded-3xl bg-white/60 backdrop-blur-lg border border-white/60 shadow-[0_4px_24px_0_rgba(31,38,135,0.06)] select-none"
               >

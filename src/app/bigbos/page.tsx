@@ -48,17 +48,23 @@ export default async function AdminDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b"><th className="pb-2">Имя</th><th className="pb-2">Возраст</th><th className="pb-2">Телефон</th><th className="pb-2">Статус</th><th className="pb-2"></th></tr>
+                <tr className="border-b text-sm">
+                  <th className="pb-2 pr-3 text-left">Имя</th>
+                  <th className="pb-2 pr-3 text-left whitespace-nowrap">Возраст</th>
+                  <th className="pb-2 pr-3 text-left whitespace-nowrap">Телефон</th>
+                  <th className="pb-2 pr-3 text-left">Статус</th>
+                  <th className="pb-2"></th>
+                </tr>
               </thead>
               <tbody>
                 {bookings.map((b: any) => (
                   <tr key={b.id} className="border-b">
-                    <td className="py-3">{b.parentName}</td>
-                    <td className="py-3">{b.childAge} лет</td>
-                    <td className="py-3 font-mono text-sm">{b.phone}</td>
-                    <td className="py-3">
+                    <td className="py-3 pr-3 text-sm">{b.parentName}</td>
+                    <td className="py-3 pr-3 text-sm whitespace-nowrap">{b.childAge} лет</td>
+                    <td className="py-3 pr-3 font-mono text-sm whitespace-nowrap">{b.phone}</td>
+                    <td className="py-3 pr-3">
                       <form action={updateBookingStatus.bind(null, b.id, b.status === "Новая" ? "Обработана" : "Новая")}>
-                        <button className={`px-3 py-1 text-xs rounded-full ${b.status === 'Новая' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
+                        <button className={`px-3 py-1 text-xs rounded-full whitespace-nowrap ${b.status === 'Новая' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
                           {b.status}
                         </button>
                       </form>
