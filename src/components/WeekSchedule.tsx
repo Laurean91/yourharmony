@@ -172,9 +172,9 @@ export default function WeekSchedule({
         </div>
       </div>
 
-      <div className="flex gap-4 items-start">
+      <div className="flex flex-col md:flex-row gap-4 items-start">
         {/* Timeline grid */}
-        <div className="flex-1 min-w-0 overflow-x-auto">
+        <div className="w-full min-w-0 overflow-x-auto">
           <div style={{ minWidth: 520 }}>
             {/* Day headers */}
             <div className="flex ml-12 mb-1">
@@ -270,7 +270,7 @@ export default function WeekSchedule({
 
         {/* Side panel */}
         {(selected || addSlot) && (
-          <div className="w-72 shrink-0 bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-4">
+          <div className="w-full md:w-72 md:shrink-0 bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-4">
             {/* Lesson detail */}
             {selected && (
               <>
