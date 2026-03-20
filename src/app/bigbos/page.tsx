@@ -32,23 +32,31 @@ export default async function AdminDashboard() {
       <DashboardStats bookings={bookings as any} lessons={lessons as any} students={students as any} />
 
       {/* Finance mini-block */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
-        <div className="flex-1">
-          <p className="text-sm text-gray-500">Доход в этом месяце</p>
-          <p className="text-3xl font-bold text-purple-700 mt-0.5">
-            {financeStats.totalThisMonth.toLocaleString('ru-RU')} ₽
-          </p>
-          <div className="flex gap-4 mt-2 text-sm text-gray-500">
-            <span>Инд.: <span className="font-medium text-gray-700">{financeStats.totalIndividual.toLocaleString('ru-RU')} ₽</span></span>
-            <span>Групп.: <span className="font-medium text-gray-700">{financeStats.totalGroup.toLocaleString('ru-RU')} ₽</span></span>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base font-semibold text-gray-800">Финансы</h2>
+          <Link href="/bigbos/finance" className="text-xs text-purple-600 hover:text-purple-700 font-medium">
+            Подробная аналитика →
+          </Link>
+        </div>
+        <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div>
+            <p className="text-sm text-gray-500 mb-0.5">Доход в этом месяце</p>
+            <p className="text-3xl font-bold text-purple-700">
+              {financeStats.totalThisMonth.toLocaleString('ru-RU')} ₽
+            </p>
+          </div>
+          <div className="flex gap-6 pb-1 text-sm text-gray-500">
+            <div>
+              <p className="text-xs text-gray-400 mb-0.5">Индивидуальные</p>
+              <p className="font-medium text-gray-700">{financeStats.totalIndividual.toLocaleString('ru-RU')} ₽</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 mb-0.5">Групповые</p>
+              <p className="font-medium text-gray-700">{financeStats.totalGroup.toLocaleString('ru-RU')} ₽</p>
+            </div>
           </div>
         </div>
-        <Link
-          href="/bigbos/finance"
-          className="text-sm text-purple-600 hover:text-purple-700 font-medium whitespace-nowrap"
-        >
-          Подробная аналитика →
-        </Link>
       </div>
 
       {/* Top row: Calendar + Bookings */}
