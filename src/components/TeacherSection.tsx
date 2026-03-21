@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 
 const slideLeft  = { hidden: { opacity: 0, x: -50 }, visible: { opacity: 1, x: 0, transition: { duration: 0.6 } } }
@@ -36,10 +37,13 @@ export default function TeacherSection({ name = DEFAULT_NAME, bio = DEFAULT_BIO,
         {/* Аватар — slide-in слева */}
         <motion.div variants={slideLeft} className="flex-shrink-0">
           {photoUrl ? (
-            <img
+            <Image
               src={photoUrl}
               alt={name}
+              width={160}
+              height={160}
               className="w-40 h-40 rounded-full object-cover shadow-lg"
+              priority
             />
           ) : (
             <div className="w-40 h-40 rounded-full bg-gradient-to-br from-purple-400 to-orange-400 flex items-center justify-center shadow-lg">
