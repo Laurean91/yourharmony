@@ -5,6 +5,28 @@ import { put, del } from '@vercel/blob'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { Resend } from 'resend'
+import sharp from 'sharp'
+
+/**
+ * Сжимает изображение до WebP с заданными ограничениями.
+ * @param file   исходный File
+ * @param maxWidth  максимальная ширина в пикселях
+ * @param quality   качество WebP (1–100)
+ * @returns { buffer, filename } — сжатый буфер и новое имя файла
+ */
+async function compressImage(
+  file: File,
+  maxWidth: number,
+  quality = 80
+): Promise<{ buffer: Buffer; filename: string }> {
+  const arrayBuffer = await file.arrayBuffer()
+  const buffer = await sharp(Buffer.from(arrayBuffer))
+    .resize({ width: maxWidth, withoutEnlargement: true })
+    .webp({ quality })
+    .toBuffer()
+  const basename = file.name.replace(/\.[^.]+$/, '')
+  return { buffer, filename: `${basename}.webp` }
+}
 
 /** Возвращает true, если Vercel Blob настроен (есть токен) */
 function isBlobEnabled() {
@@ -88,7 +110,8 @@ export async function uploadPhoto(formData: FormData) {
   const file = formData.get('file') as File
   if (!file) return
 
-  const blob = await put(file.name, file, { access: 'public' })
+  const { buffer, filename } = await compressImage(file, 1200, 80)
+  const blob = await put(filename, buffer, { access: 'public', contentType: 'image/webp' })
   await prisma.photo.create({
     data: { url: blob.url }
   })
@@ -137,7 +160,8 @@ export async function updateTeacherProfile(formData: FormData) {
   const photoFile = formData.get('photoFile') as File | null
   if (photoFile && photoFile.size > 0 && isBlobEnabled()) {
     if (photoUrl) await del(photoUrl).catch(() => null)
-    const blob = await put(`teacher/${Date.now()}-${photoFile.name}`, photoFile, { access: 'public' })
+    const { buffer, filename } = await compressImage(photoFile, 600, 85)
+    const blob = await put(`teacher/${Date.now()}-${filename}`, buffer, { access: 'public', contentType: 'image/webp' })
     photoUrl = blob.url
   }
 
@@ -197,7 +221,8 @@ export async function createPost(formData: FormData) {
   let coverImage: string | undefined
   const coverFile = formData.get('coverFile') as File | null
   if (coverFile && coverFile.size > 0 && isBlobEnabled()) {
-    const blob = await put(`covers/${Date.now()}-${coverFile.name}`, coverFile, { access: 'public' })
+    const { buffer, filename } = await compressImage(coverFile, 1200, 80)
+    const blob = await put(`covers/${Date.now()}-${filename}`, buffer, { access: 'public', contentType: 'image/webp' })
     coverImage = blob.url
   }
 
@@ -230,7 +255,8 @@ export async function updatePost(id: string, formData: FormData) {
   let coverImage: string | null = existingCoverImage
   const coverFile = formData.get('coverFile') as File | null
   if (coverFile && coverFile.size > 0 && isBlobEnabled()) {
-    const blob = await put(`covers/${Date.now()}-${coverFile.name}`, coverFile, { access: 'public' })
+    const { buffer, filename } = await compressImage(coverFile, 1200, 80)
+    const blob = await put(`covers/${Date.now()}-${filename}`, buffer, { access: 'public', contentType: 'image/webp' })
     // Удаляем старую обложку из Vercel Blob, если она была
     if (existingCoverImage) {
       await del(existingCoverImage).catch(() => null)

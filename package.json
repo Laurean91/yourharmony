@@ -29,6 +29,7 @@
     "recharts": "^3.8.0",
     "resend": "^6.9.4",
     "sanitize-html": "^2.17.1",
+    "sharp": "^0.34.5",
     "slugify": "^1.6.8"
   },
   "devDependencies": {
@@ -41,6 +42,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sharp": "^0.31.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "jest": "^30.3.0",

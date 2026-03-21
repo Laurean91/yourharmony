@@ -10,6 +10,7 @@
 - **Animations**: Framer Motion
 - **CMS / Editor**: Tiptap (Rich Text Editor)
 - **File Storage**: Vercel Blob
+- **Image Processing**: sharp (сжатие и конвертация в WebP перед загрузкой)
 - **HTML Sanitization**: sanitize-html (XSS-защита контента блога)
 - **Auth**: NextAuth.js v5 (Credentials provider, JWT-сессии)
 - **Testing**: Jest + React Testing Library + Playwright (E2E)
@@ -170,6 +171,14 @@ public/               — статика
 - 47 unit-тестов (Jest) + 10 E2E-тестов (Playwright)
 - `/admin` → `/bigbos`; удаление заявок; CRUD профиля преподавателя
 - Юридические страницы объединены в `/documents`
+
+### Сжатие изображений при загрузке (2026-03-21)
+- Добавлен `sharp` — серверная обработка изображений перед отправкой в Vercel Blob
+- Все загружаемые фото автоматически конвертируются в WebP и масштабируются:
+  - Галерея «как проходят занятия»: макс. 1200px, quality 80
+  - Фото преподавателя: макс. 600px, quality 85
+  - Обложки блога (создание / обновление): макс. 1200px, quality 80
+- Функция `compressImage()` в `actions.ts` — принимает `File`, возвращает сжатый `Buffer` + `.webp`-имя
 
 ## 📝 Backlog
 - Уведомления (Email/Telegram) о новых бронированиях
