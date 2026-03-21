@@ -241,6 +241,22 @@ GitHub push → GitHub Actions
   - Обложки блога (создание / обновление): макс. 1200px, quality 80
 - Функция `compressImage()` в `actions.ts` — принимает `File`, возвращает сжатый `Buffer` + `.webp`-имя
 
+### SEO-оптимизация и безопасность (2026-03-21)
+
+- **Title и description** — заголовок страницы обновлён: «Английский для детей в Москве | Клуб «Гармония»» (добавлено «Москва» для локального SEO). Мета-описание расширено с 105 до ~130 символов: теперь включает CELTA, IELTS 8.0 и призыв к действию
+- **ISR вместо force-dynamic** — все публичные страницы переведены с `export const dynamic = 'force-dynamic'` на `export const revalidate`:
+  - `page.tsx` и `blog/page.tsx` — `revalidate = 60` (1 минута)
+  - `blog/[slug]/page.tsx` — `revalidate = 300` (5 минут)
+  - Ожидаемый эффект: TTFB снижается с 800–1500 мс до ~50 мс (CDN-кэш вместо живого запроса к БД)
+- **Ревалидация по требованию** — в `actions.ts` добавлен `revalidatePath('/')` ко всем операциям с постами блога (create, update, delete, toggleStatus): главная сбрасывает кэш мгновенно при любом изменении контента
+- **Content Security Policy** — добавлен CSP-заголовок в `next.config.ts`:
+  - `script-src 'self' 'unsafe-inline'` — для inline ld+json и гидратации Next.js
+  - `style-src 'self' 'unsafe-inline'` — для Tailwind inline-стилей
+  - `font-src 'self'` — `next/font` self-hosts шрифты, внешние запросы не нужны
+  - `frame-src https://yandex.ru` — виджет Яндекс.Карт в разделе контактов
+  - `object-src 'none'`, `base-uri 'self'` — блокировка устаревших встраиваний
+- **SEO-аудит** — файлы `FULL-AUDIT-REPORT.md` и `ACTION-PLAN.md` содержат полный аудит (Technical, Content/E-E-A-T, Schema, Sitemap, Performance, GEO) и план действий по всем выявленным проблемам
+
 ## 📝 Backlog
 - Управление секциями лендинга из `/bigbos` (UI для `LandingSection`)
 - Расширение галереи (сортировка, подписи)

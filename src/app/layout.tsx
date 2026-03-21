@@ -22,10 +22,10 @@ const SITE_URL = 'https://yourharmony.vercel.app'
 
 export const metadata: Metadata = {
   title: {
-    default: 'Клуб «Гармония» | Английский для детей',
+    default: 'Английский для детей в Москве | Клуб «Гармония»',
     template: '%s | Клуб «Гармония»',
   },
-  description: 'Детский языковой клуб «Гармония» — английский для детей от 6 лет. Учим язык играючи, свободно и в радость!',
+  description: 'Английский для детей от 6 лет в Москве. Группы до 8 детей, педагог с CELTA и IELTS 8.0. Запишитесь на бесплатное пробное занятие!',
   alternates: { canonical: SITE_URL },
   openGraph: {
     siteName: 'Клуб «Гармония»',

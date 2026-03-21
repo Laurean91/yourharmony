@@ -278,6 +278,7 @@ export async function createPost(formData: FormData) {
     },
   })
 
+  revalidatePath('/')
   revalidatePath('/blog')
   revalidatePath('/bigbos/blog')
 }
@@ -317,6 +318,7 @@ export async function updatePost(id: string, formData: FormData) {
     },
   })
 
+  revalidatePath('/')
   revalidatePath('/blog')
   revalidatePath(`/blog/${post.slug}`)
   revalidatePath('/bigbos/blog')
@@ -329,6 +331,7 @@ export async function deletePost(id: string) {
   if (post?.coverImage && isBlobEnabled()) {
     await del(post.coverImage).catch(() => null)
   }
+  revalidatePath('/')
   revalidatePath('/blog')
   revalidatePath('/bigbos/blog')
 }
@@ -339,6 +342,7 @@ export async function togglePostStatus(id: string, currentValue: boolean) {
     where: { id },
     data: { isPublished: !currentValue },
   })
+  revalidatePath('/')
   revalidatePath('/blog')
   revalidatePath(`/blog/${post.slug}`)
   revalidatePath('/bigbos/blog')
