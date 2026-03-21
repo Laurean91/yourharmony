@@ -1,6 +1,6 @@
 FROM python:3.12-slim
 
-WORKDIR /app
+WORKDIR /code
 
 # Установка pip зависимостей
 COPY pyproject.toml ./
@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir \
     "passlib[bcrypt]==1.7.*" \
     "python-multipart==0.0.*"
 
-COPY . .
+COPY . ./api/
 
 EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

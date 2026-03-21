@@ -52,7 +52,7 @@ jobs:
             docker compose up -d --build
 
             echo "==> Running database migrations..."
-            docker compose exec -T nextjs npx prisma migrate deploy
+            docker compose run --rm migrator
 
             echo "==> Health check..."
             sleep 10

@@ -7,6 +7,8 @@ import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 import { formatDate } from '../../lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 const SITE_URL = 'https://yourharmony.vercel.app'
 
 interface Props {

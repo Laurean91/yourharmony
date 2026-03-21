@@ -5,6 +5,8 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { getSectionSettings, getTeacherProfile } from './actions'
 
+export const dynamic = 'force-dynamic'
+
 const SITE_URL = 'https://yourharmony.vercel.app'
 
 export default async function HomePage() {

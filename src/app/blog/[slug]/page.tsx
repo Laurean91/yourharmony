@@ -13,17 +13,7 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-export async function generateStaticParams() {
-  let page = 1
-  const slugs: { slug: string }[] = []
-  while (true) {
-    const { posts, totalPages } = await getPosts(page)
-    slugs.push(...posts.map((p) => ({ slug: p.slug })))
-    if (page >= totalPages) break
-    page++
-  }
-  return slugs
-}
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params

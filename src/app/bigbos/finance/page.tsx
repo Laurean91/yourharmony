@@ -2,6 +2,8 @@ import { getFinancePrices, getFinanceStats } from '../../actions'
 import FinanceChart from '../../../components/FinanceChart'
 import PriceSettingsForm from '../../../components/PriceSettingsForm'
 
+export const dynamic = 'force-dynamic'
+
 export default async function FinancePage() {
   const [prices, stats] = await Promise.all([getFinancePrices(), getFinanceStats()])
 

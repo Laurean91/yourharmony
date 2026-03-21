@@ -1,10 +1,17 @@
 import type { MetadataRoute } from 'next'
 import { getAllPublishedPostSlugs } from './actions'
 
+export const dynamic = 'force-dynamic'
+
 const SITE_URL = 'https://yourharmony.vercel.app'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const posts = await getAllPublishedPostSlugs()
+  let posts: Awaited<ReturnType<typeof getAllPublishedPostSlugs>> = []
+  try {
+    posts = await getAllPublishedPostSlugs()
+  } catch {
+    // DB unavailable (e.g. during build)
+  }
 
   return [
     {

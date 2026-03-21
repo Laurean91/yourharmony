@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { getSectionSettings, getTeacherProfile, getPhotos } from '../../actions'
 import LandingEditor from '@/components/LandingEditor'
 
+export const dynamic = 'force-dynamic'
+
 export default async function LandingSettingsPage() {
   const [hero, contacts, cta, features, formats, howItWorks, testimonials, faq, teacher, photos] = await Promise.all([
     getSectionSettings('hero'),

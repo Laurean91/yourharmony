@@ -5,6 +5,8 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json* ./
+COPY prisma ./prisma
+COPY prisma.config.ts ./
 RUN npm ci
 
 # ── Сборка ────────────────────────────────────────────────────────────────────
@@ -15,6 +17,14 @@ COPY . .
 RUN npx prisma generate
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
+
+# ── Migrator ──────────────────────────────────────────────────────────────────
+FROM base AS migrator
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+CMD ["node_modules/.bin/prisma", "migrate", "deploy"]
 
 # ── Production ────────────────────────────────────────────────────────────────
 FROM base AS runner
