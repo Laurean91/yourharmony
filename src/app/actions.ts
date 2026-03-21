@@ -51,8 +51,9 @@ export async function createBooking(formData: FormData) {
   if (process.env.RESEND_API_KEY && process.env.NOTIFICATION_EMAIL) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY)
-      await resend.emails.send({
-        from: 'Клуб «Гармония» <onboarding@resend.dev>',
+      const fromAddress = process.env.RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'
+      const { data, error } = await resend.emails.send({
+        from: `Клуб «Гармония» <${fromAddress}>`,
         to: process.env.NOTIFICATION_EMAIL,
         subject: '📩 Новая заявка на занятие',
         html: `
@@ -76,10 +77,16 @@ export async function createBooking(formData: FormData) {
           </p>
         `,
       })
+      if (error) {
+        console.error('[Resend] Ошибка отправки:', JSON.stringify(error))
+      } else {
+        console.log('[Resend] Письмо отправлено, id:', data?.id)
+      }
     } catch (e) {
-      // Не блокируем сохранение заявки из-за ошибки email
-      console.error('Ошибка отправки email:', e)
+      console.error('[Resend] Исключение при отправке email:', e)
     }
+  } else {
+    console.warn('[Resend] Пропуск отправки — RESEND_API_KEY или NOTIFICATION_EMAIL не заданы')
   }
 
   revalidatePath('/bigbos')
