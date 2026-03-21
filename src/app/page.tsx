@@ -5,7 +5,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { getSectionSettings, getTeacherProfile } from './actions'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 const SITE_URL = 'https://yourharmony.vercel.app'
 
