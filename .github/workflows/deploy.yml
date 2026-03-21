@@ -37,20 +37,10 @@ jobs:
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
-        env:
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-          ADMIN_USER: ${{ secrets.ADMIN_USER }}
-          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          NOTIFICATION_EMAIL: ${{ secrets.NOTIFICATION_EMAIL }}
-          FASTAPI_SECRET_KEY: ${{ secrets.FASTAPI_SECRET_KEY }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: deploy
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: POSTGRES_PASSWORD,AUTH_SECRET,ADMIN_USER,ADMIN_PASSWORD,BLOB_READ_WRITE_TOKEN,RESEND_API_KEY,NOTIFICATION_EMAIL,FASTAPI_SECRET_KEY
           command_timeout: 12m
           script: |
             set -e
@@ -58,8 +48,14 @@ jobs:
 
             echo "==> Writing .env from CI secrets..."
             printf 'POSTGRES_PASSWORD=%s\nAUTH_SECRET=%s\nADMIN_USER=%s\nADMIN_PASSWORD=%s\nBLOB_READ_WRITE_TOKEN=%s\nRESEND_API_KEY=%s\nNOTIFICATION_EMAIL=%s\nFASTAPI_SECRET_KEY=%s\n' \
-              "$POSTGRES_PASSWORD" "$AUTH_SECRET" "$ADMIN_USER" "$ADMIN_PASSWORD" \
-              "$BLOB_READ_WRITE_TOKEN" "$RESEND_API_KEY" "$NOTIFICATION_EMAIL" "$FASTAPI_SECRET_KEY" \
+              '${{ secrets.POSTGRES_PASSWORD }}' \
+              '${{ secrets.AUTH_SECRET }}' \
+              '${{ secrets.ADMIN_USER }}' \
+              '${{ secrets.ADMIN_PASSWORD }}' \
+              '${{ secrets.BLOB_READ_WRITE_TOKEN }}' \
+              '${{ secrets.RESEND_API_KEY }}' \
+              '${{ secrets.NOTIFICATION_EMAIL }}' \
+              '${{ secrets.FASTAPI_SECRET_KEY }}' \
               > .env
 
             echo "==> Pulling latest code..."
