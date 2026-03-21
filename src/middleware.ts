@@ -3,8 +3,9 @@ import { NextResponse } from 'next/server'
 
 export default auth((req) => {
   const isLoginPage = req.nextUrl.pathname === '/bigbos/login'
+  const isAuthenticated = !!req.auth?.user?.name
 
-  if (!req.auth && !isLoginPage) {
+  if (!isAuthenticated && !isLoginPage) {
     const loginUrl = new URL('/bigbos/login', req.url)
     return NextResponse.redirect(loginUrl)
   }

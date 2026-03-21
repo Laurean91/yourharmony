@@ -15,19 +15,24 @@ export default function LoginPage() {
     setLoading(true)
 
     const form = new FormData(e.currentTarget)
-    const result = await signIn('credentials', {
-      username: form.get('username'),
-      password: form.get('password'),
-      redirect: false,
-    })
+    try {
+      const result = await signIn('credentials', {
+        username: form.get('username'),
+        password: form.get('password'),
+        redirect: false,
+      })
 
-    setLoading(false)
+      setLoading(false)
 
-    if (result?.error) {
+      if (result?.error || !result?.ok) {
+        setError('Неверный логин или пароль')
+      } else {
+        router.push('/bigbos')
+        router.refresh()
+      }
+    } catch {
+      setLoading(false)
       setError('Неверный логин или пароль')
-    } else {
-      router.push('/bigbos')
-      router.refresh()
     }
   }
 
