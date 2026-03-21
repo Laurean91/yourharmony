@@ -1,3 +1,11 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Правовые документы',
+  description: 'Политика конфиденциальности, пользовательское соглашение и согласие на обработку персональных данных клуба «Гармония».',
+  robots: { index: false, follow: false },
+}
+
 export default function DocumentsPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-20 px-6">

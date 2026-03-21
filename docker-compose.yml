@@ -1,0 +1,68 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: yourharmony
+      POSTGRES_USER: yourharmony
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yourharmony"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://yourharmony:${POSTGRES_PASSWORD}@postgres:5432/yourharmony?schema=public
+      POSTGRES_URL: postgresql://yourharmony:${POSTGRES_PASSWORD}@postgres:5432/yourharmony
+      AUTH_SECRET: ${AUTH_SECRET}
+      ADMIN_USER: ${ADMIN_USER}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      BLOB_READ_WRITE_TOKEN: ${BLOB_READ_WRITE_TOKEN}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      NOTIFICATION_EMAIL: ${NOTIFICATION_EMAIL}
+      NEXTAUTH_URL: https://yourharmony-english.ru
+    ports:
+      - "3000:3000"
+
+  fastapi:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://yourharmony:${POSTGRES_PASSWORD}@postgres:5432/yourharmony
+      SECRET_KEY: ${FASTAPI_SECRET_KEY}
+    ports:
+      - "8000:8000"
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    depends_on:
+      - nextjs
+      - fastapi
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot:ro
+
+volumes:
+  postgres_data:

@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { getPostBySlug, getPosts } from '../../actions'
 import sanitizeHtml from 'sanitize-html'
 import BookingButton from '../../../components/BookingButton'
+import Navbar from '../../../components/Navbar'
+import Footer from '../../../components/Footer'
 import { formatDate } from '../../../lib/utils'
 
 interface Props {
@@ -12,25 +14,36 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  const { posts } = await getPosts(1)
-  return posts.map((p) => ({ slug: p.slug }))
+  let page = 1
+  const slugs: { slug: string }[] = []
+  while (true) {
+    const { posts, totalPages } = await getPosts(page)
+    slugs.push(...posts.map((p) => ({ slug: p.slug })))
+    if (page >= totalPages) break
+    page++
+  }
+  return slugs
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const post = await getPostBySlug(slug)
 
-  if (!post) return { title: 'Статья не найдена | YourHarmony' }
+  if (!post) return { title: 'Статья не найдена' }
 
   const description = post.excerpt ?? post.content.replace(/<[^>]+>/g, '').slice(0, 160)
+  const url = `https://yourharmony.vercel.app/blog/${post.slug}`
 
   return {
-    title: `${post.title} | Блог YourHarmony`,
+    title: post.title,
     description,
+    alternates: { canonical: url },
     openGraph: {
       title: post.title,
       description,
       type: 'article',
+      url,
+      siteName: 'Клуб «Гармония»',
       publishedTime: post.createdAt.toISOString(),
       modifiedTime: post.updatedAt.toISOString(),
       ...(post.coverImage && { images: [{ url: post.coverImage, width: 1200, height: 630 }] }),
@@ -51,8 +64,47 @@ export default async function BlogPostPage({ params }: Props) {
 
   if (!post || !post.isPublished) notFound()
 
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    '@id': `https://yourharmony.vercel.app/blog/${post.slug}#article`,
+    headline: post.title,
+    description: post.excerpt ?? post.content.replace(/<[^>]+>/g, '').slice(0, 160),
+    datePublished: post.createdAt.toISOString(),
+    dateModified: post.updatedAt.toISOString(),
+    ...(post.coverImage && {
+      image: { '@type': 'ImageObject', url: post.coverImage, width: 1200, height: 630 },
+    }),
+    author: {
+      '@type': 'Person',
+      '@id': 'https://yourharmony.vercel.app/#teacher',
+      name: 'Анна Сергеевна',
+    },
+    publisher: {
+      '@id': 'https://yourharmony.vercel.app/#organization',
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://yourharmony.vercel.app/blog/${post.slug}`,
+    },
+    inLanguage: 'ru-RU',
+  }
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: 'https://yourharmony.vercel.app/' },
+      { '@type': 'ListItem', position: 2, name: 'Блог', item: 'https://yourharmony.vercel.app/blog' },
+      { '@type': 'ListItem', position: 3, name: post.title, item: `https://yourharmony.vercel.app/blog/${post.slug}` },
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-orange-50 font-sans text-gray-800">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <Navbar />
 
       {/* ── HERO шапка статьи ── */}
       <section className="relative overflow-hidden pt-20 pb-16 px-4 text-center">
@@ -92,7 +144,12 @@ export default async function BlogPostPage({ params }: Props) {
           )}
 
           {/* Мета */}
-          <div className="flex items-center justify-center gap-3 text-sm text-gray-400 font-medium">
+          <div className="flex items-center justify-center gap-3 text-sm text-gray-400 font-medium flex-wrap">
+            <span className="flex items-center gap-1.5 text-gray-600 font-semibold">
+              <span className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-400 to-orange-400 inline-block shrink-0" />
+              Анна Сергеевна
+            </span>
+            <span>·</span>
             <time dateTime={post.createdAt.toISOString()}>{formatDate(post.createdAt)}</time>
             {post.updatedAt > post.createdAt && (
               <>
@@ -170,15 +227,7 @@ export default async function BlogPostPage({ params }: Props) {
         </div>
       </main>
 
-      {/* ── Декоративный footer ── */}
-      <div className="relative overflow-hidden py-12 mt-4">
-        <div className="absolute bottom-0 right-0 w-80 h-80 bg-orange-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 pointer-events-none" />
-        <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center relative">
-          <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
-            Клуб «Гармония» ·英语为孩子
-          </Link>
-        </div>
-      </div>
+      <Footer />
     </div>
   )
 }

@@ -635,22 +635,8 @@ export function FAQSection({ data = DEFAULT_FAQ }: { data?: FaqSettings }) {
   const [open, setOpen] = useState<number | null>(null)
   const faqs = data.items
 
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map(f => ({
-      '@type': 'Question',
-      name: f.q,
-      acceptedAnswer: { '@type': 'Answer', text: f.a },
-    })),
-  }
-
   return (
     <section className="py-20 px-4 max-w-4xl mx-auto">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
       <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
         className="mb-14 text-center">
         <p className="text-sm font-bold uppercase tracking-widest text-purple-500 mb-3">FAQ</p>

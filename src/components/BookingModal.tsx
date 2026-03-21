@@ -102,6 +102,20 @@ export default function BookingModal({ onClose }: { onClose: () => void }) {
             />
           </div>
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          <label className="flex items-start gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              name="pdpaConsent"
+              required
+              className="mt-0.5 w-4 h-4 rounded accent-purple-600 shrink-0"
+            />
+            <span className="text-xs text-gray-500 leading-relaxed">
+              Я даю согласие на обработку персональных данных в соответствии с{' '}
+              <a href="/documents#personal-data" target="_blank" className="text-purple-600 underline hover:text-purple-800">
+                Политикой конфиденциальности
+              </a>
+            </span>
+          </label>
           <button
             disabled={isSubmitting}
             className="mt-2 p-4 rounded-xl bg-gradient-to-r from-purple-600 to-orange-500 text-white font-bold hover:brightness-110 active:scale-95 transition-all disabled:opacity-70"

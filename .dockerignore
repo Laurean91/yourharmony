@@ -1,0 +1,41 @@
+# Git
+.git
+.gitignore
+
+# Node
+node_modules
+npm-debug.log*
+
+# Next.js
+.next
+out
+
+# Env files (передаются через docker-compose environment)
+.env
+.env.*
+!.env.production.example
+
+# Python
+api/__pycache__
+api/**/__pycache__
+api/.pytest_cache
+api/.venv
+api/venv
+
+# Dev files
+*.md
+redesign-concept.html
+redesign-light.html
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# CI
+.github
+
+# Tests
+playwright-report
+test-results
+coverage

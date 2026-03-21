@@ -30,7 +30,7 @@ export async function createBooking(formData: FormData) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY)
       await resend.emails.send({
-        from: 'YourHarmony <onboarding@resend.dev>',
+        from: 'Клуб «Гармония» <onboarding@resend.dev>',
         to: process.env.NOTIFICATION_EMAIL,
         subject: '📩 Новая заявка на занятие',
         html: `
@@ -279,7 +279,16 @@ export async function togglePostStatus(id: string, currentValue: boolean) {
   redirect('/bigbos/blog')
 }
 
-// 13. Список категорий
+// 13. Все опубликованные посты для sitemap (без пагинации)
+export async function getAllPublishedPostSlugs() {
+  return await prisma.post.findMany({
+    where: { isPublished: true },
+    select: { slug: true, updatedAt: true },
+    orderBy: { createdAt: 'desc' },
+  })
+}
+
+// 14. Список категорий
 export async function getCategories() {
   return await prisma.category.findMany({ orderBy: { name: 'asc' } })
 }

@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Клуб «Гармония» — Английский для детей</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple: #6D28D9;
+      --purple-light: #8B5CF6;
+      --purple-pale: #EDE9FE;
+      --purple-soft: #F5F3FF;
+      --orange: #EA580C;
+      --orange-light: #F97316;
+      --orange-pale: #FFF7ED;
+      --white: #FFFFFF;
+      --bg: #FAFAFA;
+      --bg-2: #F5F3FF;
+      --bg-3: #FFF7ED;
+      --text: #1E0A3C;
+      --text-mid: #4B3869;
+      --text-light: #8B7BAA;
+      --border: rgba(109, 40, 217, 0.1);
+      --border-soft: rgba(109, 40, 217, 0.06);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--white);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ===== CURSOR ===== */
+    .cursor {
+      width: 10px; height: 10px;
+      background: var(--purple);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width .3s, height .3s, background .3s;
+    }
+    .cursor-ring {
+      width: 34px; height: 34px;
+      border: 1.5px solid var(--purple-light);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%, -50%);
+      opacity: 0.5;
+      transition: opacity .3s;
+    }
+
+    /* ===== NAVBAR ===== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      padding: 0 56px; height: 72px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,0);
+      transition: background .4s, box-shadow .4s, backdrop-filter .4s;
+    }
+    nav.scrolled {
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 1px 0 var(--border);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 40px; height: 40px; border-radius: 13px;
+      background: linear-gradient(135deg, var(--purple), var(--orange-light));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 19px;
+      box-shadow: 0 4px 14px rgba(109,40,217,0.3);
+    }
+    .nav-logo-name {
+      font-weight: 800; font-size: 17px; color: var(--text); line-height: 1.1;
+    }
+    .nav-logo-sub {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.13em;
+      text-transform: uppercase; color: var(--text-light); display: block;
+    }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      font-size: 13px; font-weight: 700; letter-spacing: 0.05em;
+      color: var(--text-mid); text-decoration: none;
+      transition: color .3s; position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -3px; left: 0; right: 0;
+      height: 2px; border-radius: 2px;
+      background: linear-gradient(90deg, var(--purple), var(--orange));
+      transform: scaleX(0); transform-origin: left; transition: transform .3s ease;
+    }
+    .nav-links a:hover { color: var(--purple); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-cta {
+      background: var(--purple); color: white;
+      border: none; border-radius: 100px;
+      padding: 10px 22px; font-family: 'Nunito', sans-serif;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      transition: background .3s, transform .2s, box-shadow .2s;
+      box-shadow: 0 4px 16px rgba(109,40,217,0.3);
+    }
+    .nav-cta:hover {
+      background: var(--purple-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(109,40,217,0.35);
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      background: var(--white);
+      position: relative; overflow: hidden;
+      display: flex; align-items: center;
+    }
+
+    /* Gradient mesh */
+    .hero-mesh {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 55% 60% at 15% 40%, rgba(109,40,217,0.08) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 50% at 85% 25%, rgba(249,115,22,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 50% at 70% 85%, rgba(139,92,246,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 30% 30% at 40% 10%, rgba(234,88,12,0.05) 0%, transparent 60%);
+    }
+    /* Decorative dots grid */
+    .hero-dots {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image: radial-gradient(circle, rgba(109,40,217,0.12) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    /* Floating shapes */
+    .shape {
+      position: absolute; border-radius: 50%;
+      pointer-events: none;
+    }
+    .shape-1 {
+      width: 480px; height: 480px;
+      background: linear-gradient(135deg, rgba(109,40,217,0.06), rgba(139,92,246,0.04));
+      border: 1px solid rgba(109,40,217,0.08);
+      top: -120px; right: -80px;
+      animation: float-shape 10s ease-in-out infinite;
+    }
+    .shape-2 {
+      width: 280px; height: 280px;
+      background: linear-gradient(135deg, rgba(249,115,22,0.06), rgba(234,88,12,0.03));
+      border: 1px solid rgba(249,115,22,0.1);
+      bottom: 60px; left: -60px;
+      animation: float-shape 14s ease-in-out infinite reverse;
+    }
+    .shape-3 {
+      width: 180px; height: 180px;
+      background: rgba(109,40,217,0.04);
+      border: 1px solid rgba(109,40,217,0.08);
+      bottom: 200px; right: 120px;
+      animation: float-shape 8s ease-in-out infinite 2s;
+    }
+    @keyframes float-shape {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33%       { transform: translate(16px, -24px) rotate(5deg); }
+      66%       { transform: translate(-12px, 16px) rotate(-3deg); }
+    }
+
+    /* Floating chips */
+    .chip {
+      position: absolute; pointer-events: none;
+      display: flex; align-items: center; gap: 8px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 10px 18px;
+      box-shadow: 0 4px 20px rgba(109,40,217,0.1);
+      font-size: 13px; font-weight: 700; color: var(--text-mid);
+      white-space: nowrap;
+      animation: float-chip 7s ease-in-out infinite;
+    }
+    .chip-emoji { font-size: 16px; }
+    .chip-1 { top: 22%; right: 8%; animation-delay: 0s; }
+    .chip-2 { top: 48%; right: 5%; animation-delay: -2.5s; font-size: 12px; }
+    .chip-3 { bottom: 28%; right: 14%; animation-delay: -5s; }
+    @keyframes float-chip {
+      0%, 100% { transform: translateY(0) rotate(-1deg); }
+      50%       { transform: translateY(-14px) rotate(1deg); }
+    }
+
+    .hero-content {
+      position: relative; z-index: 10;
+      max-width: 1200px; margin: 0 auto;
+      padding: 150px 56px 100px;
+      display: grid; grid-template-columns: 1fr 360px;
+      gap: 72px; align-items: center;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--purple-pale);
+      border: 1px solid rgba(109,40,217,0.2);
+      border-radius: 100px; padding: 6px 16px;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--purple); margin-bottom: 28px;
+      opacity: 0; transform: translateY(16px);
+      animation: in-up 0.7s ease forwards 0.3s;
+    }
+    .hero-tag-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--orange); flex-shrink: 0; }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(50px, 5.5vw, 78px);
+      font-weight: 700; line-height: 1.06; color: var(--text);
+      margin-bottom: 24px;
+      opacity: 0; transform: translateY(24px);
+      animation: in-up 0.8s ease forwards 0.5s;
+    }
+    h1 em {
+      font-style: italic;
+      background: linear-gradient(135deg, var(--purple) 30%, var(--orange) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-sub {
+      font-size: 18px; line-height: 1.75; color: var(--text-mid);
+      max-width: 520px; margin-bottom: 44px;
+      opacity: 0; transform: translateY(20px);
+      animation: in-up 0.8s ease forwards 0.7s;
+    }
+    .hero-btns {
+      display: flex; align-items: center; gap: 20px;
+      opacity: 0; transform: translateY(20px);
+      animation: in-up 0.8s ease forwards 0.9s;
+    }
+    .btn-main {
+      background: linear-gradient(135deg, var(--purple) 0%, var(--orange) 100%);
+      color: white; border: none; border-radius: 100px;
+      padding: 16px 36px; font-family: 'Nunito', sans-serif;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 8px 28px rgba(109,40,217,0.3);
+      text-decoration: none; display: inline-block;
+      transition: transform .2s, box-shadow .2s;
+      position: relative; overflow: hidden;
+    }
+    .btn-main::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.25), transparent);
+      opacity: 0; transition: opacity .3s;
+    }
+    .btn-main:hover { transform: translateY(-3px); box-shadow: 0 16px 44px rgba(109,40,217,0.4); }
+    .btn-main:hover::after { opacity: 1; }
+    .btn-outline {
+      display: flex; align-items: center; gap: 8px;
+      color: var(--text-mid); font-size: 14px; font-weight: 700;
+      text-decoration: none; transition: color .3s;
+      border: none; background: none; cursor: pointer; font-family: 'Nunito', sans-serif;
+    }
+    .btn-outline svg { transition: transform .3s; }
+    .btn-outline:hover { color: var(--purple); }
+    .btn-outline:hover svg { transform: translateX(5px); }
+
+    /* Stats card */
+    .hero-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 28px; padding: 36px;
+      box-shadow: 0 16px 56px rgba(109,40,217,0.08);
+      opacity: 0; transform: translateX(24px);
+      animation: in-right 0.9s ease forwards 1.0s;
+    }
+    @keyframes in-right { to { opacity: 1; transform: translateX(0); } }
+    .card-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--text-light); margin-bottom: 24px;
+    }
+    .card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card-stat { text-align: center; }
+    .card-stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 44px; font-weight: 700; line-height: 1;
+      background: linear-gradient(135deg, var(--purple), var(--orange));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .card-stat-label { font-size: 12px; font-weight: 600; color: var(--text-light); margin-top: 6px; }
+    .card-divider { grid-column: 1/-1; height: 1px; background: var(--border-soft); }
+    .card-review {
+      grid-column: 1/-1;
+      background: var(--orange-pale);
+      border: 1px solid rgba(234,88,12,0.12);
+      border-radius: 16px; padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .card-review-stars { font-size: 17px; color: var(--orange); }
+    .card-review-text { font-size: 13px; color: var(--text-mid); line-height: 1.5; }
+    .card-review-text strong { display: block; font-size: 15px; color: var(--text); }
+
+    /* Scroll hint */
+    .hero-scroll {
+      position: absolute; bottom: 32px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      z-index: 10; opacity: 0; animation: in-up 1s ease forwards 1.4s;
+    }
+    .hero-scroll span {
+      font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--text-light); font-weight: 700;
+    }
+    .scroll-bar {
+      width: 1px; height: 48px;
+      background: linear-gradient(to bottom, var(--purple-light), transparent);
+      position: relative; overflow: hidden;
+    }
+    .scroll-bar::after {
+      content: ''; position: absolute; top: -100%; left: 0; right: 0; height: 100%;
+      background: var(--purple);
+      animation: scroll-anim 2s ease-in-out infinite;
+    }
+    @keyframes scroll-anim {
+      0%   { top: -100%; }
+      100% { top: 200%; }
+    }
+    @keyframes in-up { to { opacity: 1; transform: translateY(0); } }
+
+    /* ===== MARQUEE ===== */
+    .marquee-wrap {
+      background: var(--purple-soft);
+      border-top: 1px solid var(--border-soft);
+      border-bottom: 1px solid var(--border-soft);
+      overflow: hidden; padding: 16px 0;
+    }
+    .marquee-track {
+      display: flex; width: fit-content;
+      animation: marquee 28s linear infinite;
+    }
+    .marquee-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 28px; white-space: nowrap;
+    }
+    .marquee-item span { font-size: 13px; font-weight: 700; color: var(--text-mid); }
+    .m-dot { color: var(--orange-light); font-size: 8px; }
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ===== SECTIONS ===== */
+    .tag {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--purple); margin-bottom: 14px;
+    }
+    .tag-orange { color: var(--orange); }
+    .section-h {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(34px, 3.8vw, 52px);
+      font-weight: 700; line-height: 1.12; color: var(--text);
+    }
+    .section-h em {
+      font-style: italic;
+      background: linear-gradient(135deg, var(--purple), var(--orange));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .section-lead {
+      font-size: 17px; line-height: 1.75; color: var(--text-mid); max-width: 560px;
+    }
+
+    /* ===== ABOUT ===== */
+    .about-section { background: var(--bg-2); }
+    .about-inner {
+      max-width: 1200px; margin: 0 auto; padding: 120px 56px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+    }
+    .about-text { font-size: 17px; line-height: 1.8; color: var(--text-mid); margin: 24px 0 32px; }
+    .about-pills { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pill {
+      display: flex; align-items: center; gap: 8px;
+      background: white; border: 1px solid var(--border);
+      border-radius: 100px; padding: 8px 16px;
+      font-size: 13px; font-weight: 700; color: var(--text-mid);
+      box-shadow: 0 2px 8px rgba(109,40,217,0.06);
+    }
+    .pill-dot { width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, var(--purple), var(--orange)); flex-shrink: 0; }
+    .about-card {
+      background: white; border: 1px solid var(--border);
+      border-radius: 28px; padding: 40px;
+      box-shadow: 0 12px 48px rgba(109,40,217,0.07);
+      position: relative;
+    }
+    .teacher-ava {
+      width: 76px; height: 76px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple-pale), var(--purple-light));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; margin-bottom: 20px;
+      box-shadow: 0 0 0 4px var(--purple-pale);
+    }
+    .teacher-name { font-size: 21px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+    .teacher-role { font-size: 13px; color: var(--text-light); font-weight: 600; margin-bottom: 20px; }
+    .teacher-quote {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px; font-style: italic; line-height: 1.65; color: var(--text-mid);
+    }
+    .teacher-badge {
+      position: absolute; bottom: -14px; right: 28px;
+      background: linear-gradient(135deg, var(--purple), var(--orange));
+      border-radius: 100px; padding: 8px 18px;
+      font-size: 13px; font-weight: 700; color: white;
+      box-shadow: 0 6px 20px rgba(109,40,217,0.35);
+    }
+
+    /* ===== FEATURES ===== */
+    .features-section { background: white; }
+    .features-inner { max-width: 1200px; margin: 0 auto; padding: 120px 56px; }
+    .features-head { margin-bottom: 60px; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .feat-card {
+      background: var(--bg);
+      border: 1px solid var(--border-soft);
+      border-radius: 22px; padding: 32px;
+      transition: transform .3s, box-shadow .3s, border-color .3s, background .3s;
+      position: relative; overflow: hidden; cursor: default;
+    }
+    .feat-card::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; border-radius: 0 0 4px 4px;
+      background: linear-gradient(90deg, var(--purple), var(--orange));
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .4s ease;
+    }
+    .feat-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 52px rgba(109,40,217,0.1);
+      border-color: rgba(109,40,217,0.2);
+      background: white;
+    }
+    .feat-card:hover::after { transform: scaleX(1); }
+    .feat-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 20px;
+    }
+    .fi-a { background: var(--purple-pale); }
+    .fi-b { background: var(--orange-pale); }
+    .fi-c { background: #ECFDF5; }
+    .fi-d { background: #FDF2F8; }
+    .fi-e { background: #FFFBEB; }
+    .fi-f { background: #EFF6FF; }
+    .feat-title { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 10px; }
+    .feat-text { font-size: 14px; line-height: 1.7; color: var(--text-mid); }
+
+    /* ===== FORMATS ===== */
+    .formats-section { background: var(--bg-3); }
+    .formats-inner { max-width: 1200px; margin: 0 auto; padding: 120px 56px; }
+    .formats-head { margin-bottom: 56px; }
+    .formats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .fmt-card {
+      background: white; border: 1.5px solid var(--border);
+      border-radius: 28px; padding: 44px;
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+      position: relative;
+    }
+    .fmt-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 24px 64px rgba(109,40,217,0.1);
+      border-color: rgba(109,40,217,0.3);
+    }
+    .fmt-card.selected { border-color: var(--orange); }
+    .fmt-card.selected:hover { border-color: var(--orange-light); box-shadow: 0 24px 64px rgba(234,88,12,0.1); }
+    .fmt-badge {
+      display: inline-block; border-radius: 100px; padding: 5px 14px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+    .badge-purple { background: var(--purple-pale); color: var(--purple); }
+    .badge-orange { background: var(--orange-pale); color: var(--orange); }
+    .fmt-title { font-size: 26px; font-weight: 800; color: var(--text); margin-bottom: 12px; }
+    .fmt-desc { font-size: 15px; line-height: 1.7; color: var(--text-mid); margin-bottom: 28px; }
+    .fmt-list { list-style: none; display: flex; flex-direction: column; gap: 11px; }
+    .fmt-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: var(--text-mid); line-height: 1.5;
+    }
+    .fmt-check {
+      flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
+      background: var(--purple-pale); color: var(--purple);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; margin-top: 1px;
+    }
+    .fmt-check.orange { background: var(--orange-pale); color: var(--orange); }
+    .fmt-price {
+      margin-top: 28px; padding-top: 24px;
+      border-top: 1px solid var(--border-soft);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .price-from { font-size: 12px; font-weight: 600; color: var(--text-light); }
+    .price-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px; font-weight: 700; color: var(--text);
+    }
+    .price-num span { font-size: 16px; color: var(--text-light); font-family: 'Nunito', sans-serif; }
+
+    /* ===== STEPS ===== */
+    .steps-section { background: white; }
+    .steps-inner { max-width: 1200px; margin: 0 auto; padding: 120px 56px; }
+    .steps-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0; margin-top: 64px; position: relative;
+    }
+    .steps-grid::before {
+      content: ''; position: absolute;
+      top: 27px; left: 12.5%; right: 12.5%; height: 2px;
+      background: linear-gradient(90deg, var(--purple), var(--orange));
+    }
+    .step-col { text-align: center; padding: 0 16px; }
+    .step-circle {
+      width: 54px; height: 54px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--orange));
+      color: white; display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
+      margin: 0 auto 22px;
+      box-shadow: 0 8px 20px rgba(109,40,217,0.3);
+      position: relative; z-index: 1;
+    }
+    .step-title { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 10px; }
+    .step-text { font-size: 13px; line-height: 1.65; color: var(--text-mid); }
+
+    /* ===== TESTIMONIALS ===== */
+    .testi-section { background: var(--bg-2); }
+    .testi-inner { max-width: 1200px; margin: 0 auto; padding: 120px 56px; }
+    .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; }
+    .testi-card {
+      background: white; border: 1px solid var(--border-soft);
+      border-radius: 24px; padding: 32px;
+      transition: transform .3s, box-shadow .3s;
+    }
+    .testi-card:hover { transform: translateY(-6px); box-shadow: 0 20px 48px rgba(109,40,217,0.08); }
+    .testi-stars { color: var(--orange); font-size: 15px; margin-bottom: 16px; }
+    .testi-quote {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px; line-height: 0.8; color: var(--purple-pale);
+      margin-bottom: 14px;
+    }
+    .testi-text { font-size: 15px; line-height: 1.75; color: var(--text-mid); margin-bottom: 24px; }
+    .testi-author { display: flex; align-items: center; gap: 12px; }
+    .testi-ava {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple-pale), var(--purple-light));
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .testi-name { font-size: 14px; font-weight: 800; color: var(--text); }
+    .testi-role { font-size: 12px; color: var(--text-light); }
+
+    /* ===== CTA ===== */
+    .cta-section {
+      background: linear-gradient(135deg, var(--purple) 0%, #4C1D95 60%, var(--orange) 140%);
+      position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    .cta-section::after {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(255,255,255,0.06) 0%, transparent 70%);
+    }
+    .cta-inner {
+      max-width: 760px; margin: 0 auto; padding: 130px 56px;
+      text-align: center; position: relative; z-index: 1;
+    }
+    .cta-label {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(255,255,255,0.65); margin-bottom: 20px;
+    }
+    .cta-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 5vw, 58px);
+      font-weight: 700; line-height: 1.1; color: white; margin-bottom: 18px;
+    }
+    .cta-sub {
+      font-size: 17px; color: rgba(255,255,255,0.7); line-height: 1.7; margin-bottom: 44px;
+    }
+    .cta-form { display: flex; gap: 10px; max-width: 460px; margin: 0 auto 20px; }
+    .cta-inp {
+      flex: 1; background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25); border-radius: 100px;
+      padding: 14px 22px; font-family: 'Nunito', sans-serif;
+      font-size: 15px; color: white; outline: none;
+      transition: background .3s, border-color .3s;
+    }
+    .cta-inp::placeholder { color: rgba(255,255,255,0.45); }
+    .cta-inp:focus { background: rgba(255,255,255,0.22); border-color: rgba(255,255,255,0.5); }
+    .btn-cta-send {
+      background: white; color: var(--purple);
+      border: none; border-radius: 100px; padding: 14px 26px;
+      font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800;
+      cursor: pointer; white-space: nowrap;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+    .btn-cta-send:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.25); }
+    .cta-note { font-size: 13px; color: rgba(255,255,255,0.4); }
+
+    /* ===== BLOG ===== */
+    .blog-section { background: white; }
+    .blog-inner { max-width: 1200px; margin: 0 auto; padding: 120px 56px; }
+    .blog-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; }
+    .blog-all {
+      font-size: 14px; font-weight: 700; color: var(--purple);
+      text-decoration: none; display: flex; align-items: center; gap: 6px;
+      transition: gap .3s;
+    }
+    .blog-all:hover { gap: 12px; }
+    .blog-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .blog-card {
+      background: var(--bg); border: 1px solid var(--border-soft);
+      border-radius: 24px; overflow: hidden;
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+    }
+    .blog-card:hover {
+      transform: translateY(-6px); border-color: var(--border);
+      box-shadow: 0 20px 48px rgba(109,40,217,0.08);
+    }
+    .blog-thumb {
+      height: 210px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 60px;
+    }
+    .blog-thumb-1 { background: linear-gradient(135deg, var(--purple-pale), var(--purple-soft)); }
+    .blog-thumb-2 { background: linear-gradient(135deg, var(--orange-pale), #FEF9C3); }
+    .blog-body { padding: 28px; }
+    .blog-date { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); margin-bottom: 10px; }
+    .blog-title { font-size: 19px; font-weight: 800; color: var(--text); line-height: 1.4; margin-bottom: 10px; }
+    .blog-excerpt { font-size: 14px; line-height: 1.7; color: var(--text-mid); margin-bottom: 18px; }
+    .blog-read { font-size: 13px; font-weight: 700; color: var(--purple); text-decoration: none; display: flex; align-items: center; gap: 5px; transition: gap .3s; }
+    .blog-read:hover { gap: 10px; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--text); border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 64px 56px 36px;
+    }
+    .foot-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 44px;
+    }
+    .foot-brand p { font-size: 14px; color: rgba(255,255,255,0.35); line-height: 1.7; margin-top: 14px; max-width: 240px; }
+    .foot-col-title { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin-bottom: 14px; }
+    .foot-links { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+    .foot-links a { color: rgba(255,255,255,0.45); font-size: 14px; text-decoration: none; transition: color .3s; }
+    .foot-links a:hover { color: white; }
+    .foot-bottom {
+      max-width: 1200px; margin: 0 auto;
+      padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.07);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .foot-copy { font-size: 13px; color: rgba(255,255,255,0.22); }
+    .foot-heart { font-size: 13px; color: rgba(255,255,255,0.22); }
+    .foot-heart span { color: var(--orange-light); }
+
+    /* ===== REVEAL ===== */
+    .reveal {
+      opacity: 0; transform: translateY(36px);
+      transition: opacity .8s ease, transform .8s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .d1 { transition-delay: .1s; } .d2 { transition-delay: .2s; }
+    .d3 { transition-delay: .3s; } .d4 { transition-delay: .4s; }
+    .d5 { transition-delay: .5s; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 960px) {
+      .hero-content { grid-template-columns: 1fr; }
+      .hero-card { display: none; }
+      .features-grid, .testi-grid, .formats-grid, .blog-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr 1fr; }
+      .steps-grid::before { display: none; }
+      .about-inner { grid-template-columns: 1fr; }
+      .foot-inner { grid-template-columns: 1fr 1fr; }
+      nav { padding: 0 24px; }
+      .nav-links { display: none; }
+      .chip { display: none; }
+      .hero-content, .about-inner, .features-inner, .formats-inner,
+      .steps-inner, .testi-inner, .cta-inner, .blog-inner { padding-left: 24px; padding-right: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Cursor
+  const c = document.getElementById('cursor');
+  const r = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; c.style.cssText += `left:${mx}px;top:${my}px`; });
+  (function animR() { rx += (mx-rx)*.1; ry += (my-ry)*.1; r.style.cssText += `left:${rx}px;top:${ry}px`; requestAnimationFrame(animR); })();
+
+  // Nav
+  window.addEventListener('scroll', () => document.querySelector('nav').classList.toggle('scrolled', scrollY > 50));
+
+  // Scroll reveal
+  const obs = new IntersectionObserver(entries => entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } }), { threshold: .15 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // Count-up
+  const cObs = new IntersectionObserver(entries => entries.forEach(e => {
+    if(e.isIntersecting) {
+      const el = e.target, target = +el.dataset.target, sfx = el.dataset.sfx||'', t0 = performance.now();
+      (function tick(now){ const p = Math.min((now-t0)/1800,1), v = Math.round((1-Math.pow(1-p,4))*target); el.textContent = v+sfx; if(p<1) requestAnimationFrame(tick); })(performance.now());
+      cObs.unobserve(el);
+    }
+  }), { threshold: .5 });
+  document.querySelectorAll('.cu').forEach(el => cObs.observe(el));
+});
+</script>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">💬</div>
+    <div style="display:flex;flex-direction:column">
+      <span class="nav-logo-name">Гармония</span>
+      <span class="nav-logo-sub">Языковой клуб</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">О клубе</a></li>
+    <li><a href="#formats">Форматы</a></li>
+    <li><a href="#process">Как проходят</a></li>
+    <li><a href="#reviews">Отзывы</a></li>
+    <li><a href="#blog">Блог</a></li>
+  </ul>
+  <button class="nav-cta" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Записаться</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-mesh"></div>
+  <div class="hero-dots"></div>
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+
+  <div class="chip chip-1"><span class="chip-emoji">🌟</span> Hello, world!</div>
+  <div class="chip chip-2"><span class="chip-emoji">🎮</span> Учиться весело</div>
+  <div class="chip chip-3"><span class="chip-emoji">💬</span> Говорим с первого урока</div>
+
+  <div class="hero-content">
+    <div>
+      <div class="hero-tag">
+        <span class="hero-tag-dot"></span>
+        Английский для детей от 6 лет
+      </div>
+      <h1>Языковой клуб<br><em>«Гармония»</em></h1>
+      <p class="hero-sub">
+        Учим язык играючи, свободно и в радость. Без зубрёжки и стресса — только живое общение и настоящий результат.
+      </p>
+      <div class="hero-btns">
+        <a href="#contact" class="btn-main">Записаться на пробный урок</a>
+        <button class="btn-outline" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">
+          Узнать больше
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="hero-card">
+      <div class="card-label">Наш клуб в цифрах</div>
+      <div class="card-stats">
+        <div class="card-stat">
+          <div class="card-stat-num"><span class="cu" data-target="20" data-sfx="+">0+</span></div>
+          <div class="card-stat-label">учеников</div>
+        </div>
+        <div class="card-stat">
+          <div class="card-stat-num"><span class="cu" data-target="3" data-sfx="">0</span></div>
+          <div class="card-stat-label">года опыта</div>
+        </div>
+        <div class="card-divider"></div>
+        <div class="card-review">
+          <div class="card-review-stars">★★★★★</div>
+          <div class="card-review-text">
+            <strong>5.0 / 5.0</strong>
+            оценка родителей
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <span>Листайте</span>
+    <div class="scroll-bar"></div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <div class="marquee-item"><span>Игровой подход</span><span class="m-dot">●</span></div>
+    <div class="marquee-item"><span>Живое общение</span><span class="m-dot">●</span></div>
+    <div class="marquee-item"><span>Малые группы</span><span class="m-dot">●</span></div>
+    <div class="marquee-item"><span>Индивидуальный темп</span><span class="m-dot">●</span></div>
+    <div class="marquee-item"><span>Онлайн и офлайн</span><span class="m-dot">●</span></div>
+    <div class="marquee-item"><span>Результат с первого месяца</span><span class="m-dot">●</span></div>
+    <div class="marquee-item"><span>Без стресса и зубрёжки</span><span class="m-dot">●</span></div>
+    <div class="marquee-item"><span>Игровой подход</span><span class="m-dot">●</span></div>
+    <div class="marquee-item"><span>Живое общение</span><span class="m-dot">●</span></div>
+    <div class="marquee-item"><span>Малые группы</span><span class="m-dot">●</span></div>
+    <div class="marquee-item"><span>Индивидуальный темп</span><span class="m-dot">●</span></div>
+    <div class="marquee-item"><span>Онлайн и офлайн</span><span class="m-dot">●</span></div>
+    <div class="marquee-item"><span>Результат с первого месяца</span><span class="m-dot">●</span></div>
+    <div class="marquee-item"><span>Без стресса и зубрёжки</span><span class="m-dot">●</span></div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="about-section" id="about">
+  <div class="about-inner">
+    <div>
+      <div class="tag reveal">О клубе</div>
+      <h2 class="section-h reveal d1">Место, где дети<br><em>влюбляются</em> в язык</h2>
+      <p class="about-text reveal d2">
+        Клуб «Гармония» — это живая среда, где английский становится естественным способом общения. Мы работаем с детьми от 6 лет и строим обучение на играх, песнях и реальных диалогах — без скучных учебников.
+      </p>
+      <div class="about-pills reveal d3">
+        <div class="pill"><span class="pill-dot"></span>Прогресс за первый месяц</div>
+        <div class="pill"><span class="pill-dot"></span>Говорим с первого урока</div>
+        <div class="pill"><span class="pill-dot"></span>До 6 детей в группе</div>
+        <div class="pill"><span class="pill-dot"></span>Без зубрёжки</div>
+      </div>
+    </div>
+    <div class="reveal d2">
+      <div class="about-card">
+        <div class="teacher-ava">👩‍🏫</div>
+        <div class="teacher-name">Анастасия</div>
+        <div class="teacher-role">Основатель и главный преподаватель</div>
+        <p class="teacher-quote">«Я верю, что каждый ребёнок может говорить по-английски свободно — нужно только создать правильную среду.»</p>
+        <div class="teacher-badge">3 года опыта ✨</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="features-inner">
+    <div class="features-head">
+      <div class="tag reveal">Почему мы</div>
+      <h2 class="section-h reveal d1">Шесть причин выбрать<br><em>«Гармонию»</em></h2>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card reveal d1">
+        <div class="feat-icon fi-a">🎮</div>
+        <div class="feat-title">Игровая форма</div>
+        <p class="feat-text">Уроки построены на играх, песнях и сценках. Дети учатся незаметно для себя — без стресса и зубрёжки.</p>
+      </div>
+      <div class="feat-card reveal d2">
+        <div class="feat-icon fi-b">💬</div>
+        <div class="feat-title">Живое общение</div>
+        <p class="feat-text">Разговорная практика с первого занятия. Дети говорят, слушают и понимают — не только читают тексты.</p>
+      </div>
+      <div class="feat-card reveal d3">
+        <div class="feat-icon fi-c">👶</div>
+        <div class="feat-title">Малые группы</div>
+        <p class="feat-text">Не более 6 детей в группе. Каждый ребёнок получает внимание педагога и занимается в своём темпе.</p>
+      </div>
+      <div class="feat-card reveal d1">
+        <div class="feat-icon fi-d">📈</div>
+        <div class="feat-title">Быстрый результат</div>
+        <p class="feat-text">Прогресс заметен уже после первого месяца. Родители видят изменения, дети чувствуют уверенность.</p>
+      </div>
+      <div class="feat-card reveal d2">
+        <div class="feat-icon fi-e">🌍</div>
+        <div class="feat-title">Гибкий формат</div>
+        <p class="feat-text">Очные занятия и онлайн — выберите то, что удобно для вашей семьи. Расписание под вас.</p>
+      </div>
+      <div class="feat-card reveal d3">
+        <div class="feat-icon fi-f">💡</div>
+        <div class="feat-title">Авторская программа</div>
+        <p class="feat-text">Методика разработана специально для детей. Учитываем возраст, темп и интересы каждого ребёнка.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FORMATS -->
+<section class="formats-section" id="formats">
+  <div class="formats-inner">
+    <div class="formats-head">
+      <div class="tag tag-orange reveal">Форматы обучения</div>
+      <h2 class="section-h reveal d1">Выберите удобный<br><em>формат для ребёнка</em></h2>
+    </div>
+    <div class="formats-grid">
+      <div class="fmt-card reveal d1">
+        <div class="fmt-badge badge-purple">Группа</div>
+        <div class="fmt-title">Групповые занятия</div>
+        <p class="fmt-desc">Живая среда общения, новые друзья и командные игры. Идеально для социальных детей, которые любят активность.</p>
+        <ul class="fmt-list">
+          <li><span class="fmt-check">✓</span>До 6 детей в группе</li>
+          <li><span class="fmt-check">✓</span>2 занятия в неделю по 60 мин</li>
+          <li><span class="fmt-check">✓</span>Игры, песни, сценки и творчество</li>
+          <li><span class="fmt-check">✓</span>Регулярная обратная связь родителям</li>
+        </ul>
+        <div class="fmt-price">
+          <span class="price-from">от</span>
+          <div class="price-num">2 500 <span>₽/мес</span></div>
+        </div>
+      </div>
+      <div class="fmt-card selected reveal d2">
+        <div class="fmt-badge badge-orange">Индивидуально</div>
+        <div class="fmt-title">Индивидуальные занятия</div>
+        <p class="fmt-desc">Максимум внимания одному ребёнку. Программа полностью адаптируется под его темп, интересы и цели.</p>
+        <ul class="fmt-list">
+          <li><span class="fmt-check orange">✓</span>1 на 1 с педагогом</li>
+          <li><span class="fmt-check orange">✓</span>Гибкое расписание</li>
+          <li><span class="fmt-check orange">✓</span>Персональная программа</li>
+          <li><span class="fmt-check orange">✓</span>Онлайн или очно</li>
+        </ul>
+        <div class="fmt-price">
+          <span class="price-from">от</span>
+          <div class="price-num">3 500 <span>₽/мес</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STEPS -->
+<section class="steps-section" id="process">
+  <div class="steps-inner">
+    <div class="tag reveal">Как это работает</div>
+    <h2 class="section-h reveal d1">От записи до<br><em>первых результатов</em></h2>
+    <div class="steps-grid">
+      <div class="step-col reveal d1">
+        <div class="step-circle">1</div>
+        <div class="step-title">Оставляете заявку</div>
+        <p class="step-text">Заполните форму — свяжемся в течение нескольких часов для уточнения деталей.</p>
+      </div>
+      <div class="step-col reveal d2">
+        <div class="step-circle">2</div>
+        <div class="step-title">Пробный урок</div>
+        <p class="step-text">Бесплатное занятие: ребёнок знакомится с форматом и педагогом в игровой атмосфере.</p>
+      </div>
+      <div class="step-col reveal d3">
+        <div class="step-circle">3</div>
+        <div class="step-title">Выбираете формат</div>
+        <p class="step-text">Подбираем группу или индивидуальные занятия, расписание и программу под вашего ребёнка.</p>
+      </div>
+      <div class="step-col reveal d4">
+        <div class="step-circle">4</div>
+        <div class="step-title">Первый прогресс</div>
+        <p class="step-text">Уже через месяц ребёнок говорит первые фразы и понимает речь на слух!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testi-section" id="reviews">
+  <div class="testi-inner">
+    <div class="tag reveal">Отзывы</div>
+    <h2 class="section-h reveal d1">Что говорят<br><em>родители наших учеников</em></h2>
+    <div class="testi-grid">
+      <div class="testi-card reveal d1">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">"</div>
+        <p class="testi-text">Моя дочь занимается уже полгода — она смотрит мультики на английском и всё понимает! Спасибо за такой подход.</p>
+        <div class="testi-author">
+          <div class="testi-ava">👩</div>
+          <div><div class="testi-name">Мария К.</div><div class="testi-role">Мама Полины, 8 лет</div></div>
+        </div>
+      </div>
+      <div class="testi-card reveal d2">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">"</div>
+        <p class="testi-text">Сын раньше не хотел учить языки вообще. После первого занятия сам попросил записаться! Теперь ждёт каждый урок.</p>
+        <div class="testi-author">
+          <div class="testi-ava">👨</div>
+          <div><div class="testi-name">Алексей П.</div><div class="testi-role">Папа Кирилла, 7 лет</div></div>
+        </div>
+      </div>
+      <div class="testi-card reveal d3">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">"</div>
+        <p class="testi-text">Индивидуальный подход — это не просто слова. Педагог знает особенности каждого ребёнка и строит урок под него.</p>
+        <div class="testi-author">
+          <div class="testi-ava">👩</div>
+          <div><div class="testi-name">Елена В.</div><div class="testi-role">Мама Миши, 10 лет</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOG -->
+<section class="blog-section" id="blog">
+  <div class="blog-inner">
+    <div class="blog-head">
+      <div>
+        <div class="tag reveal">Блог</div>
+        <h2 class="section-h reveal d1">Полезные статьи</h2>
+      </div>
+      <a href="/blog" class="blog-all reveal">Все статьи →</a>
+    </div>
+    <div class="blog-grid">
+      <div class="blog-card reveal d1">
+        <div class="blog-thumb blog-thumb-1">📚</div>
+        <div class="blog-body">
+          <div class="blog-date">15 Марта 2026</div>
+          <h3 class="blog-title">Польза раннего изучения английского языка для детей</h3>
+          <p class="blog-excerpt">В современном мире знание английского становится важным навыком, который открывает двери к новым возможностям...</p>
+          <a href="#" class="blog-read">Читать →</a>
+        </div>
+      </div>
+      <div class="blog-card reveal d2">
+        <div class="blog-thumb blog-thumb-2">🎮</div>
+        <div class="blog-body">
+          <div class="blog-date">8 Марта 2026</div>
+          <h3 class="blog-title">5 лучших игр для изучения английского с детьми дома</h3>
+          <p class="blog-excerpt">Превратите домашние занятия в увлекательное приключение. Эти игры помогут закрепить словарный запас без скуки...</p>
+          <a href="#" class="blog-read">Читать →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="cta-inner">
+    <div class="cta-label reveal">Бесплатный пробный урок</div>
+    <h2 class="cta-title reveal d1">Начните путешествие<br>в мир английского</h2>
+    <p class="cta-sub reveal d2">Оставьте телефон — мы свяжемся и запишем ребёнка на бесплатный пробный урок.</p>
+    <form class="cta-form reveal d3" onsubmit="return false">
+      <input type="tel" class="cta-inp" placeholder="Ваш телефон">
+      <button class="btn-cta-send">Записаться</button>
+    </form>
+    <p class="cta-note reveal d4">Без обязательств · Первый урок бесплатно · Ответим в течение часа</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <a href="#" class="nav-logo">
+        <div class="nav-logo-icon">💬</div>
+        <div style="display:flex;flex-direction:column">
+          <span class="nav-logo-name" style="color:white">Гармония</span>
+          <span class="nav-logo-sub">Языковой клуб</span>
+        </div>
+      </a>
+      <p>Детский языковой клуб — английский для детей от 6 лет в игровой форме.</p>
+    </div>
+    <div>
+      <div class="foot-col-title">Навигация</div>
+      <ul class="foot-links">
+        <li><a href="#about">О клубе</a></li>
+        <li><a href="#formats">Форматы</a></li>
+        <li><a href="#process">Как проходят</a></li>
+        <li><a href="#reviews">Отзывы</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="foot-col-title">Ресурсы</div>
+      <ul class="foot-links">
+        <li><a href="/blog">Блог</a></li>
+        <li><a href="#contact">Записаться</a></li>
+        <li><a href="/gallery">Галерея</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="foot-col-title">Контакты</div>
+      <ul class="foot-links">
+        <li><a href="tel:+79999999999">+7 (999) 999-99-99</a></li>
+        <li><a href="mailto:hello@yourharmony.ru">hello@yourharmony.ru</a></li>
+        <li><a href="#">ВКонтакте</a></li>
+        <li><a href="#">Telegram</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <div class="foot-copy">© 2026 Языковой клуб «Гармония». Все права защищены.</div>
+    <div class="foot-heart">Сделано с <span>♥</span></div>
+  </div>
+</footer>
+
+</body>
+</html>

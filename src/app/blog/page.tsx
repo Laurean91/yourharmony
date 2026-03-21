@@ -3,20 +3,36 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getPosts } from '../actions'
 import BookingButton from '../../components/BookingButton'
+import Navbar from '../../components/Navbar'
+import Footer from '../../components/Footer'
 import { formatDate } from '../../lib/utils'
 
-export const metadata: Metadata = {
-  title: 'Блог | YourHarmony',
-  description: 'Полезные статьи, новости клуба и советы для родителей от детского центра YourHarmony.',
-  openGraph: {
-    title: 'Блог | YourHarmony',
-    description: 'Полезные статьи, новости клуба и советы для родителей.',
-    type: 'website',
-  },
-}
+const SITE_URL = 'https://yourharmony.vercel.app'
 
 interface Props {
   searchParams: Promise<{ page?: string }>
+}
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { page } = await searchParams
+  const currentPage = Math.max(1, Number(page) || 1)
+  const canonical = currentPage > 1
+    ? `${SITE_URL}/blog?page=${currentPage}`
+    : `${SITE_URL}/blog`
+
+  return {
+    title: 'Блог',
+    description: 'Полезные статьи, новости клуба и советы для родителей от детского языкового клуба «Гармония».',
+    alternates: { canonical },
+    openGraph: {
+      title: 'Блог | Клуб «Гармония»',
+      description: 'Полезные статьи, новости клуба и советы для родителей.',
+      url: canonical,
+      siteName: 'Клуб «Гармония»',
+      type: 'website',
+      images: [{ url: `${SITE_URL}/logo.png`, width: 512, height: 512, alt: 'Клуб «Гармония»' }],
+    },
+  }
 }
 
 
@@ -25,8 +41,34 @@ export default async function BlogPage({ searchParams }: Props) {
   const currentPage = Math.max(1, Number(page) || 1)
   const { posts, totalPages } = await getPosts(currentPage)
 
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Блог', item: `${SITE_URL}/blog` },
+    ],
+  }
+
+  const itemListSchema = posts.length > 0 ? {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Блог клуба «Гармония»',
+    description: 'Полезные статьи, новости клуба и советы для родителей.',
+    url: `${SITE_URL}/blog`,
+    itemListElement: posts.map((post, i) => ({
+      '@type': 'ListItem',
+      position: (currentPage - 1) * 6 + i + 1,
+      url: `${SITE_URL}/blog/${post.slug}`,
+      name: post.title,
+    })),
+  } : null
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-orange-50 font-sans text-gray-800">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      {itemListSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />}
+      <Navbar />
 
       {/* ── Hero шапка ── */}
       <section className="relative overflow-hidden pt-20 pb-24 px-4 text-center">
@@ -156,6 +198,8 @@ export default async function BlogPage({ searchParams }: Props) {
           </BookingButton>
         </div>
       </section>
+
+      <Footer />
     </div>
   )
 }

@@ -48,6 +48,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "https://yourharmony.ru",
+        "https://yourharmony-english.ru",
+        "https://www.yourharmony-english.ru",
     ],
     allow_credentials=True,
     allow_methods=["*"],

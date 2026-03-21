@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Клуб «Гармония» — Английский для детей</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple: #7C3AED;
+      --purple-light: #A855F7;
+      --purple-dark: #4C1D95;
+      --orange: #F97316;
+      --orange-light: #FB923C;
+      --cream: #FDF8F3;
+      --cream-dark: #F5EDE0;
+      --night: #0F0720;
+      --night-2: #1A0B35;
+      --night-3: #250E4A;
+      --text-dark: #1A0A2E;
+      --text-mid: #4B3869;
+      --text-light: #9B8AB8;
+      --white: #FFFFFF;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--cream);
+      color: var(--text-dark);
+      overflow-x: hidden;
+    }
+
+    /* ===== CURSOR ===== */
+    .cursor {
+      width: 12px; height: 12px;
+      background: var(--purple);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transition: transform 0.15s ease, width 0.3s, height 0.3s, background 0.3s;
+      transform: translate(-50%, -50%);
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--purple);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      transition: transform 0.4s cubic-bezier(.23,1,.32,1), opacity 0.3s;
+      transform: translate(-50%, -50%);
+      opacity: 0.6;
+    }
+
+    /* ===== NAVBAR ===== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      padding: 0 48px;
+      height: 72px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background 0.4s, backdrop-filter 0.4s, box-shadow 0.4s;
+    }
+    nav.scrolled {
+      background: rgba(15, 7, 32, 0.85);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 1px 0 rgba(124, 58, 237, 0.2);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--purple), var(--orange));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4);
+    }
+    .nav-logo-text {
+      display: flex; flex-direction: column;
+    }
+    .nav-logo-name {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 17px;
+      color: white;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+    .nav-logo-sub {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+    }
+    .nav-links {
+      display: flex; gap: 36px; list-style: none;
+    }
+    .nav-links a {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      transition: color 0.3s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--purple-light), var(--orange));
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+    .nav-links a:hover { color: white; }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--purple), var(--orange));
+      color: white;
+      border: none; border-radius: 100px;
+      padding: 10px 24px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+    }
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(124, 58, 237, 0.6);
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      background: var(--night);
+      position: relative;
+      overflow: hidden;
+      display: flex; align-items: center;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 50%, rgba(124, 58, 237, 0.35) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 60% at 80% 30%, rgba(249, 115, 22, 0.2) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 60% 80%, rgba(168, 85, 247, 0.2) 0%, transparent 60%);
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(124, 58, 237, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124, 58, 237, 0.06) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .hero-noise {
+      position: absolute; inset: 0;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* Floating orbs */
+    .orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(60px);
+      animation: float-orb 8s ease-in-out infinite;
+    }
+    .orb-1 {
+      width: 300px; height: 300px;
+      background: rgba(124, 58, 237, 0.25);
+      top: 10%; left: -5%;
+      animation-delay: 0s;
+    }
+    .orb-2 {
+      width: 200px; height: 200px;
+      background: rgba(249, 115, 22, 0.2);
+      top: 60%; right: 5%;
+      animation-delay: -3s;
+    }
+    .orb-3 {
+      width: 150px; height: 150px;
+      background: rgba(168, 85, 247, 0.3);
+      bottom: 20%; left: 30%;
+      animation-delay: -6s;
+    }
+    @keyframes float-orb {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(20px, -30px) scale(1.05); }
+      66% { transform: translate(-15px, 20px) scale(0.95); }
+    }
+
+    /* Floating speech bubbles */
+    .bubble {
+      position: absolute;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      padding: 12px 18px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      white-space: nowrap;
+      animation: float-bubble 6s ease-in-out infinite;
+    }
+    .bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -8px; left: 20px;
+      width: 0; height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid rgba(255,255,255,0.1);
+    }
+    .bubble-1 { top: 25%; right: 12%; animation-delay: 0s; }
+    .bubble-2 { top: 55%; right: 8%; animation-delay: -2s; font-size: 11px; opacity: 0.6; }
+    .bubble-3 { bottom: 30%; right: 18%; animation-delay: -4s; font-size: 12px; }
+    @keyframes float-bubble {
+      0%, 100% { transform: translateY(0px) rotate(-1deg); }
+      50% { transform: translateY(-12px) rotate(1deg); }
+    }
+
+    /* Stars */
+    .star {
+      position: absolute;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: white;
+      animation: twinkle 3s ease-in-out infinite;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.5); }
+    }
+
+    .hero-content {
+      position: relative; z-index: 10;
+      max-width: 1200px; margin: 0 auto;
+      padding: 140px 48px 100px;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 80px; align-items: center;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--purple-light);
+      margin-bottom: 28px;
+      opacity: 0; transform: translateY(20px);
+      animation: reveal 0.8s ease forwards 0.3s;
+    }
+    .hero-eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(52px, 6vw, 80px);
+      font-weight: 600;
+      line-height: 1.05;
+      color: white;
+      margin-bottom: 24px;
+      opacity: 0; transform: translateY(30px);
+      animation: reveal 0.9s ease forwards 0.5s;
+    }
+    .hero-title em {
+      font-style: italic;
+      background: linear-gradient(135deg, var(--purple-light) 0%, var(--orange-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-subtitle {
+      font-size: 18px; line-height: 1.7;
+      color: rgba(255,255,255,0.55);
+      max-width: 520px; margin-bottom: 44px;
+      opacity: 0; transform: translateY(20px);
+      animation: reveal 0.9s ease forwards 0.7s;
+    }
+    .hero-actions {
+      display: flex; align-items: center; gap: 20px;
+      opacity: 0; transform: translateY(20px);
+      animation: reveal 0.9s ease forwards 0.9s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple) 0%, var(--orange) 100%);
+      color: white; border: none; border-radius: 100px;
+      padding: 16px 36px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 8px 32px rgba(124, 58, 237, 0.5);
+      text-decoration: none; display: inline-block;
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(124, 58, 237, 0.6); }
+    .btn-primary:hover::before { opacity: 1; }
+    .btn-ghost {
+      color: rgba(255,255,255,0.6);
+      font-size: 14px; font-weight: 600;
+      text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+      transition: color 0.3s;
+    }
+    .btn-ghost svg { transition: transform 0.3s; }
+    .btn-ghost:hover { color: white; }
+    .btn-ghost:hover svg { transform: translateX(4px); }
+
+    /* Stats card */
+    .hero-stats-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 28px;
+      padding: 36px;
+      backdrop-filter: blur(16px);
+      opacity: 0; transform: translateX(30px);
+      animation: reveal-right 1s ease forwards 1s;
+    }
+    @keyframes reveal-right {
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .stats-title {
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.4); margin-bottom: 28px;
+    }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .stat-item { text-align: center; }
+    .stat-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 48px; font-weight: 700;
+      line-height: 1;
+      background: linear-gradient(135deg, white 0%, rgba(168,85,247,0.8) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label {
+      font-size: 12px; font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      margin-top: 6px;
+    }
+    .stat-divider {
+      grid-column: 1 / -1;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+    .stat-review {
+      grid-column: 1 / -1;
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(249, 115, 22, 0.1);
+      border: 1px solid rgba(249, 115, 22, 0.2);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .stat-stars { color: var(--orange); font-size: 18px; letter-spacing: 2px; }
+    .stat-review-text { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.4; }
+    .stat-review-text strong { color: white; display: block; font-size: 15px; }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute; bottom: 32px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      z-index: 10;
+      opacity: 0; animation: reveal 1s ease forwards 1.5s;
+    }
+    .scroll-indicator span {
+      font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+      color: rgba(255,255,255,0.3); font-weight: 600;
+    }
+    .scroll-line {
+      width: 1px; height: 48px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+      position: relative; overflow: hidden;
+    }
+    .scroll-line::after {
+      content: '';
+      position: absolute; top: -100%; left: 0; right: 0; bottom: 0;
+      background: white;
+      animation: scroll-down 2s ease-in-out infinite;
+    }
+    @keyframes scroll-down {
+      0% { top: -100%; }
+      100% { top: 200%; }
+    }
+
+    @keyframes reveal {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== SECTION COMMON ===== */
+    .section {
+      padding: 120px 48px;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .section-tag {
+      display: inline-block;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(38px, 4vw, 56px);
+      font-weight: 600; line-height: 1.1;
+      color: var(--text-dark);
+    }
+    .section-title em {
+      font-style: italic;
+      background: linear-gradient(135deg, var(--purple), var(--orange));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ===== ABOUT SECTION ===== */
+    .about-wrapper {
+      background: var(--night);
+      position: relative; overflow: hidden;
+    }
+    .about-wrapper::before {
+      content: '';
+      position: absolute;
+      top: -50%; right: -20%;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.2) 0%, transparent 70%);
+    }
+    .about-inner {
+      max-width: 1200px; margin: 0 auto;
+      padding: 120px 48px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 80px; align-items: center;
+    }
+    .about-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--purple-light); margin-bottom: 20px;
+    }
+    .about-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 4vw, 52px);
+      font-weight: 600; line-height: 1.1; color: white;
+      margin-bottom: 28px;
+    }
+    .about-title em {
+      font-style: italic; color: var(--orange-light);
+    }
+    .about-text {
+      font-size: 17px; line-height: 1.8;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 36px;
+    }
+    .about-list { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+    .about-list li {
+      display: flex; align-items: flex-start; gap: 14px;
+      color: rgba(255,255,255,0.7); font-size: 15px; line-height: 1.6;
+    }
+    .about-list li::before {
+      content: '';
+      flex-shrink: 0;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--orange));
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 2px;
+    }
+    .about-visual {
+      position: relative;
+    }
+    .about-card-main {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 28px; padding: 40px;
+      backdrop-filter: blur(16px);
+      position: relative;
+    }
+    .about-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple-dark), var(--purple));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; margin-bottom: 24px;
+      box-shadow: 0 0 0 4px rgba(124,58,237,0.2);
+    }
+    .about-card-name {
+      font-size: 22px; font-weight: 800; color: white;
+      margin-bottom: 6px;
+    }
+    .about-card-role {
+      font-size: 13px; color: rgba(255,255,255,0.4);
+      font-weight: 600; letter-spacing: 0.05em;
+      margin-bottom: 20px;
+    }
+    .about-card-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px; font-style: italic;
+      color: rgba(255,255,255,0.7); line-height: 1.6;
+    }
+    .about-badge {
+      position: absolute; bottom: -16px; right: 32px;
+      background: linear-gradient(135deg, var(--orange), var(--purple));
+      border-radius: 100px; padding: 10px 20px;
+      font-size: 13px; font-weight: 700; color: white;
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(249,115,22,0.4);
+    }
+
+    /* ===== FEATURES ===== */
+    .features-wrapper { background: var(--cream); }
+    .features-inner {
+      max-width: 1200px; margin: 0 auto; padding: 120px 48px;
+    }
+    .features-header { margin-bottom: 64px; }
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    }
+    .feature-card {
+      background: white;
+      border-radius: 24px;
+      padding: 36px;
+      border: 1px solid rgba(0,0,0,0.06);
+      transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+      position: relative; overflow: hidden;
+      cursor: default;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--purple), var(--orange));
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 24px 64px rgba(124,58,237,0.1);
+      border-color: rgba(124,58,237,0.15);
+    }
+    .feature-card:hover::before { transform: scaleX(1); }
+    .feature-icon {
+      width: 56px; height: 56px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; margin-bottom: 24px;
+    }
+    .fi-1 { background: rgba(124,58,237,0.1); }
+    .fi-2 { background: rgba(249,115,22,0.1); }
+    .fi-3 { background: rgba(16,185,129,0.1); }
+    .fi-4 { background: rgba(236,72,153,0.1); }
+    .fi-5 { background: rgba(245,158,11,0.1); }
+    .fi-6 { background: rgba(59,130,246,0.1); }
+    .feature-title {
+      font-size: 20px; font-weight: 800; color: var(--text-dark);
+      margin-bottom: 12px;
+    }
+    .feature-text {
+      font-size: 15px; line-height: 1.7; color: var(--text-mid);
+    }
+
+    /* ===== FORMATS ===== */
+    .formats-wrapper {
+      background: var(--night);
+      position: relative; overflow: hidden;
+    }
+    .formats-wrapper::before {
+      content: '';
+      position: absolute; bottom: -20%; left: -10%;
+      width: 500px; height: 500px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(249,115,22,0.15) 0%, transparent 70%);
+    }
+    .formats-inner {
+      max-width: 1200px; margin: 0 auto; padding: 120px 48px;
+    }
+    .formats-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--orange-light); margin-bottom: 16px;
+    }
+    .formats-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(38px, 4vw, 54px);
+      font-weight: 600; line-height: 1.1; color: white;
+      margin-bottom: 60px;
+    }
+    .formats-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+    }
+    .format-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 28px; padding: 44px;
+      transition: border-color 0.3s, background 0.3s, transform 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .format-card:hover {
+      border-color: rgba(124,58,237,0.4);
+      background: rgba(124,58,237,0.06);
+      transform: translateY(-4px);
+    }
+    .format-card.orange:hover {
+      border-color: rgba(249,115,22,0.4);
+      background: rgba(249,115,22,0.06);
+    }
+    .format-badge {
+      display: inline-block;
+      background: rgba(124,58,237,0.2);
+      color: var(--purple-light);
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 100px; padding: 5px 14px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 24px;
+    }
+    .format-card.orange .format-badge {
+      background: rgba(249,115,22,0.15);
+      color: var(--orange-light);
+      border-color: rgba(249,115,22,0.3);
+    }
+    .format-title {
+      font-size: 28px; font-weight: 800; color: white; margin-bottom: 14px;
+    }
+    .format-desc {
+      font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.5);
+      margin-bottom: 28px;
+    }
+    .format-features { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .format-features li {
+      display: flex; align-items: center; gap: 10px;
+      color: rgba(255,255,255,0.65); font-size: 14px;
+    }
+    .format-features li::before {
+      content: '✓';
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: rgba(124,58,237,0.2);
+      color: var(--purple-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .format-card.orange .format-features li::before {
+      background: rgba(249,115,22,0.15);
+      color: var(--orange-light);
+    }
+    .format-price {
+      margin-top: 32px; padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .price-label { font-size: 12px; color: rgba(255,255,255,0.35); font-weight: 600; }
+    .price-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 34px; font-weight: 700; color: white;
+    }
+    .price-value span { font-size: 16px; color: rgba(255,255,255,0.4); }
+
+    /* ===== HOW IT WORKS ===== */
+    .hiw-wrapper { background: var(--cream-dark); }
+    .hiw-inner { max-width: 1200px; margin: 0 auto; padding: 120px 48px; }
+    .hiw-steps {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0; margin-top: 64px; position: relative;
+    }
+    .hiw-steps::before {
+      content: '';
+      position: absolute; top: 28px; left: 12.5%; right: 12.5%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--purple), var(--orange));
+    }
+    .hiw-step { text-align: center; padding: 0 16px; position: relative; }
+    .step-num {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--orange));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px; font-weight: 700; color: white;
+      margin: 0 auto 24px;
+      box-shadow: 0 8px 24px rgba(124,58,237,0.35);
+      position: relative; z-index: 1;
+    }
+    .step-title {
+      font-size: 17px; font-weight: 800; color: var(--text-dark);
+      margin-bottom: 10px;
+    }
+    .step-text { font-size: 14px; line-height: 1.6; color: var(--text-mid); }
+
+    /* ===== TESTIMONIALS ===== */
+    .testi-wrapper {
+      background: white;
+      overflow: hidden;
+    }
+    .testi-inner { max-width: 1200px; margin: 0 auto; padding: 120px 48px; }
+    .testi-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+      margin-top: 60px;
+    }
+    .testi-card {
+      background: var(--cream);
+      border-radius: 24px; padding: 32px;
+      border: 1px solid rgba(0,0,0,0.06);
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+    }
+    .testi-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 48px rgba(0,0,0,0.08);
+    }
+    .testi-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 52px; line-height: 0.8;
+      color: var(--purple); margin-bottom: 16px;
+    }
+    .testi-text {
+      font-size: 16px; line-height: 1.75; color: var(--text-mid);
+      margin-bottom: 24px;
+    }
+    .testi-author {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .testi-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple-dark), var(--purple-light));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .testi-name { font-size: 14px; font-weight: 700; color: var(--text-dark); }
+    .testi-role { font-size: 12px; color: var(--text-light); }
+    .testi-stars { color: var(--orange); font-size: 14px; margin-bottom: 16px; }
+
+    /* ===== CTA ===== */
+    .cta-wrapper {
+      background: var(--night);
+      position: relative; overflow: hidden;
+    }
+    .cta-wrapper::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 50% 50%, rgba(124, 58, 237, 0.25) 0%, transparent 70%);
+    }
+    .cta-inner {
+      max-width: 800px; margin: 0 auto; padding: 140px 48px;
+      text-align: center; position: relative; z-index: 1;
+    }
+    .cta-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--orange-light); margin-bottom: 20px;
+    }
+    .cta-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(40px, 5vw, 64px);
+      font-weight: 600; line-height: 1.1; color: white;
+      margin-bottom: 20px;
+    }
+    .cta-sub {
+      font-size: 17px; color: rgba(255,255,255,0.5); line-height: 1.7; margin-bottom: 48px;
+    }
+    .cta-form {
+      display: flex; gap: 12px; max-width: 480px; margin: 0 auto 24px;
+    }
+    .cta-input {
+      flex: 1;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 100px;
+      padding: 14px 24px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px; color: white;
+      outline: none; transition: border-color 0.3s, background 0.3s;
+    }
+    .cta-input::placeholder { color: rgba(255,255,255,0.3); }
+    .cta-input:focus {
+      border-color: rgba(124,58,237,0.5);
+      background: rgba(255,255,255,0.1);
+    }
+    .btn-cta {
+      background: linear-gradient(135deg, var(--purple), var(--orange));
+      color: white; border: none; border-radius: 100px;
+      padding: 14px 28px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; white-space: nowrap;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 8px 24px rgba(124,58,237,0.5);
+    }
+    .btn-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(124,58,237,0.6); }
+    .cta-note { font-size: 13px; color: rgba(255,255,255,0.3); }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--night-2);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 60px 48px 40px;
+    }
+    .footer-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px; margin-bottom: 48px;
+    }
+    .footer-brand p {
+      font-size: 14px; color: rgba(255,255,255,0.35);
+      line-height: 1.7; margin-top: 16px; max-width: 260px;
+    }
+    .footer-col-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+      color: rgba(255,255,255,0.3); margin-bottom: 16px;
+    }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-links a {
+      color: rgba(255,255,255,0.5); font-size: 14px; text-decoration: none;
+      transition: color 0.3s;
+    }
+    .footer-links a:hover { color: white; }
+    .footer-bottom {
+      max-width: 1200px; margin: 0 auto;
+      padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-copy { font-size: 13px; color: rgba(255,255,255,0.25); }
+    .footer-made {
+      font-size: 13px; color: rgba(255,255,255,0.25);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .footer-made span { color: var(--orange); }
+
+    /* ===== SCROLL REVEAL ===== */
+    .reveal {
+      opacity: 0; transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.visible {
+      opacity: 1; transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+    .reveal-delay-5 { transition-delay: 0.5s; }
+
+    /* ===== MARQUEE ===== */
+    .marquee-wrapper {
+      background: linear-gradient(135deg, var(--purple-dark), var(--night-3));
+      overflow: hidden; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .marquee-track {
+      display: flex; gap: 0;
+      animation: marquee 25s linear infinite;
+      width: fit-content;
+    }
+    .marquee-item {
+      display: flex; align-items: center; gap: 16px; padding: 0 32px;
+      white-space: nowrap;
+    }
+    .marquee-item span {
+      font-size: 13px; font-weight: 700; letter-spacing: 0.05em;
+      color: rgba(255,255,255,0.45);
+    }
+    .marquee-dot { color: var(--orange); font-size: 8px; }
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ===== BLOG SECTION ===== */
+    .blog-wrapper { background: var(--cream); }
+    .blog-inner { max-width: 1200px; margin: 0 auto; padding: 120px 48px; }
+    .blog-header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 48px;
+    }
+    .blog-link {
+      font-size: 14px; font-weight: 700; color: var(--purple);
+      text-decoration: none; display: flex; align-items: center; gap: 6px;
+      transition: gap 0.3s;
+    }
+    .blog-link:hover { gap: 12px; }
+    .blog-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .blog-card {
+      background: white; border-radius: 24px; overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.06);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .blog-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 48px rgba(0,0,0,0.08);
+    }
+    .blog-img {
+      width: 100%; height: 220px; background: linear-gradient(135deg, var(--purple-dark), var(--purple));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 64px;
+    }
+    .blog-body { padding: 28px; }
+    .blog-date { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); margin-bottom: 12px; }
+    .blog-title { font-size: 20px; font-weight: 800; color: var(--text-dark); line-height: 1.4; margin-bottom: 12px; }
+    .blog-excerpt { font-size: 14px; line-height: 1.7; color: var(--text-mid); margin-bottom: 20px; }
+    .blog-read {
+      font-size: 13px; font-weight: 700; color: var(--purple);
+      text-decoration: none; display: flex; align-items: center; gap: 6px;
+      transition: gap 0.3s;
+    }
+    .blog-read:hover { gap: 10px; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .hero-content { grid-template-columns: 1fr; }
+      .hero-stats-card { display: none; }
+      .features-grid, .formats-grid, .testi-grid { grid-template-columns: 1fr; }
+      .hiw-steps { grid-template-columns: 1fr 1fr; }
+      .hiw-steps::before { display: none; }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+      .about-inner { grid-template-columns: 1fr; }
+      .blog-grid { grid-template-columns: 1fr; }
+      .bubble { display: none; }
+      nav { padding: 0 24px; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Stars background generation -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx + 'px';
+      cursor.style.top = my + 'px';
+    });
+    function animateRing() {
+      rx += (mx - rx) * 0.12;
+      ry += (my - ry) *.12;
+      ring.style.left = rx + 'px';
+      ring.style.top = ry + 'px';
+      requestAnimationFrame(animateRing);
+    }
+    animateRing();
+
+    // Nav scroll
+    const nav = document.querySelector('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Counter animation
+    function animateCounter(el, target, suffix = '') {
+      let start = 0;
+      const duration = 2000;
+      const startTime = performance.now();
+      function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 4);
+        const current = Math.round(eased * target);
+        el.textContent = current + suffix;
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }
+    const counterObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const el = e.target;
+          animateCounter(el, parseInt(el.dataset.target), el.dataset.suffix || '');
+          counterObs.unobserve(el);
+        }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.count-up').forEach(el => counterObs.observe(el));
+  });
+</script>
+
+<!-- NAVBAR -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">💬</div>
+    <div class="nav-logo-text">
+      <span class="nav-logo-name">Гармония</span>
+      <span class="nav-logo-sub">Языковой клуб</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">О клубе</a></li>
+    <li><a href="#formats">Форматы</a></li>
+    <li><a href="#process">Как проходят</a></li>
+    <li><a href="#reviews">Отзывы</a></li>
+    <li><a href="#blog">Блог</a></li>
+  </ul>
+  <button class="nav-cta">Записаться</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-noise"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Stars -->
+  <div class="star" style="top:15%;left:15%;animation-delay:0s;opacity:0.3"></div>
+  <div class="star" style="top:25%;left:45%;animation-delay:1s;opacity:0.5;width:6px;height:6px"></div>
+  <div class="star" style="top:60%;left:25%;animation-delay:2s;opacity:0.2"></div>
+  <div class="star" style="top:40%;left:70%;animation-delay:0.5s;opacity:0.4"></div>
+  <div class="star" style="top:75%;left:60%;animation-delay:1.5s;opacity:0.3;width:6px;height:6px"></div>
+  <div class="star" style="top:80%;left:35%;animation-delay:2.5s;opacity:0.2"></div>
+  <div class="star" style="top:20%;left:80%;animation-delay:3s;opacity:0.4;width:5px;height:5px"></div>
+
+  <!-- Speech bubbles -->
+  <div class="bubble bubble-1">Hello! How are you? 🌟</div>
+  <div class="bubble bubble-2">I love learning English!</div>
+  <div class="bubble bubble-3">What's your name? 😊</div>
+
+  <div class="hero-content">
+    <div>
+      <div class="hero-eyebrow">
+        <span></span>
+        Английский для детей от 6 лет
+      </div>
+      <h1 class="hero-title">
+        Языковой клуб<br>
+        <em>«Гармония»</em>
+      </h1>
+      <p class="hero-subtitle">
+        Учим язык играючи, свободно и в радость. Без зубрёжки и стресса — только живое общение и настоящий результат.
+      </p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-primary">Записаться на пробный урок</a>
+        <a href="#about" class="btn-ghost">
+          Узнать больше
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-stats-card">
+      <div class="stats-title">Наш клуб в цифрах</div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number"><span class="count-up" data-target="20" data-suffix="+">0+</span></div>
+          <div class="stat-label">учеников</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number"><span class="count-up" data-target="3" data-suffix="">0</span></div>
+          <div class="stat-label">года работы</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-review" style="grid-column:1/-1">
+          <div>
+            <div class="stat-stars">★★★★★</div>
+            <div class="stat-review-text">
+              <strong>5.0 / 5.0</strong>
+              средняя оценка родителей
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>Листайте</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrapper">
+  <div class="marquee-track">
+    <!-- Repeat twice for seamless loop -->
+    <div class="marquee-item"><span>Игровой подход</span><span class="marquee-dot">●</span></div>
+    <div class="marquee-item"><span>Живое общение</span><span class="marquee-dot">●</span></div>
+    <div class="marquee-item"><span>Малые группы</span><span class="marquee-dot">●</span></div>
+    <div class="marquee-item"><span>Индивидуальный темп</span><span class="marquee-dot">●</span></div>
+    <div class="marquee-item"><span>Онлайн и офлайн</span><span class="marquee-dot">●</span></div>
+    <div class="marquee-item"><span>Результат с первого месяца</span><span class="marquee-dot">●</span></div>
+    <div class="marquee-item"><span>Игровой подход</span><span class="marquee-dot">●</span></div>
+    <div class="marquee-item"><span>Живое общение</span><span class="marquee-dot">●</span></div>
+    <div class="marquee-item"><span>Малые группы</span><span class="marquee-dot">●</span></div>
+    <div class="marquee-item"><span>Индивидуальный темп</span><span class="marquee-dot">●</span></div>
+    <div class="marquee-item"><span>Онлайн и офлайн</span><span class="marquee-dot">●</span></div>
+    <div class="marquee-item"><span>Результат с первого месяца</span><span class="marquee-dot">●</span></div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="about-wrapper" id="about">
+  <div class="about-inner">
+    <div>
+      <div class="about-label reveal">О клубе</div>
+      <h2 class="about-title reveal reveal-delay-1">
+        Место, где дети<br>
+        <em>влюбляются</em> в язык
+      </h2>
+      <p class="about-text reveal reveal-delay-2">
+        Клуб «Гармония» — это не скучные уроки с учебниками. Это живая среда, где английский становится естественным способом общения. Мы работаем с детьми от 6 лет и строим обучение на играх, песнях и реальных диалогах.
+      </p>
+      <ul class="about-list reveal reveal-delay-3">
+        <li>Прогресс заметен уже после первого месяца занятий</li>
+        <li>Дети говорят, слушают и понимают — не только читают тексты</li>
+        <li>Уроки без стресса: игры, сценки, творческие задания</li>
+        <li>Маленькие группы — каждый ребёнок в центре внимания</li>
+      </ul>
+    </div>
+    <div class="about-visual reveal reveal-delay-2">
+      <div class="about-card-main">
+        <div class="about-avatar">👩‍🏫</div>
+        <div class="about-card-name">Анастасия</div>
+        <div class="about-card-role">Основатель и главный преподаватель</div>
+        <p class="about-card-quote">
+          "Я верю, что каждый ребёнок может говорить по-английски свободно — нужно только создать правильную среду."
+        </p>
+        <div class="about-badge">3 года опыта ✨</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-wrapper" id="features">
+  <div class="features-inner">
+    <div class="features-header">
+      <div class="section-tag reveal">Почему мы</div>
+      <h2 class="section-title reveal reveal-delay-1">
+        Шесть причин выбрать<br>
+        <em>«Гармонию»</em>
+      </h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon fi-1">🎮</div>
+        <div class="feature-title">Игровая форма</div>
+        <p class="feature-text">Уроки построены на играх, песнях и сценках. Дети учатся незаметно для себя — без стресса и зубрёжки.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon fi-2">💬</div>
+        <div class="feature-title">Живое общение</div>
+        <p class="feature-text">Разговорная практика с первого занятия. Дети говорят, слушают и понимают — не только читают тексты.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-3">
+        <div class="feature-icon fi-3">👶</div>
+        <div class="feature-title">Малые группы</div>
+        <p class="feature-text">Не более 6 детей в группе. Каждый ребёнок получает внимание педагога и занимается в своём темпе.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon fi-4">📈</div>
+        <div class="feature-title">Быстрый результат</div>
+        <p class="feature-text">Прогресс заметен уже после первого месяца. Родители видят изменения, дети чувствуют уверенность.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon fi-5">🌍</div>
+        <div class="feature-title">Гибкий формат</div>
+        <p class="feature-text">Очные занятия и онлайн — выберите то, что удобно для вашей семьи. Расписание под вас.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-3">
+        <div class="feature-icon fi-6">💡</div>
+        <div class="feature-title">Авторская программа</div>
+        <p class="feature-text">Методика разработана специально для детей. Учитываем возраст, темп и интересы каждого ребёнка.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FORMATS -->
+<section class="formats-wrapper" id="formats">
+  <div class="formats-inner">
+    <div class="formats-label reveal">Форматы обучения</div>
+    <h2 class="formats-title reveal reveal-delay-1">
+      Выберите удобный<br>формат для ребёнка
+    </h2>
+    <div class="formats-grid">
+      <div class="format-card reveal reveal-delay-1">
+        <div class="format-badge">Группа</div>
+        <div class="format-title">Групповые занятия</div>
+        <p class="format-desc">Живая среда общения, новые друзья и командные игры. Идеально для социальных детей, которые любят активность.</p>
+        <ul class="format-features">
+          <li>До 6 детей в группе</li>
+          <li>2 занятия в неделю по 60 мин</li>
+          <li>Игры, песни, сценки и творчество</li>
+          <li>Регулярная обратная связь родителям</li>
+        </ul>
+        <div class="format-price">
+          <span class="price-label">от</span>
+          <div class="price-value">2 500 <span>₽/мес</span></div>
+        </div>
+      </div>
+      <div class="format-card orange reveal reveal-delay-2">
+        <div class="format-badge">Индивидуально</div>
+        <div class="format-title">Индивидуальные занятия</div>
+        <p class="format-desc">Максимум внимания одному ребёнку. Программа полностью адаптируется под его темп, интересы и цели.</p>
+        <ul class="format-features">
+          <li>1 на 1 с педагогом</li>
+          <li>Гибкое расписание</li>
+          <li>Персональная программа</li>
+          <li>Онлайн или очно</li>
+        </ul>
+        <div class="format-price">
+          <span class="price-label">от</span>
+          <div class="price-value">3 500 <span>₽/мес</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="hiw-wrapper" id="process">
+  <div class="hiw-inner">
+    <div class="section-tag reveal">Как это работает</div>
+    <h2 class="section-title reveal reveal-delay-1">Путь от записи до<br><em>первых результатов</em></h2>
+    <div class="hiw-steps">
+      <div class="hiw-step reveal reveal-delay-1">
+        <div class="step-num">1</div>
+        <div class="step-title">Оставляете заявку</div>
+        <p class="step-text">Заполните форму — мы свяжемся с вами в течение нескольких часов для уточнения деталей.</p>
+      </div>
+      <div class="hiw-step reveal reveal-delay-2">
+        <div class="step-num">2</div>
+        <div class="step-title">Пробный урок</div>
+        <p class="step-text">Бесплатное занятие, где ребёнок знакомится с форматом и преподавателем в игровой атмосфере.</p>
+      </div>
+      <div class="hiw-step reveal reveal-delay-3">
+        <div class="step-num">3</div>
+        <div class="step-title">Выбираете формат</div>
+        <p class="step-text">Вместе подбираем группу или индивидуальные занятия, расписание и программу под вашего ребёнка.</p>
+      </div>
+      <div class="hiw-step reveal reveal-delay-4">
+        <div class="step-num">4</div>
+        <div class="step-title">Первый прогресс</div>
+        <p class="step-text">Уже через месяц ребёнок начинает говорить первые фразы и понимать речь на слух — и вы это заметите!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testi-wrapper" id="reviews">
+  <div class="testi-inner">
+    <div class="section-tag reveal">Отзывы</div>
+    <h2 class="section-title reveal reveal-delay-1">Что говорят<br><em>родители наших учеников</em></h2>
+    <div class="testi-grid">
+      <div class="testi-card reveal reveal-delay-1">
+        <div class="testi-quote">"</div>
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">Моя дочь занимается уже полгода, и я не верю своим глазам — она смотрит мультики на английском и всё понимает! Спасибо за такой подход.</p>
+        <div class="testi-author">
+          <div class="testi-avatar">👩</div>
+          <div>
+            <div class="testi-name">Мария К.</div>
+            <div class="testi-role">Мама Полины, 8 лет</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card reveal reveal-delay-2">
+        <div class="testi-quote">"</div>
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">Сын раньше не хотел учить языки вообще. После первого же занятия сам попросил записаться! Теперь ждёт каждый урок.</p>
+        <div class="testi-author">
+          <div class="testi-avatar">👨</div>
+          <div>
+            <div class="testi-name">Алексей П.</div>
+            <div class="testi-role">Папа Кирилла, 7 лет</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card reveal reveal-delay-3">
+        <div class="testi-quote">"</div>
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">Индивидуальный подход — это не просто слова. Педагог реально знает особенности каждого ребёнка и строит урок под него.</p>
+        <div class="testi-author">
+          <div class="testi-avatar">👩</div>
+          <div>
+            <div class="testi-name">Елена В.</div>
+            <div class="testi-role">Мама Миши, 10 лет</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOG -->
+<section class="blog-wrapper" id="blog">
+  <div class="blog-inner">
+    <div class="blog-header">
+      <div>
+        <div class="section-tag reveal">Блог</div>
+        <h2 class="section-title reveal reveal-delay-1">Полезные статьи</h2>
+      </div>
+      <a href="/blog" class="blog-link reveal">
+        Все статьи →
+      </a>
+    </div>
+    <div class="blog-grid">
+      <div class="blog-card reveal reveal-delay-1">
+        <div class="blog-img">📚</div>
+        <div class="blog-body">
+          <div class="blog-date">15 Марта 2026</div>
+          <h3 class="blog-title">Польза раннего изучения английского языка для детей</h3>
+          <p class="blog-excerpt">В современном мире знание английского языка становится важным навыком, который открывает двери к новым возможностям...</p>
+          <a href="#" class="blog-read">Читать →</a>
+        </div>
+      </div>
+      <div class="blog-card reveal reveal-delay-2">
+        <div class="blog-img" style="background: linear-gradient(135deg, #4C1D95, #F97316)">🎮</div>
+        <div class="blog-body">
+          <div class="blog-date">8 Марта 2026</div>
+          <h3 class="blog-title">5 лучших игр для изучения английского с детьми дома</h3>
+          <p class="blog-excerpt">Превратите домашние занятия в увлекательное приключение. Эти игры помогут закрепить словарный запас без скуки...</p>
+          <a href="#" class="blog-read">Читать →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-wrapper" id="contact">
+  <div class="cta-inner">
+    <div class="cta-label reveal">Бесплатный пробный урок</div>
+    <h2 class="cta-title reveal reveal-delay-1">
+      Начните путешествие<br>в мир английского
+    </h2>
+    <p class="cta-sub reveal reveal-delay-2">
+      Оставьте имя и телефон — мы свяжемся с вами и запишем ребёнка на бесплатный пробный урок.
+    </p>
+    <form class="cta-form reveal reveal-delay-3" onsubmit="return false">
+      <input type="tel" class="cta-input" placeholder="Ваш телефон">
+      <button class="btn-cta">Записаться</button>
+    </form>
+    <p class="cta-note reveal reveal-delay-4">Без обязательств · Первый урок бесплатно · Ответим в течение часа</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo" style="margin-bottom:0">
+        <div class="nav-logo-icon">💬</div>
+        <div class="nav-logo-text">
+          <span class="nav-logo-name">Гармония</span>
+          <span class="nav-logo-sub">Языковой клуб</span>
+        </div>
+      </a>
+      <p>Детский языковой клуб — английский для детей от 6 лет в игровой форме.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Навигация</div>
+      <ul class="footer-links">
+        <li><a href="#about">О клубе</a></li>
+        <li><a href="#formats">Форматы</a></li>
+        <li><a href="#process">Как проходят</a></li>
+        <li><a href="#reviews">Отзывы</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Ресурсы</div>
+      <ul class="footer-links">
+        <li><a href="/blog">Блог</a></li>
+        <li><a href="#contact">Записаться</a></li>
+        <li><a href="/gallery">Галерея</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Контакты</div>
+      <ul class="footer-links">
+        <li><a href="tel:+79999999999">+7 (999) 999-99-99</a></li>
+        <li><a href="mailto:hello@yourharmony.ru">hello@yourharmony.ru</a></li>
+        <li><a href="#">ВКонтакте</a></li>
+        <li><a href="#">Telegram</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 Языковой клуб «Гармония». Все права защищены.</div>
+    <div class="footer-made">Сделано с <span>♥</span></div>
+  </div>
+</footer>
+
+</body>
+</html>

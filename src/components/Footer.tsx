@@ -91,7 +91,7 @@ export default function Footer() {
         </div>
 
         <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4 text-gray-500 text-sm">
-          <p>© {currentYear} Клуб &quot;Гармония&quot;. Все права защищены.</p>
+          <p>© {currentYear} Клуб «Гармония». Все права защищены.</p>
           <div className="flex gap-6">
             <p className="italic">Сделано с любовью к детям</p>
           </div>
