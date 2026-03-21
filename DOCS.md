@@ -13,7 +13,9 @@
 - **Image Processing**: sharp (сжатие и конвертация в WebP перед загрузкой)
 - **HTML Sanitization**: sanitize-html (XSS-защита контента блога)
 - **Auth**: NextAuth.js v5 (Credentials provider, JWT-сессии)
+- **Email**: Resend (уведомления о новых заявках)
 - **Testing**: Jest + React Testing Library + Playwright (E2E)
+- **Deployment**: Docker Compose + Nginx + GitHub Actions CI/CD (VPS)
 
 ## 📂 Структура проекта
 ```
@@ -121,6 +123,10 @@ public/               — статика
 | `ADMIN_USER` | Логин для доступа к `/bigbos` |
 | `ADMIN_PASSWORD` | Пароль для доступа к `/bigbos` |
 | `AUTH_SECRET` | Секрет NextAuth.js для подписи JWT (`npx auth secret`) |
+| `RESEND_API_KEY` | API-ключ Resend для отправки email-уведомлений |
+| `NOTIFICATION_EMAIL` | Email, на который приходят уведомления о новых заявках |
+| `POSTGRES_PASSWORD` | Пароль PostgreSQL (используется в Docker Compose) |
+| `FASTAPI_SECRET_KEY` | Секретный ключ FastAPI-сервиса |
 
 ## 🎨 Брендинг и логотип
 
@@ -134,6 +140,37 @@ public/               — статика
 | Тёмный | Footer | purple-400 → orange-400, подпись purple-300/60 |
 
 **Шрифт** — `Nunito` (ExtraBold 800, cyrillic) подключён через `next/font/google`, CSS-переменная `--font-nunito`.
+
+---
+
+## 🚢 Деплой (Production)
+
+Приложение разворачивается на VPS через Docker Compose. Схема:
+
+```
+GitHub push → GitHub Actions
+  1. Lint job: npm ci → prisma generate → tsc --noEmit
+  2. Deploy job (SSH):
+     - Записывает .env из GitHub Secrets
+     - git pull origin main
+     - docker compose up -d --build
+     - docker compose run --rm migrator  (Prisma migrations)
+     - Health check: Next.js :3000, FastAPI :8000
+     - docker image prune -f
+```
+
+**Контейнеры:**
+| Сервис | Образ | Порт |
+|---|---|---|
+| `postgres` | postgres:16-alpine | — |
+| `nextjs` | Dockerfile (standalone) | 3000 |
+| `fastapi` | api/Dockerfile | 8000 |
+| `nginx` | nginx:alpine | 80, 443 |
+| `migrator` | Dockerfile (target: migrator) | — (one-shot) |
+
+**Nginx** — reverse proxy + SSL (Let's Encrypt), обслуживает `yourharmony-english.ru`.
+
+**GitHub Secrets** (обязательные): `VPS_HOST`, `VPS_SSH_KEY`, `POSTGRES_PASSWORD`, `AUTH_SECRET`, `ADMIN_USER`, `ADMIN_PASSWORD`, `BLOB_READ_WRITE_TOKEN`, `RESEND_API_KEY`, `NOTIFICATION_EMAIL`, `FASTAPI_SECRET_KEY`
 
 ---
 
@@ -172,6 +209,13 @@ public/               — статика
 - `/admin` → `/bigbos`; удаление заявок; CRUD профиля преподавателя
 - Юридические страницы объединены в `/documents`
 
+### Email-уведомления, CI/CD, фиксы (2026-03-21)
+- **Resend** — при отправке заявки через `BookingModal` уходит письмо на `NOTIFICATION_EMAIL`
+- **GitHub Actions** — workflow `deploy.yml`: lint (tsc) → SSH-деплой на VPS. Secrets передаются через `${{ secrets.X }}` прямо в теле скрипта (обход ограничений `AcceptEnv` на VPS)
+- **Docker Compose** — .env записывается на VPS при каждом деплое из GitHub Secrets
+- **Auth-баг** — исправлена уязвимость: `middleware.ts` проверяет `req.auth?.user?.name` вместо `req.auth` (NextAuth v5 beta может возвращать truthy-объект без валидного пользователя)
+- Удалён `playwright.yml` — E2E-тесты не запускаются в CI (нет DATABASE_URL в runner)
+
 ### Сжатие изображений при загрузке (2026-03-21)
 - Добавлен `sharp` — серверная обработка изображений перед отправкой в Vercel Blob
 - Все загружаемые фото автоматически конвертируются в WebP и масштабируются:
@@ -181,8 +225,7 @@ public/               — статика
 - Функция `compressImage()` в `actions.ts` — принимает `File`, возвращает сжатый `Buffer` + `.webp`-имя
 
 ## 📝 Backlog
-- Уведомления (Email/Telegram) о новых бронированиях
-- CI/CD (GitHub Actions) с автозапуском Jest + Playwright
 - Управление секциями лендинга из `/bigbos` (UI для `LandingSection`)
 - Расширение галереи (сортировка, подписи)
 - Тесты для новых компонентов лендинга
+- E2E-тесты в CI (настройка DATABASE_URL для Playwright)
