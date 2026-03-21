@@ -44,6 +44,7 @@ services:
       RESEND_API_KEY: ${RESEND_API_KEY}
       NOTIFICATION_EMAIL: ${NOTIFICATION_EMAIL}
       NEXTAUTH_URL: https://yourharmony-english.ru
+      AUTH_TRUST_HOST: "true"
     ports:
       - "3000:3000"
 
