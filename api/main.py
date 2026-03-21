@@ -27,7 +27,7 @@ from .middleware.error_handler import (
     integrity_error_handler,
     validation_error_handler,
 )
-from .routers import auth, blog, schedule, students
+from .routers import auth, blog, bookings, schedule, students
 
 logging.basicConfig(
     level=logging.INFO,
@@ -65,6 +65,7 @@ app.add_exception_handler(Exception, generic_error_handler)
 # ── Routers ───────────────────────────────────────────────────────────────────
 app.include_router(auth.router)
 app.include_router(blog.router)
+app.include_router(bookings.router)
 app.include_router(students.router)
 app.include_router(schedule.router)
 
