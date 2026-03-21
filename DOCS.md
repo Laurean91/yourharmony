@@ -14,6 +14,7 @@
 - **HTML Sanitization**: sanitize-html (XSS-защита контента блога)
 - **Auth**: NextAuth.js v5 (Credentials provider, JWT-сессии)
 - **Email**: Resend (уведомления о новых заявках)
+- **Telegram**: Bot API (уведомления о новых заявках прямо в Telegram)
 - **Testing**: Jest + React Testing Library + Playwright (E2E)
 - **Deployment**: Docker Compose + Nginx + GitHub Actions CI/CD (VPS)
 
@@ -80,6 +81,8 @@ public/               — статика
 - `BookingModal.tsx` — форма записи (имя родителя, возраст ребёнка, телефон)
 - Вызывается из Hero, `HowItWorksSection`, `CtaSection`
 - Данные → таблица `Booking` через Server Action с серверной валидацией (возраст 1–18, телефон)
+- При создании заявки параллельно отправляются уведомления: email (Resend) и Telegram (Bot API)
+- Если канал уведомления не настроен — заявка всё равно сохраняется, ошибка только логируется
 
 ### 4. Блог
 - `/blog` — список статей, `/blog/[slug]` — страница статьи (SSR + SEO-метаданные)
@@ -125,6 +128,8 @@ public/               — статика
 | `AUTH_SECRET` | Секрет NextAuth.js для подписи JWT (`npx auth secret`) |
 | `RESEND_API_KEY` | API-ключ Resend для отправки email-уведомлений |
 | `NOTIFICATION_EMAIL` | Email, на который приходят уведомления о новых заявках |
+| `TELEGRAM_BOT_TOKEN` | Токен бота Telegram (получить у @BotFather) |
+| `TELEGRAM_CHAT_ID` | ID чата/пользователя для Telegram-уведомлений (узнать у @userinfobot) |
 | `POSTGRES_PASSWORD` | Пароль PostgreSQL (используется в Docker Compose) |
 | `FASTAPI_SECRET_KEY` | Секретный ключ FastAPI-сервиса |
 
@@ -170,7 +175,7 @@ GitHub push → GitHub Actions
 
 **Nginx** — reverse proxy + SSL (Let's Encrypt), обслуживает `yourharmony-english.ru`.
 
-**GitHub Secrets** (обязательные): `VPS_HOST`, `VPS_SSH_KEY`, `POSTGRES_PASSWORD`, `AUTH_SECRET`, `ADMIN_USER`, `ADMIN_PASSWORD`, `BLOB_READ_WRITE_TOKEN`, `RESEND_API_KEY`, `NOTIFICATION_EMAIL`, `FASTAPI_SECRET_KEY`
+**GitHub Secrets** (обязательные): `VPS_HOST`, `VPS_SSH_KEY`, `POSTGRES_PASSWORD`, `AUTH_SECRET`, `ADMIN_USER`, `ADMIN_PASSWORD`, `BLOB_READ_WRITE_TOKEN`, `RESEND_API_KEY`, `NOTIFICATION_EMAIL`, `FASTAPI_SECRET_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
 
 ---
 
@@ -208,6 +213,12 @@ GitHub push → GitHub Actions
 - 47 unit-тестов (Jest) + 10 E2E-тестов (Playwright)
 - `/admin` → `/bigbos`; удаление заявок; CRUD профиля преподавателя
 - Юридические страницы объединены в `/documents`
+
+### Telegram-уведомления + API счётчика заявок (2026-03-21)
+- **`GET /api/bookings/count`** — новый REST endpoint, возвращает `{ "count": N }` количество заявок со статусом «Новая»
+- **Telegram Bot API** — при создании заявки бот отправляет сообщение в чат: имя, возраст, телефон
+- Уведомление отправляется параллельно с email (Resend); при сбое любого канала заявка всё равно сохраняется
+- Настройка: `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` в `.env` и GitHub Secrets
 
 ### Email-уведомления, CI/CD, фиксы (2026-03-21)
 - **Resend** — при отправке заявки через `BookingModal` уходит письмо на `NOTIFICATION_EMAIL`

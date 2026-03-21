@@ -47,7 +47,7 @@ jobs:
             cd /home/deploy/yourharmony
 
             echo "==> Writing .env from CI secrets..."
-            printf 'POSTGRES_PASSWORD=%s\nAUTH_SECRET=%s\nADMIN_USER=%s\nADMIN_PASSWORD=%s\nBLOB_READ_WRITE_TOKEN=%s\nRESEND_API_KEY=%s\nNOTIFICATION_EMAIL=%s\nFASTAPI_SECRET_KEY=%s\n' \
+            printf 'POSTGRES_PASSWORD=%s\nAUTH_SECRET=%s\nADMIN_USER=%s\nADMIN_PASSWORD=%s\nBLOB_READ_WRITE_TOKEN=%s\nRESEND_API_KEY=%s\nNOTIFICATION_EMAIL=%s\nFASTAPI_SECRET_KEY=%s\nTELEGRAM_BOT_TOKEN=%s\nTELEGRAM_CHAT_ID=%s\n' \
               '${{ secrets.POSTGRES_PASSWORD }}' \
               '${{ secrets.AUTH_SECRET }}' \
               '${{ secrets.ADMIN_USER }}' \
@@ -56,6 +56,8 @@ jobs:
               '${{ secrets.RESEND_API_KEY }}' \
               '${{ secrets.NOTIFICATION_EMAIL }}' \
               '${{ secrets.FASTAPI_SECRET_KEY }}' \
+              '${{ secrets.TELEGRAM_BOT_TOKEN }}' \
+              '${{ secrets.TELEGRAM_CHAT_ID }}' \
               > .env
 
             echo "==> Pulling latest code..."

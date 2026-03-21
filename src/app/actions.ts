@@ -47,6 +47,39 @@ export async function createBooking(formData: FormData) {
     data: { parentName, childAge, phone }
   })
 
+  // Отправляем уведомление в Telegram если настроен бот
+  if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
+    try {
+      const text =
+        `📩 *Новая заявка на занятие*\n\n` +
+        `👤 Имя: ${parentName}\n` +
+        `🧒 Возраст ребёнка: ${childAge} лет\n` +
+        `📞 Телефон: ${phone}`
+      const res = await fetch(
+        `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: process.env.TELEGRAM_CHAT_ID,
+            text,
+            parse_mode: 'Markdown',
+          }),
+        }
+      )
+      if (!res.ok) {
+        const err = await res.text()
+        console.error('[Telegram] Ошибка отправки:', err)
+      } else {
+        console.log('[Telegram] Сообщение отправлено')
+      }
+    } catch (e) {
+      console.error('[Telegram] Исключение при отправке:', e)
+    }
+  } else {
+    console.warn('[Telegram] Пропуск — TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID не заданы')
+  }
+
   // Отправляем email-уведомление если настроен Resend
   if (process.env.RESEND_API_KEY && process.env.NOTIFICATION_EMAIL) {
     try {
