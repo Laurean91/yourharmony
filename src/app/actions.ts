@@ -183,11 +183,15 @@ const DEFAULT_TEACHER = {
 }
 
 export async function getTeacherProfile() {
-  return await prisma.teacherProfile.upsert({
-    where: { id: 'singleton' },
-    update: {},
-    create: DEFAULT_TEACHER,
-  })
+  try {
+    return await prisma.teacherProfile.upsert({
+      where: { id: 'singleton' },
+      update: {},
+      create: DEFAULT_TEACHER,
+    })
+  } catch {
+    return DEFAULT_TEACHER
+  }
 }
 
 export async function updateTeacherProfile(formData: FormData) {
@@ -221,16 +225,20 @@ const POST_PAGE_SIZE = 6
 
 // 6. Список опубликованных постов (с пагинацией, для читателей)
 export async function getPosts(page = 1) {
-  const skip = (page - 1) * POST_PAGE_SIZE
-  const posts = await prisma.post.findMany({
-    where: { isPublished: true },
-    orderBy: { createdAt: 'desc' },
-    skip,
-    take: POST_PAGE_SIZE,
-    include: { category: true },
-  })
-  const total = await prisma.post.count({ where: { isPublished: true } })
-  return { posts, total, totalPages: Math.ceil(total / POST_PAGE_SIZE) }
+  try {
+    const skip = (page - 1) * POST_PAGE_SIZE
+    const posts = await prisma.post.findMany({
+      where: { isPublished: true },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: POST_PAGE_SIZE,
+      include: { category: true },
+    })
+    const total = await prisma.post.count({ where: { isPublished: true } })
+    return { posts, total, totalPages: Math.ceil(total / POST_PAGE_SIZE) }
+  } catch {
+    return { posts: [], total: 0, totalPages: 0 }
+  }
 }
 
 // 7. Пост по slug (для страницы статьи)
@@ -351,11 +359,15 @@ export async function togglePostStatus(id: string, currentValue: boolean) {
 
 // 13. Все опубликованные посты для sitemap (без пагинации)
 export async function getAllPublishedPostSlugs() {
-  return await prisma.post.findMany({
-    where: { isPublished: true },
-    select: { slug: true, updatedAt: true },
-    orderBy: { createdAt: 'desc' },
-  })
+  try {
+    return await prisma.post.findMany({
+      where: { isPublished: true },
+      select: { slug: true, updatedAt: true },
+      orderBy: { createdAt: 'desc' },
+    })
+  } catch {
+    return []
+  }
 }
 
 // 14. Список категорий
@@ -374,9 +386,9 @@ import type { SectionKey } from '../lib/landingTypes'
 import { SECTION_DEFAULTS } from '../lib/landingTypes'
 
 export async function getSectionSettings<K extends SectionKey>(key: K): Promise<typeof SECTION_DEFAULTS[K]> {
-  const row = await prisma.siteSettings.findUnique({ where: { key } })
-  if (!row) return SECTION_DEFAULTS[key]
   try {
+    const row = await prisma.siteSettings.findUnique({ where: { key } })
+    if (!row) return SECTION_DEFAULTS[key]
     return JSON.parse(row.value) as typeof SECTION_DEFAULTS[K]
   } catch {
     return SECTION_DEFAULTS[key]
