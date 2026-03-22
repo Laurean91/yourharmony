@@ -251,10 +251,14 @@ export async function getPostBySlug(slug: string) {
 
 // 8. Все посты для административной таблицы
 export async function getAllPostsAdmin() {
-  return await prisma.post.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: { category: true },
-  })
+  try {
+    return await prisma.post.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: { category: true },
+    })
+  } catch {
+    return []
+  }
 }
 
 // 9. Создание поста
@@ -274,17 +278,25 @@ export async function createPost(formData: FormData) {
     coverImage = blob.url
   }
 
-  await prisma.post.create({
-    data: {
-      title,
-      slug,
-      excerpt: excerpt || null,
-      content,
-      coverImage,
-      isPublished,
-      categoryId: categoryId || null,
-    },
-  })
+  try {
+    await prisma.post.create({
+      data: {
+        title,
+        slug,
+        excerpt: excerpt || null,
+        content,
+        coverImage,
+        isPublished,
+        categoryId: categoryId || null,
+      },
+    })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    if (msg.includes('Unique constraint') || msg.includes('unique constraint')) {
+      throw new Error(`Статья с таким slug уже существует: «${slug}»`)
+    }
+    throw new Error('Ошибка при сохранении статьи. Попробуйте ещё раз.')
+  }
 
   revalidatePath('/')
   revalidatePath('/blog')
@@ -372,7 +384,11 @@ export async function getAllPublishedPostSlugs() {
 
 // 14. Список категорий
 export async function getCategories() {
-  return await prisma.category.findMany({ orderBy: { name: 'asc' } })
+  try {
+    return await prisma.category.findMany({ orderBy: { name: 'asc' } })
+  } catch {
+    return []
+  }
 }
 
 // 14. Создание категории

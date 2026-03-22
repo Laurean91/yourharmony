@@ -50,7 +50,8 @@ export default function PostForm({ categories, post, action, submitLabel }: Post
       router.refresh()
     } catch (err) {
       console.error(err)
-      alert('Ошибка при сохранении. Попробуйте ещё раз.')
+      const msg = err instanceof Error ? err.message : 'Ошибка при сохранении. Попробуйте ещё раз.'
+      alert(msg)
       setLoading(false)
     }
   }
