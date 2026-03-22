@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { getPostBySlug, getPosts } from '../../actions'
+import { getPostBySlug, getPosts, getTeacherProfile } from '../../actions'
 import sanitizeHtml from 'sanitize-html'
 import BookingButton from '../../../components/BookingButton'
 import Navbar from '../../../components/Navbar'
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params
-  const post = await getPostBySlug(slug)
+  const [post, teacher] = await Promise.all([getPostBySlug(slug), getTeacherProfile()])
 
   if (!post || !post.isPublished) notFound()
 
@@ -70,7 +70,7 @@ export default async function BlogPostPage({ params }: Props) {
     author: {
       '@type': 'Person',
       '@id': `${SITE_URL}/#teacher`,
-      name: 'Анна Сергеевна',
+      name: teacher.name,
     },
     publisher: {
       '@id': `${SITE_URL}/#organization`,
@@ -139,7 +139,7 @@ export default async function BlogPostPage({ params }: Props) {
           <div className="flex items-center justify-center gap-3 text-sm text-gray-400 font-medium flex-wrap">
             <span className="flex items-center gap-1.5 text-gray-600 font-semibold">
               <span className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-400 to-orange-400 inline-block shrink-0" />
-              Анна Сергеевна
+              {teacher.name}
             </span>
             <span>·</span>
             <time dateTime={post.createdAt.toISOString()}>{formatDate(post.createdAt)}</time>
