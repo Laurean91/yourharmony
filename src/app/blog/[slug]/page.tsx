@@ -15,6 +15,8 @@ interface Props {
 
 export const revalidate = 300
 
+const SITE_URL = 'https://yourharmony-english.ru'
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const post = await getPostBySlug(slug)
@@ -22,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return { title: 'Статья не найдена' }
 
   const description = post.excerpt ?? post.content.replace(/<[^>]+>/g, '').slice(0, 160)
-  const url = `https://yourharmony.vercel.app/blog/${post.slug}`
+  const url = `${SITE_URL}/blog/${post.slug}`
 
   return {
     title: post.title,
@@ -57,7 +59,7 @@ export default async function BlogPostPage({ params }: Props) {
   const articleSchema = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
-    '@id': `https://yourharmony.vercel.app/blog/${post.slug}#article`,
+    '@id': `${SITE_URL}/blog/${post.slug}#article`,
     headline: post.title,
     description: post.excerpt ?? post.content.replace(/<[^>]+>/g, '').slice(0, 160),
     datePublished: post.createdAt.toISOString(),
@@ -67,15 +69,15 @@ export default async function BlogPostPage({ params }: Props) {
     }),
     author: {
       '@type': 'Person',
-      '@id': 'https://yourharmony.vercel.app/#teacher',
+      '@id': `${SITE_URL}/#teacher`,
       name: 'Анна Сергеевна',
     },
     publisher: {
-      '@id': 'https://yourharmony.vercel.app/#organization',
+      '@id': `${SITE_URL}/#organization`,
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://yourharmony.vercel.app/blog/${post.slug}`,
+      '@id': `${SITE_URL}/blog/${post.slug}`,
     },
     inLanguage: 'ru-RU',
   }
@@ -84,9 +86,9 @@ export default async function BlogPostPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Главная', item: 'https://yourharmony.vercel.app/' },
-      { '@type': 'ListItem', position: 2, name: 'Блог', item: 'https://yourharmony.vercel.app/blog' },
-      { '@type': 'ListItem', position: 3, name: post.title, item: `https://yourharmony.vercel.app/blog/${post.slug}` },
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Блог', item: `${SITE_URL}/blog` },
+      { '@type': 'ListItem', position: 3, name: post.title, item: `${SITE_URL}/blog/${post.slug}` },
     ],
   }
 

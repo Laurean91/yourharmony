@@ -65,8 +65,8 @@ export default function Footer() {
             <ul className="flex flex-col gap-4">
               {navItems.map((item) => (
                 <li key={item.href}>
-                  <a 
-                    href={item.href} 
+                  <a
+                    href={item.href}
                     onClick={(e) => handleScrollTo(e, item.href)}
                     className="footer-link"
                   >
@@ -74,6 +74,11 @@ export default function Footer() {
                   </a>
                 </li>
               ))}
+              <li>
+                <Link href="/blog" className="footer-link">
+                  Статьи
+                </Link>
+              </li>
             </ul>
           </div>
 

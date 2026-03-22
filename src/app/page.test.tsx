@@ -3,6 +3,13 @@ import LandingPage from './page'
 import '@testing-library/jest-dom'
 import { DEFAULT_HERO, DEFAULT_FEATURES, DEFAULT_FORMATS, DEFAULT_CONTACTS, DEFAULT_HOW_IT_WORKS, DEFAULT_TESTIMONIALS, DEFAULT_CTA, DEFAULT_FAQ } from '../lib/landingTypes'
 
+const mockTeacher = {
+  name: 'Анна Сергеевна',
+  bio: 'Сертифицированный преподаватель.',
+  photoUrl: null,
+  badges: 'CELTA, IELTS 8.0',
+}
+
 jest.mock('./actions', () => ({
   getSectionSettings: jest.fn((key: string) => {
     const defaults: Record<string, unknown> = {
@@ -12,6 +19,7 @@ jest.mock('./actions', () => ({
     }
     return Promise.resolve(defaults[key])
   }),
+  getTeacherProfile: jest.fn(() => Promise.resolve(mockTeacher)),
 }))
 
 // Mock complex client components — tested separately
@@ -39,9 +47,8 @@ jest.mock('../components/LandingClient', () => ({
   ),
   LandingContacts: () => (
     <section data-testid="landing-contacts">
-      <p>ул. Мира, д. 15, офис 302</p>
-      <a href="https://t.me/yourharmony_club">Telegram</a>
-      <a href="https://wa.me/79991234567">WhatsApp</a>
+      <p>Армавирская ул., 1/20</p>
+      <a href="https://t.me/harmonyEnglish">Telegram</a>
     </section>
   ),
   HowItWorksSection: () => <section data-testid="how-it-works" />,
@@ -50,8 +57,8 @@ jest.mock('../components/LandingClient', () => ({
   FAQSection: () => <section data-testid="faq" />,
 }))
 
-const renderAsync = async (Component: any) => {
-  const jsx = await Component()
+const renderAsync = async (Component: React.FC) => {
+  const jsx = await (Component as unknown as () => Promise<React.ReactElement>)()
   return render(jsx)
 }
 
@@ -67,7 +74,7 @@ describe('Landing Page', () => {
     expect(screen.getByTestId('footer')).toBeInTheDocument()
   })
 
-  it('renders hero with updated club name', async () => {
+  it('renders hero with club name', async () => {
     await renderAsync(LandingPage)
     expect(screen.getByText('Языковой клуб "Гармония"')).toBeInTheDocument()
     expect(screen.getByText(/Английский для детей от 6 лет/i)).toBeInTheDocument()
@@ -88,11 +95,70 @@ describe('Landing Page', () => {
     expect(screen.getByText('Уютная атмосфера')).toBeInTheDocument()
   })
 
-  it('renders contacts with messengers', async () => {
+  it('renders contacts with Telegram link', async () => {
     await renderAsync(LandingPage)
-    expect(screen.getByText('ул. Мира, д. 15, офис 302')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Telegram' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'WhatsApp' })).toBeInTheDocument()
+  })
+
+  it('injects at least one JSON-LD schema', async () => {
+    await renderAsync(LandingPage)
+    const scripts = document.querySelectorAll('script[type="application/ld+json"]')
+    expect(scripts.length).toBeGreaterThan(0)
+  })
+
+  it('injects Course JSON-LD schema', async () => {
+    await renderAsync(LandingPage)
+    const scripts = document.querySelectorAll('script[type="application/ld+json"]')
+    const schemas = Array.from(scripts).map((s) => JSON.parse(s.textContent ?? '{}'))
+    const course = schemas.find((s) => s['@type'] === 'Course')
+    expect(course).toBeDefined()
+    expect(course.name).toMatch(/английск/i)
+    expect(course.hasCourseInstance).toHaveLength(2)
+  })
+
+  it('injects FAQPage JSON-LD when faq items exist', async () => {
+    await renderAsync(LandingPage)
+    const scripts = document.querySelectorAll('script[type="application/ld+json"]')
+    const schemas = Array.from(scripts).map((s) => JSON.parse(s.textContent ?? '{}'))
+    const faqSchema = schemas.find((s) => s['@type'] === 'FAQPage')
+    expect(faqSchema).toBeDefined()
+    expect(faqSchema.mainEntity.length).toBeGreaterThan(0)
+  })
+
+  it('does not inject FAQPage when faq items are empty', async () => {
+    const { getSectionSettings } = require('./actions')
+    getSectionSettings.mockImplementation((key: string) => {
+      if (key === 'faq') return Promise.resolve({ enabled: true, items: [] })
+      const defaults: Record<string, unknown> = {
+        hero: DEFAULT_HERO, features: DEFAULT_FEATURES, formats: DEFAULT_FORMATS,
+        contacts: DEFAULT_CONTACTS, howItWorks: DEFAULT_HOW_IT_WORKS,
+        testimonials: DEFAULT_TESTIMONIALS, cta: DEFAULT_CTA,
+      }
+      return Promise.resolve(defaults[key])
+    })
+    await renderAsync(LandingPage)
+    const scripts = document.querySelectorAll('script[type="application/ld+json"]')
+    const schemas = Array.from(scripts).map((s) => JSON.parse(s.textContent ?? '{}'))
+    expect(schemas.find((s) => s['@type'] === 'FAQPage')).toBeUndefined()
+    // restore
+    getSectionSettings.mockImplementation((key: string) => {
+      const defaults: Record<string, unknown> = {
+        hero: DEFAULT_HERO, features: DEFAULT_FEATURES, formats: DEFAULT_FORMATS,
+        contacts: DEFAULT_CONTACTS, howItWorks: DEFAULT_HOW_IT_WORKS,
+        testimonials: DEFAULT_TESTIMONIALS, cta: DEFAULT_CTA, faq: DEFAULT_FAQ,
+      }
+      return Promise.resolve(defaults[key])
+    })
+  })
+
+  it('injects Person JSON-LD with correct domain', async () => {
+    await renderAsync(LandingPage)
+    const scripts = document.querySelectorAll('script[type="application/ld+json"]')
+    const schemas = Array.from(scripts).map((s) => JSON.parse(s.textContent ?? '{}'))
+    const person = schemas.find((s) => s['@type'] === 'Person')
+    expect(person).toBeDefined()
+    expect(person.name).toBe('Анна Сергеевна')
+    expect(person['@id']).toContain('yourharmony-english.ru')
   })
 
   it('renders sections in correct order', async () => {

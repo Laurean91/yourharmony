@@ -56,3 +56,11 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 screenshots/
+.playwright-mcp/
+
+# Временные скриншоты и прототипы
+*.jpeg
+*.jpg
+redesign-*.html
+ACTION-PLAN.md
+FULL-AUDIT-REPORT.md

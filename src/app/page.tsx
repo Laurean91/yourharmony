@@ -5,9 +5,9 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { getSectionSettings, getTeacherProfile } from './actions'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
-const SITE_URL = 'https://yourharmony.vercel.app'
+const SITE_URL = 'https://yourharmony-english.ru'
 
 export default async function HomePage() {
   const [hero, features, formats, contacts, howItWorks, testimonials, cta, faq, teacher] = await Promise.all([
@@ -21,6 +21,36 @@ export default async function HomePage() {
     getSectionSettings('faq'),
     getTeacherProfile(),
   ])
+
+  const courseSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Course',
+    name: 'Английский язык для детей от 4 лет',
+    description: 'Групповые офлайн-занятия по субботам и онлайн-занятия по согласованию для детей от 4 лет в Москве (м. Люблино)',
+    provider: { '@id': `${SITE_URL}/#organization` },
+    hasCourseInstance: [
+      {
+        '@type': 'CourseInstance',
+        courseMode: 'Onsite',
+        location: {
+          '@type': 'Place',
+          name: 'Языковой клуб «Гармония»',
+          address: 'Армавирская ул., 1/20, Москва',
+        },
+        courseSchedule: {
+          '@type': 'Schedule',
+          repeatFrequency: 'P1W',
+          byDay: ['Saturday'],
+          startTime: '12:00',
+        },
+      },
+      {
+        '@type': 'CourseInstance',
+        courseMode: 'Online',
+        description: 'Онлайн-занятия по согласованию с преподавателем',
+      },
+    ],
+  }
 
   const personSchema = {
     '@context': 'https://schema.org',
@@ -55,25 +85,28 @@ export default async function HomePage() {
         {faq.enabled !== false && (
           <>
             <FAQSection data={faq} />
-            <script
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{
-                __html: JSON.stringify({
-                  '@context': 'https://schema.org',
-                  '@type': 'FAQPage',
-                  mainEntity: faq.items.map((f) => ({
-                    '@type': 'Question',
-                    name: f.q,
-                    acceptedAnswer: { '@type': 'Answer', text: f.a },
-                  })),
-                }),
-              }}
-            />
+            {faq.items?.length > 0 && (
+              <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                  __html: JSON.stringify({
+                    '@context': 'https://schema.org',
+                    '@type': 'FAQPage',
+                    mainEntity: faq.items.map((f) => ({
+                      '@type': 'Question',
+                      name: f.q,
+                      acceptedAnswer: { '@type': 'Answer', text: f.a },
+                    })),
+                  }),
+                }}
+              />
+            )}
           </>
         )}
         {contacts.enabled !== false && <LandingContacts data={contacts} />}
       </main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }} />
       <Footer />
     </div>
   )

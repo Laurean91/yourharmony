@@ -17,6 +17,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/bigbos/', '/api/'],
       },
     ],
-    sitemap: 'https://yourharmony.vercel.app/sitemap.xml',
+    sitemap: 'https://yourharmony-english.ru/sitemap.xml',
   }
 }

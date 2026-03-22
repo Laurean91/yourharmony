@@ -19,7 +19,7 @@ export default function BookingButton({ className, children }: BookingButtonProp
         onClick={() => setShowModal(true)}
         className={className}
       >
-        {children ?? 'Записаться на пробное занятие'}
+        {children ?? 'Записаться на занятие'}
       </button>
 
       <AnimatePresence>

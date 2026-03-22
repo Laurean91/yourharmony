@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Nunito } from "next/font/google";
+import { Geist, Nunito } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -18,14 +13,14 @@ const nunito = Nunito({
   weight: ["800"],
 });
 
-const SITE_URL = 'https://yourharmony.vercel.app'
+const SITE_URL = 'https://yourharmony-english.ru'
 
 export const metadata: Metadata = {
   title: {
     default: 'Английский для детей в Москве | Клуб «Гармония»',
     template: '%s | Клуб «Гармония»',
   },
-  description: 'Английский для детей от 6 лет в Москве. Группы до 8 детей, педагог с CELTA и IELTS 8.0. Запишитесь на бесплатное пробное занятие!',
+  description: 'Английский для детей от 4 лет в Москве у метро Люблино. Групповые занятия по субботам в 12:00. Онлайн по согласованию. Группы до 8 детей, педагог с CELTA и IELTS 8.0.',
   alternates: { canonical: SITE_URL },
   openGraph: {
     siteName: 'Клуб «Гармония»',
@@ -42,7 +37,7 @@ const localBusinessSchema = {
   '@id': `${SITE_URL}/#organization`,
   name: 'Языковой клуб «Гармония»',
   alternateName: 'Клуб Гармония',
-  description: 'Детский языковой клуб «Гармония» — английский для детей от 6 до 14 лет. Групповые офлайн-занятия и индивидуальные онлайн-занятия.',
+  description: 'Детский языковой клуб «Гармония» — английский для детей от 4 лет в Москве. Групповые занятия по субботам у метро Люблино, онлайн-занятия по согласованию.',
   url: SITE_URL,
   logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png`, width: 512, height: 512 },
   image: `${SITE_URL}/logo.png`,
@@ -56,7 +51,16 @@ const localBusinessSchema = {
     addressCountry: 'RU',
   },
   geo: { '@type': 'GeoCoordinates', latitude: 55.6777, longitude: 37.7632 },
+  foundingDate: '2023',
   sameAs: ['https://t.me/harmonyEnglish'],
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Saturday'],
+      opens: '12:00',
+      closes: '18:00',
+    },
+  ],
   priceRange: '₽₽',
   currenciesAccepted: 'RUB',
   areaServed: { '@type': 'City', name: 'Москва' },
@@ -69,15 +73,15 @@ const localBusinessSchema = {
         itemOffered: {
           '@type': 'Service',
           name: 'Групповые занятия английским',
-          description: 'До 8 детей в группе. Офлайн-занятия 2 раза в неделю для детей от 6 лет.',
+          description: 'До 8 детей в группе. Офлайн-занятия по субботам в 12:00 у метро Люблино, для детей от 4 лет.',
         },
       },
       {
         '@type': 'Offer',
         itemOffered: {
           '@type': 'Service',
-          name: 'Индивидуальные онлайн-занятия',
-          description: 'Персональный урок онлайн. Программа под конкретного ребёнка, гибкий график.',
+          name: 'Онлайн-занятия',
+          description: 'Персональный урок онлайн. Программа под конкретного ребёнка, время по согласованию с преподавателем.',
         },
       },
     ],
@@ -97,7 +101,7 @@ const websiteSchema = {
   '@id': `${SITE_URL}/#website`,
   url: SITE_URL,
   name: 'Клуб «Гармония»',
-  description: 'Детский языковой клуб — английский для детей от 6 лет',
+  description: 'Детский языковой клуб — английский для детей от 4 лет в Москве',
   inLanguage: 'ru-RU',
   publisher: { '@id': `${SITE_URL}/#organization` },
 }
@@ -121,7 +125,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${nunito.variable} antialiased`}
+        className={`${geistSans.variable} ${nunito.variable} antialiased`}
       >
         {children}
       </body>

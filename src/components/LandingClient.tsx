@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence, useMotionValue, useTransform, useInView } from 'framer-motion'
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { Star, BookOpen, Smile, Camera, X, Send, Users, Monitor, Check } from 'lucide-react'
 import { getPhotos } from '../app/actions'
 import BookingModal from './BookingModal'
@@ -91,10 +92,9 @@ export function LandingHero({ data = DEFAULT_HERO }: { data?: HeroSettings }) {
           style={{ x: blobRightX, y: blobRightY }}
         />
 
-        <motion.h1 initial="hidden" animate="visible" variants={fadeUp}
-          className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-orange-500 mb-6">
+        <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-orange-500 mb-6">
           {data.title}
-        </motion.h1>
+        </h1>
         <motion.p initial="hidden" animate="visible" variants={fadeUp}
           className="text-xl md:text-2xl text-gray-600 mb-10 max-w-2xl">
           {data.subtitle}
@@ -105,7 +105,7 @@ export function LandingHero({ data = DEFAULT_HERO }: { data?: HeroSettings }) {
           whileTap={{ scale: 0.95 }}
           className="px-8 py-4 bg-gradient-to-r from-purple-500 to-orange-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow ring-2 ring-white/30 animate-glow-pulse"
         >
-          Записаться на пробное занятие
+          Записаться на занятие
         </motion.button>
 
         {/* Stats bar with counter */}
@@ -282,11 +282,17 @@ export function LandingTop({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {photos.map((photo, idx) => (
               <motion.div key={photo.id} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
+                whileHover={{ scale: 1.05 }}
                 transition={{ delay: idx * 0.1 }}
-                className="overflow-hidden rounded-2xl cursor-pointer aspect-square bg-gray-200"
+                className="relative overflow-hidden rounded-2xl cursor-pointer aspect-square bg-gray-200"
                 onClick={() => setSelectedImage(photo.url)}>
-                <motion.img whileHover={{ scale: 1.1 }} src={photo.url} alt="Занятие"
-                  className="w-full h-full object-cover transition-transform" />
+                <Image
+                  src={photo.url}
+                  alt="Занятие в клубе «Гармония»"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover"
+                />
               </motion.div>
             ))}
           </div>
@@ -355,7 +361,7 @@ export function LandingContacts({ data = DEFAULT_CONTACTS }: { data?: ContactsSe
               </div>
               <div>
                 <p className="font-bold">Телефон</p>
-                <p>{data.phone}</p>
+                <a href={`tel:${data.phone.replace(/[^+\d]/g, '')}`} className="hover:text-purple-600 transition-colors">{data.phone}</a>
               </div>
             </motion.div>
             <motion.div variants={fadeUp} className="flex gap-3 pt-2">
@@ -438,7 +444,7 @@ export function HowItWorksSection({ data = DEFAULT_HOW_IT_WORKS }: { data?: HowI
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="px-8 py-4 bg-gradient-to-r from-purple-500 to-orange-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow">
-            Записаться на пробное занятие
+            Записаться на занятие
           </motion.button>
         </motion.div>
       </section>

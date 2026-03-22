@@ -1,9 +1,9 @@
 import type { MetadataRoute } from 'next'
 import { getAllPublishedPostSlugs } from './actions'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600
 
-const SITE_URL = 'https://yourharmony.vercel.app'
+const SITE_URL = 'https://yourharmony-english.ru'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let posts: Awaited<ReturnType<typeof getAllPublishedPostSlugs>> = []

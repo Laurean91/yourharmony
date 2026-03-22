@@ -7,7 +7,7 @@ const spec = {
     version: '1.0.0',
     description: 'API для работы с заявками на пробное занятие.',
   },
-  servers: [{ url: 'https://yourharmony.vercel.app' }],
+  servers: [{ url: 'https://yourharmony-english.ru' }],
   components: {
     securitySchemes: {
       BearerAuth: {

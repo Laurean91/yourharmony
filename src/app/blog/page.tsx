@@ -9,7 +9,7 @@ import { formatDate } from '../../lib/utils'
 
 export const revalidate = 60
 
-const SITE_URL = 'https://yourharmony.vercel.app'
+const SITE_URL = 'https://yourharmony-english.ru'
 
 interface Props {
   searchParams: Promise<{ page?: string }>
@@ -196,7 +196,7 @@ export default async function BlogPage({ searchParams }: Props) {
         <div className="relative max-w-xl mx-auto">
           <p className="text-gray-500 mb-5 text-sm">Хотите отдать ребёнка в наш клуб?</p>
           <BookingButton className="inline-block px-8 py-4 bg-gradient-to-r from-purple-500 to-orange-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl hover:brightness-110 transition-all">
-            Записаться на пробное занятие
+            Записаться на занятие
           </BookingButton>
         </div>
       </section>

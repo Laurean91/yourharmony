@@ -84,7 +84,17 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <nav className="hidden md:flex gap-8">
-          {navItems.map((item) => (
+          <a
+            href={navItems[0].href}
+            onClick={(e) => handleScrollTo(e, navItems[0].href)}
+            className="nav-link text-sm uppercase tracking-wider"
+          >
+            {navItems[0].name}
+          </a>
+          <Link href="/blog" className="nav-link text-sm uppercase tracking-wider">
+            Статьи
+          </Link>
+          {navItems.slice(1).map((item) => (
             <a
               key={item.href}
               href={item.href}
@@ -116,7 +126,21 @@ export default function Navbar() {
             className="md:hidden bg-white/95 backdrop-blur-xl border-t border-gray-100 overflow-hidden"
           >
             <div className="flex flex-col p-6 gap-4">
-              {navItems.map((item) => (
+              <a
+                href={navItems[0].href}
+                onClick={(e) => handleScrollTo(e, navItems[0].href)}
+                className="text-lg font-medium text-gray-800 hover:text-purple-600 transition-colors"
+              >
+                {navItems[0].name}
+              </a>
+              <Link
+                href="/blog"
+                onClick={() => setIsOpen(false)}
+                className="text-lg font-medium text-gray-800 hover:text-purple-600 transition-colors"
+              >
+                Статьи
+              </Link>
+              {navItems.slice(1).map((item) => (
                 <a
                   key={item.href}
                   href={item.href}
