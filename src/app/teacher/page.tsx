@@ -10,17 +10,23 @@ export const revalidate = 300
 
 const SITE_URL = 'https://yourharmony-english.ru'
 
-export const metadata: Metadata = {
-  title: 'Преподаватель — Анна Сергеевна | Клуб «Гармония»',
-  description: 'Сертифицированный преподаватель английского языка с опытом 7 лет. Обладатель CELTA (Кембридж) и IELTS 8.0. Специализируется на обучении детей от 4 до 14 лет.',
-  alternates: { canonical: `${SITE_URL}/teacher` },
-  openGraph: {
-    title: 'Преподаватель — Анна Сергеевна | Клуб «Гармония»',
-    description: 'Сертифицированный преподаватель английского языка с опытом 7 лет. CELTA (Кембридж), IELTS 8.0.',
-    url: `${SITE_URL}/teacher`,
-    siteName: 'Клуб «Гармония»',
-    type: 'profile',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const teacher = await getTeacherProfile()
+  const title = `Преподаватель — ${teacher.name} | Клуб «Гармония»`
+  const description = teacher.bio ?? 'Преподаватель клуба «Гармония»'
+  return {
+    title,
+    description,
+    alternates: { canonical: `${SITE_URL}/teacher` },
+    openGraph: {
+      title,
+      description,
+      url: `${SITE_URL}/teacher`,
+      siteName: 'Клуб «Гармония»',
+      type: 'profile',
+      ...(teacher.photoUrl && { images: [{ url: teacher.photoUrl }] }),
+    },
+  }
 }
 
 export default async function TeacherPage() {
