@@ -2,8 +2,30 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { X } from 'lucide-react'
+import { X, Check } from 'lucide-react'
 import { createBooking } from '../app/actions'
+
+function ConsentCheckbox() {
+  const [checked, setChecked] = useState(false)
+  return (
+    <label className="flex items-start gap-3 cursor-pointer group" onClick={() => setChecked(v => !v)}>
+      <input type="checkbox" name="pdpaConsent" required checked={checked} onChange={() => {}} className="sr-only" />
+      <span className={`mt-0.5 w-5 h-5 rounded-md border-2 shrink-0 flex items-center justify-center transition-all duration-200 ${
+        checked
+          ? 'bg-purple-600 border-purple-600 shadow-[0_0_0_3px_rgba(147,51,234,0.15)]'
+          : 'bg-white/70 border-gray-300 group-hover:border-purple-400'
+      }`}>
+        {checked && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+      </span>
+      <span className="text-xs text-gray-500 leading-relaxed select-none">
+        Я даю согласие на обработку персональных данных в соответствии с{' '}
+        <a href="/documents#personal-data" target="_blank" onClick={e => e.stopPropagation()} className="text-purple-600 hover:text-purple-800 underline decoration-dotted">
+          Политикой конфиденциальности
+        </a>
+      </span>
+    </label>
+  )
+}
 
 const modalBackdrop = {
   hidden: { opacity: 0 },
@@ -88,7 +110,6 @@ export default function BookingModal({ onClose }: { onClose: () => void }) {
               name="childAge"
               type="number"
               min="1"
-              max="18"
               required
               placeholder="Возраст"
               className="w-1/3 p-4 rounded-xl bg-white/70 focus:bg-white outline-none focus:ring-purple-400 border border-white/50"
@@ -102,20 +123,7 @@ export default function BookingModal({ onClose }: { onClose: () => void }) {
             />
           </div>
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-          <label className="flex items-start gap-2.5 cursor-pointer">
-            <input
-              type="checkbox"
-              name="pdpaConsent"
-              required
-              className="mt-0.5 w-4 h-4 rounded accent-purple-600 shrink-0"
-            />
-            <span className="text-xs text-gray-500 leading-relaxed">
-              Я даю согласие на обработку персональных данных в соответствии с{' '}
-              <a href="/documents#personal-data" target="_blank" className="text-purple-600 underline hover:text-purple-800">
-                Политикой конфиденциальности
-              </a>
-            </span>
-          </label>
+          <ConsentCheckbox />
           <button
             disabled={isSubmitting}
             className="mt-2 p-4 rounded-xl bg-gradient-to-r from-purple-600 to-orange-500 text-white font-bold hover:brightness-110 active:scale-95 transition-all disabled:opacity-70"

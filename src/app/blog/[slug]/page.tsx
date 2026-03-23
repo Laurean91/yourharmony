@@ -208,26 +208,6 @@ export default async function BlogPostPage({ params }: Props) {
           />
         </div>
 
-        {/* ── Автор ── */}
-        <div className="mt-10 flex items-start gap-4 p-6 bg-white/60 backdrop-blur-sm border border-white/60 rounded-2xl shadow-sm">
-          {teacher.photoUrl ? (
-            <Image
-              src={teacher.photoUrl}
-              alt={teacher.name}
-              width={64}
-              height={64}
-              className="rounded-full object-cover shrink-0"
-            />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-orange-400 shrink-0" />
-          )}
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-purple-500 mb-1">Автор</p>
-            <p className="font-bold text-gray-900">{teacher.name}</p>
-            {teacher.bio && <p className="text-sm text-gray-600 mt-1 leading-relaxed">{teacher.bio}</p>}
-          </div>
-        </div>
-
         {/* ── Навигация в конце ── */}
         <div className="mt-12 flex items-center justify-between">
           <Link
