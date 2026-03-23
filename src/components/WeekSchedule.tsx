@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { createLesson, deleteLesson, markAttendance, updateLesson, moveLessonDate } from '@/app/actions'
 
 interface Student {
@@ -84,9 +84,16 @@ export default function WeekSchedule({
   const [editStudentIds, setEditStudentIds] = useState<string[]>([])
   const [editStudentSearch, setEditStudentSearch] = useState('')
   const [editShowDropdown, setEditShowDropdown] = useState(false)
-  // Drag-and-drop
+  // Mouse drag-and-drop
   const dragLessonId = useRef<string | null>(null)
   const [dragOverSlot, setDragOverSlot] = useState<{ dateKey: string; hour: number } | null>(null)
+  // Touch drag-and-drop
+  const touchDragLessonId = useRef<string | null>(null)
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null)
+  const touchDragging = useRef(false)
+  const touchDraggedEl = useRef<HTMLElement | null>(null)
+  const dragOverSlotRef = useRef<{ dateKey: string; hour: number } | null>(null)
+  const [pendingTouchDrop, setPendingTouchDrop] = useState<{ lessonId: string; dateKey: string; hour: number } | null>(null)
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
   const weekEnd = addDays(weekStart, 6)
@@ -199,6 +206,71 @@ export default function WeekSchedule({
     await moveLessonDate(id, newDate.toISOString())
   }
 
+  // Non-passive touch listeners for drag-and-drop on mobile
+  useEffect(() => {
+    function onTouchMove(e: TouchEvent) {
+      if (!touchDragLessonId.current || !touchStartPos.current) return
+      const touch = e.touches[0]
+      const dx = touch.clientX - touchStartPos.current.x
+      const dy = touch.clientY - touchStartPos.current.y
+      if (!touchDragging.current && Math.sqrt(dx * dx + dy * dy) < 10) return
+      touchDragging.current = true
+      e.preventDefault()
+      // Temporarily disable pointer events on the dragged element so elementFromPoint finds what's underneath
+      const draggedEl = touchDraggedEl.current
+      if (draggedEl) draggedEl.style.pointerEvents = 'none'
+      const el = document.elementFromPoint(touch.clientX, touch.clientY)
+      if (draggedEl) draggedEl.style.pointerEvents = ''
+      if (!el) { setDragOverSlot(null); dragOverSlotRef.current = null; return }
+      const slot = (el as HTMLElement).closest('[data-hour]') as HTMLElement | null
+      if (slot?.dataset.datekey && slot.dataset.hour) {
+        const s = { dateKey: slot.dataset.datekey, hour: parseInt(slot.dataset.hour) }
+        setDragOverSlot(s)
+        dragOverSlotRef.current = s
+      } else {
+        setDragOverSlot(null)
+        dragOverSlotRef.current = null
+      }
+    }
+
+    function onTouchEnd() {
+      const id = touchDragLessonId.current
+      const slot = dragOverSlotRef.current
+      touchDragLessonId.current = null
+      touchStartPos.current = null
+      touchDraggedEl.current = null
+      touchDragging.current = false
+      dragOverSlotRef.current = null
+      setDragOverSlot(null)
+      if (id && slot) {
+        setPendingTouchDrop({ lessonId: id, dateKey: slot.dateKey, hour: slot.hour })
+      }
+    }
+
+    document.addEventListener('touchmove', onTouchMove, { passive: false })
+    document.addEventListener('touchend', onTouchEnd)
+    return () => {
+      document.removeEventListener('touchmove', onTouchMove)
+      document.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!pendingTouchDrop) return
+    const { lessonId, dateKey, hour } = pendingTouchDrop
+    setPendingTouchDrop(null)
+    const lesson = lessons.find(l => l.id === lessonId)
+    if (!lesson) return
+    const [year, month, day] = dateKey.split('-').map(Number)
+    const targetDay = new Date(year, month - 1, day)
+    const oldDate = new Date(lesson.date)
+    const newDate = new Date(targetDay)
+    newDate.setHours(hour, oldDate.getMinutes(), 0, 0)
+    setLessons(ls => ls.map(l => l.id === lessonId ? { ...l, date: newDate } : l))
+    setSelected(prev => prev?.id === lessonId ? { ...prev, date: newDate } : prev)
+    moveLessonDate(lessonId, newDate.toISOString())
+  }, [pendingTouchDrop, lessons])
+
   async function handleAttendance(lessonId: string, studentId: string, attended: boolean) {
     setPendingAttendance(studentId)
     await markAttendance(lessonId, studentId, attended)
@@ -266,12 +338,19 @@ export default function WeekSchedule({
             {/* Grid */}
             <div className="flex">
               {/* Time labels */}
-              <div className="w-12 shrink-0 relative" style={{ height: gridHeight }}>
+              <div
+                className="w-12 shrink-0 relative"
+                style={{
+                  height: gridHeight,
+                  background: 'rgba(139,92,246,0.02)',
+                  borderRight: '1px solid rgba(139,92,246,0.08)',
+                }}
+              >
                 {hours.map(h => (
                   <div
                     key={h}
-                    className="absolute right-2 text-[10px] text-gray-400 -translate-y-2"
-                    style={{ top: (h - START_HOUR) * 60 * PX_PER_MIN }}
+                    className="absolute right-2 text-[10px] font-medium -translate-y-2"
+                    style={{ top: (h - START_HOUR) * 60 * PX_PER_MIN, color: '#c4b5fd' }}
                   >
                     {h}:00
                   </div>
@@ -290,6 +369,8 @@ export default function WeekSchedule({
                       return (
                         <div
                           key={h}
+                          data-datekey={key}
+                          data-hour={h}
                           className={`absolute left-0 right-0 border-t border-gray-100 cursor-pointer transition-colors group ${isDragOver ? 'bg-purple-100/70' : 'hover:bg-purple-50/50'}`}
                           style={{ top: (h - START_HOUR) * 60 * PX_PER_MIN, height: 60 * PX_PER_MIN }}
                           onClick={() => handleSlotClick(day, h)}
@@ -297,10 +378,25 @@ export default function WeekSchedule({
                           onDragLeave={() => setDragOverSlot(null)}
                           onDrop={e => handleDrop(e, day, h)}
                         >
-                          {isDragOver
-                            ? <span className="absolute right-1 top-1 text-[10px] text-purple-500 font-bold">↓</span>
-                            : <span className="hidden group-hover:block absolute right-1 top-1 text-[10px] text-purple-400">+</span>
-                          }
+                          {isDragOver ? (
+                            <div className="absolute inset-0 flex items-center justify-center rounded">
+                              <span
+                                className="text-xs font-bold px-2 py-0.5 rounded"
+                                style={{ background: 'rgba(124,58,237,0.15)', color: '#7c3aed' }}
+                              >
+                                Перенести сюда ↓
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="hidden group-hover:flex absolute inset-0 items-center justify-center rounded">
+                              <span
+                                className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
+                                style={{ background: 'rgba(124,58,237,0.12)', color: '#7c3aed' }}
+                              >
+                                + занятие
+                              </span>
+                            </div>
+                          )}
                         </div>
                       )
                     })}
@@ -308,33 +404,51 @@ export default function WeekSchedule({
                     {/* Lesson blocks */}
                     {dayLessons.map(l => {
                       const lDate = new Date(l.date)
+                      const endDate = new Date(lDate.getTime() + LESSON_DURATION * 60 * 1000)
                       const top = lessonTopPx(lDate)
                       const height = LESSON_DURATION * PX_PER_MIN
                       const isIndividual = l.tag !== 'Группа' && l.tag !== 'Групповое'
                       const isActive = selected?.id === l.id
+                      const timeStart = lDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+                      const timeEnd   = endDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
                       return (
                         <div
                           key={l.id}
                           draggable
                           onDragStart={e => { e.stopPropagation(); handleDragStart(l.id) }}
+                          onTouchStart={e => {
+                            touchDragLessonId.current = l.id
+                            touchStartPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+                            touchDragging.current = false
+                            touchDraggedEl.current = e.currentTarget
+                          }}
                           onClick={e => { e.stopPropagation(); if (isActive) { setSelected(null); closeEditMode() } else { setSelected(l); setAddSlot(null); closeEditMode() } }}
-                          className={`absolute left-1 right-1 rounded-lg px-2 py-1 text-left text-xs transition-all shadow-sm border cursor-grab active:cursor-grabbing select-none ${
-                            isActive
-                              ? 'ring-2 ring-offset-1 ring-purple-500 z-10'
-                              : 'hover:brightness-95 z-0'
-                          } ${
-                            isIndividual
-                              ? 'bg-purple-100 border-purple-200 text-purple-800'
-                              : 'bg-orange-100 border-orange-200 text-orange-800'
+                          className={`absolute left-1 right-1 rounded-lg px-2 py-1 text-left text-xs transition-all shadow-sm cursor-grab active:cursor-grabbing select-none ${
+                            isActive ? 'z-10' : 'hover:brightness-95 z-0'
                           }`}
-                          style={{ top, height: Math.max(height, 28) }}
+                          style={{
+                            top,
+                            height: Math.max(height, 28),
+                            background: isIndividual
+                              ? (isActive ? 'rgba(124,58,237,0.2)' : 'rgba(139,92,246,0.12)')
+                              : (isActive ? 'rgba(249,115,22,0.2)' : 'rgba(251,146,60,0.12)'),
+                            border: isActive
+                              ? `2px solid ${isIndividual ? '#7c3aed' : '#f97316'}`
+                              : `1px solid ${isIndividual ? 'rgba(124,58,237,0.25)' : 'rgba(249,115,22,0.25)'}`,
+                            color: isIndividual ? '#5b21b6' : '#c2410c',
+                            borderLeft: `3px solid ${isIndividual ? '#7c3aed' : '#f97316'}`,
+                            boxShadow: isActive
+                              ? `0 2px 12px ${isIndividual ? 'rgba(124,58,237,0.25)' : 'rgba(249,115,22,0.25)'}`
+                              : 'none',
+                          }}
                         >
-                          <div className="font-semibold leading-tight truncate">
-                            {lDate.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-                            {l.title ? ` ${l.title}` : ''}
+                          <div className="font-bold leading-tight truncate text-[11px]">
+                            {timeStart}
+                            <span className="font-normal opacity-60 ml-1">→ {timeEnd}</span>
+                            {l.title ? ` · ${l.title}` : ''}
                           </div>
                           {l.students.length > 0 && (
-                            <div className="truncate opacity-70 text-[10px]">
+                            <div className="truncate opacity-60 text-[10px] mt-0.5">
                               {l.students.map(s => s.student.name).join(', ')}
                             </div>
                           )}
