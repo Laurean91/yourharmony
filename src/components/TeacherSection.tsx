@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 
 const slideLeft  = { hidden: { opacity: 0, x: -50 }, visible: { opacity: 1, x: 0, transition: { duration: 0.6 } } }
@@ -73,6 +74,14 @@ export default function TeacherSection({ name = DEFAULT_NAME, bio = DEFAULT_BIO,
                 {badge}
               </motion.span>
             ))}
+          </motion.div>
+          <motion.div variants={slideRight} className="mt-6 flex justify-center md:justify-start">
+            <Link
+              href="/teacher"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-purple-600 hover:text-purple-800 transition-colors"
+            >
+              Подробнее →
+            </Link>
           </motion.div>
         </motion.div>
       </motion.div>

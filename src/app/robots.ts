@@ -4,7 +4,11 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: ['GPTBot', 'OAI-SearchBot', 'ClaudeBot', 'PerplexityBot', 'Googlebot'],
+        userAgent: 'Googlebot',
+        allow: '/',
+      },
+      {
+        userAgent: ['GPTBot', 'OAI-SearchBot', 'ClaudeBot', 'PerplexityBot'],
         allow: '/',
       },
       {

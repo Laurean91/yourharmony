@@ -36,20 +36,25 @@ const modalBackdrop = {
 
 /* ───────── useCounter ───────── */
 function useCounter(target: number, duration = 1.5) {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(target)
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true })
+  const animated = useRef(false)
 
   useEffect(() => {
-    if (!inView) return
-    let start = 0
-    const step = target / (duration * 60)
-    const timer = setInterval(() => {
-      start += step
-      if (start >= target) { setCount(target); clearInterval(timer) }
-      else setCount(Math.floor(start))
-    }, 1000 / 60)
-    return () => clearInterval(timer)
+    if (!inView || animated.current) return
+    animated.current = true
+    setCount(0)
+    let startTime = 0
+    const animate = (time: number) => {
+      if (!startTime) startTime = time
+      const progress = Math.min((time - startTime) / (duration * 1000), 1)
+      setCount(Math.floor(progress * target))
+      if (progress < 1) requestAnimationFrame(animate)
+      else setCount(target)
+    }
+    const id = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(id)
   }, [inView, target, duration])
 
   return { count, ref }
@@ -66,8 +71,20 @@ export function LandingHero({ data = DEFAULT_HERO }: { data?: HeroSettings }) {
   const blobRightX = useTransform(mouseX, [-600, 600], [20, -20])
   const blobRightY = useTransform(mouseY, [-400, 400], [15, -15])
 
+  const sectionRef = useRef<HTMLElement>(null)
+  const rectRef = useRef<{ left: number; top: number; width: number; height: number } | null>(null)
+
+  useEffect(() => {
+    const update = () => {
+      if (sectionRef.current) rectRef.current = sectionRef.current.getBoundingClientRect()
+    }
+    update()
+    window.addEventListener('resize', update, { passive: true })
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
+    const rect = rectRef.current ?? e.currentTarget.getBoundingClientRect()
     mouseX.set(e.clientX - rect.left - rect.width / 2)
     mouseY.set(e.clientY - rect.top - rect.height / 2)
   }
@@ -79,6 +96,7 @@ export function LandingHero({ data = DEFAULT_HERO }: { data?: HeroSettings }) {
   return (
     <>
       <section
+        ref={sectionRef}
         id="home"
         className="relative overflow-hidden pt-24 pb-32 flex flex-col items-center text-center px-4"
         onMouseMove={handleMouseMove}
@@ -95,10 +113,9 @@ export function LandingHero({ data = DEFAULT_HERO }: { data?: HeroSettings }) {
         <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-orange-500 mb-6">
           {data.title}
         </h1>
-        <motion.p initial="hidden" animate="visible" variants={fadeUp}
-          className="text-xl md:text-2xl text-gray-600 mb-10 max-w-2xl">
+        <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-2xl">
           {data.subtitle}
-        </motion.p>
+        </p>
         <motion.button
           onClick={() => setShowModal(true)}
           whileHover={{ scale: 1.05 }}
@@ -162,7 +179,7 @@ export function LandingTop({
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
           className="mb-12 text-center max-w-3xl mx-auto">
           <p className="text-sm font-bold uppercase tracking-widest text-purple-500 mb-3">О клубе</p>
-          <h2 className="text-4xl font-extrabold text-gray-900 mb-4">Почему выбирают нас</h2>
+          <h2 className="text-4xl font-extrabold text-gray-900 mb-4">Почему родители выбирают клуб «Гармония»?</h2>
           <p className="text-gray-500 text-lg leading-relaxed">{features.description}</p>
         </motion.div>
 
@@ -191,7 +208,7 @@ export function LandingTop({
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
           className="mb-14 text-center max-w-3xl mx-auto">
           <p className="text-sm font-bold uppercase tracking-widest text-orange-500 mb-3">Форматы</p>
-          <h2 className="text-4xl font-extrabold text-gray-900 mb-4">Выберите свой формат обучения</h2>
+          <h2 className="text-4xl font-extrabold text-gray-900 mb-4">Какие форматы занятий доступны?</h2>
           <p className="text-gray-500 text-lg leading-relaxed">{formats.subtitle}</p>
         </motion.div>
 
@@ -319,6 +336,42 @@ export function LandingTop({
   )
 }
 
+/* ───────── YandexMapFacade ───────── */
+function YandexMapFacade() {
+  const [loaded, setLoaded] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!containerRef.current) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setLoaded(true); observer.disconnect() } },
+      { rootMargin: '200px' }
+    )
+    observer.observe(containerRef.current)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div ref={containerRef} className="w-full md:w-1/2 h-80 rounded-2xl overflow-hidden shadow-inner bg-gray-100">
+      {loaded ? (
+        <iframe
+          src="https://yandex.ru/map-widget/v1/?text=%D0%90%D1%80%D0%BC%D0%B0%D0%B2%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F+%D1%83%D0%BB%D0%B8%D1%86%D0%B0+1%2F20%2C+%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0&z=16&l=map"
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          allowFullScreen
+          title="Языковой клуб Гармония на карте"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm cursor-pointer select-none"
+          onClick={() => setLoaded(true)}>
+          <span>Загрузить карту</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ───────── Contacts ───────── */
 export function LandingContacts({ data = DEFAULT_CONTACTS }: { data?: ContactsSettings }) {
   return (
@@ -364,6 +417,17 @@ export function LandingContacts({ data = DEFAULT_CONTACTS }: { data?: ContactsSe
                 <a href={`tel:${data.phone.replace(/[^+\d]/g, '')}`} className="hover:text-purple-600 transition-colors">{data.phone}</a>
               </div>
             </motion.div>
+            <motion.div variants={fadeUp} className="flex items-center gap-4 text-gray-700">
+              <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-bold">Email</p>
+                <a href="mailto:info@yourharmony-english.ru" className="hover:text-purple-600 transition-colors">info@yourharmony-english.ru</a>
+              </div>
+            </motion.div>
             <motion.div variants={fadeUp} className="flex gap-3 pt-2">
               <a href={data.telegramUrl} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 rounded-full bg-sky-500 text-white text-sm font-semibold hover:bg-sky-600 transition-colors">
@@ -372,16 +436,7 @@ export function LandingContacts({ data = DEFAULT_CONTACTS }: { data?: ContactsSe
             </motion.div>
           </motion.div>
         </div>
-        <div className="w-full md:w-1/2 h-80 rounded-2xl overflow-hidden shadow-inner">
-          <iframe
-            src="https://yandex.ru/map-widget/v1/?text=%D0%90%D1%80%D0%BC%D0%B0%D0%B2%D0%B8%D1%80%D1%81%D0%BA%D0%B0%D1%8F+%D1%83%D0%BB%D0%B8%D1%86%D0%B0+1%2F20%2C+%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0&z=16&l=map"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen
-            title="Языковой клуб Гармония на карте"
-          />
-        </div>
+        <YandexMapFacade />
       </div>
     </motion.section>
   )

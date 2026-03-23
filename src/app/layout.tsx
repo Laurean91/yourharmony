@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     locale: 'ru_RU',
     type: 'website',
     url: SITE_URL,
-    images: [{ url: `${SITE_URL}/logo.png`, width: 512, height: 512, alt: 'Клуб «Гармония»' }],
+    images: [{ url: `${SITE_URL}/og-image.webp`, width: 1200, height: 630, alt: 'Клуб «Гармония»' }],
   },
 };
 
@@ -39,8 +39,8 @@ const localBusinessSchema = {
   alternateName: 'Клуб Гармония',
   description: 'Детский языковой клуб «Гармония» — английский для детей от 4 лет в Москве. Групповые занятия по субботам у метро Люблино, онлайн-занятия по согласованию.',
   url: SITE_URL,
-  logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png`, width: 512, height: 512 },
-  image: `${SITE_URL}/logo.png`,
+  logo: { '@type': 'ImageObject', url: `${SITE_URL}/og-image.webp`, width: 1200, height: 630 },
+  image: `${SITE_URL}/og-image.webp`,
   telephone: '+7 (985) 150-83-00',
   address: {
     '@type': 'PostalAddress',
@@ -86,12 +86,13 @@ const localBusinessSchema = {
       },
     ],
   },
+  email: 'info@yourharmony-english.ru',
   aggregateRating: {
     '@type': 'AggregateRating',
     ratingValue: '5.0',
     bestRating: '5',
     worstRating: '1',
-    reviewCount: '40',
+    reviewCount: '6',
   },
 }
 
@@ -115,6 +116,7 @@ export default function RootLayout({
     <html lang="ru">
       <head>
         <meta name="theme-color" content="#7c3aed" />
+        <link rel="preconnect" href="https://c27qjcTvvwmmVqah.public.blob.vercel-storage.com" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}

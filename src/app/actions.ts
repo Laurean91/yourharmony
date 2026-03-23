@@ -7,6 +7,20 @@ import { redirect } from 'next/navigation'
 import { Resend } from 'resend'
 import sharp from 'sharp'
 
+async function notifyIndexNow(slug: string) {
+  const key = process.env.INDEXNOW_KEY
+  if (!key) return
+  await fetch('https://api.indexnow.org/indexnow', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      host: 'yourharmony-english.ru',
+      key,
+      urlList: [`https://yourharmony-english.ru/blog/${slug}`],
+    }),
+  }).catch(() => {})
+}
+
 /**
  * Сжимает изображение до WebP с заданными ограничениями.
  * @param file   исходный File
@@ -216,7 +230,79 @@ export async function updateTeacherProfile(formData: FormData) {
   })
 
   revalidatePath('/')
+  revalidatePath('/teacher')
   revalidatePath('/bigbos')
+}
+
+// ─── TEACHER PAGE CONTENT ─────────────────────────────────────────────────────
+
+export type TeacherCredential = { icon: string; title: string; description: string }
+export type TeacherApproachItem = { title: string; text: string }
+
+const DEFAULT_CREDENTIALS: TeacherCredential[] = [
+  { icon: '🎓', title: 'Сертификат CELTA', description: 'Certificate in English Language Teaching to Adults — международный сертификат Кембриджского университета, один из наиболее признанных в мире.' },
+  { icon: '📊', title: 'IELTS 8.0', description: 'Высший балл в системе международного тестирования знания английского языка, подтверждающий уровень C2 (экспертный).' },
+  { icon: '👦', title: 'Специализация: дети', description: 'Более 7 лет работы исключительно с детьми от 4 до 14 лет. Знает, как объяснить сложное просто и сделать урок интересным для каждого возраста.' },
+  { icon: '🎮', title: 'Игровые методики', description: 'Коммуникативный подход в сочетании с ролевыми играми, песнями и творческими заданиями. Дети учатся говорить с первого занятия.' },
+]
+
+const DEFAULT_APPROACH: TeacherApproachItem[] = [
+  { title: 'Коммуникативный метод', text: 'Дети общаются на английском с первого занятия. Никакой зубрёжки — только живое общение в контексте.' },
+  { title: 'Погружение через игру', text: 'Язык осваивается в игровых ситуациях: ролевые игры, диалоги, задания. Ребёнок не переводит — он думает на английском.' },
+  { title: 'Индивидуальный подход', text: 'Группы до 8 человек. Каждый ребёнок в поле зрения, получает обратную связь и двигается в комфортном темпе.' },
+  { title: 'Позитивная атмосфера', text: 'Поощрение и поддержка — не критика. Ребёнок не боится ошибаться и говорит свободнее.' },
+]
+
+export async function getTeacherPageContent() {
+  try {
+    const [credRow, approachRow, showCredRow, showApproachRow] = await Promise.all([
+      prisma.siteSettings.findUnique({ where: { key: 'teacher_credentials' } }),
+      prisma.siteSettings.findUnique({ where: { key: 'teacher_approach' } }),
+      prisma.siteSettings.findUnique({ where: { key: 'teacher_show_credentials' } }),
+      prisma.siteSettings.findUnique({ where: { key: 'teacher_show_approach' } }),
+    ])
+    return {
+      credentials: credRow ? JSON.parse(credRow.value) as TeacherCredential[] : DEFAULT_CREDENTIALS,
+      approach: approachRow ? JSON.parse(approachRow.value) as TeacherApproachItem[] : DEFAULT_APPROACH,
+      showCredentials: showCredRow ? showCredRow.value === 'true' : true,
+      showApproach: showApproachRow ? showApproachRow.value === 'true' : true,
+    }
+  } catch {
+    return { credentials: DEFAULT_CREDENTIALS, approach: DEFAULT_APPROACH, showCredentials: true, showApproach: true }
+  }
+}
+
+export async function updateTeacherPageContent(formData: FormData) {
+  const credentials = JSON.parse(formData.get('credentials') as string) as TeacherCredential[]
+  const approach = JSON.parse(formData.get('approach') as string) as TeacherApproachItem[]
+  const showCredentials = formData.get('showCredentials') === 'true'
+  const showApproach = formData.get('showApproach') === 'true'
+
+  await Promise.all([
+    prisma.siteSettings.upsert({
+      where: { key: 'teacher_credentials' },
+      update: { value: JSON.stringify(credentials) },
+      create: { key: 'teacher_credentials', value: JSON.stringify(credentials) },
+    }),
+    prisma.siteSettings.upsert({
+      where: { key: 'teacher_approach' },
+      update: { value: JSON.stringify(approach) },
+      create: { key: 'teacher_approach', value: JSON.stringify(approach) },
+    }),
+    prisma.siteSettings.upsert({
+      where: { key: 'teacher_show_credentials' },
+      update: { value: String(showCredentials) },
+      create: { key: 'teacher_show_credentials', value: String(showCredentials) },
+    }),
+    prisma.siteSettings.upsert({
+      where: { key: 'teacher_show_approach' },
+      update: { value: String(showApproach) },
+      create: { key: 'teacher_show_approach', value: String(showApproach) },
+    }),
+  ])
+
+  revalidatePath('/teacher')
+  revalidatePath('/bigbos/teacher')
 }
 
 // ─── BLOG ────────────────────────────────────────────────────────────────────
@@ -301,6 +387,7 @@ export async function createPost(formData: FormData) {
   revalidatePath('/')
   revalidatePath('/blog')
   revalidatePath('/bigbos/blog')
+  if (isPublished) await notifyIndexNow(slug)
 }
 
 // 10. Обновление поста
@@ -342,6 +429,7 @@ export async function updatePost(id: string, formData: FormData) {
   revalidatePath('/blog')
   revalidatePath(`/blog/${post.slug}`)
   revalidatePath('/bigbos/blog')
+  if (isPublished) await notifyIndexNow(post.slug)
 }
 
 // 11. Удаление поста
@@ -366,6 +454,7 @@ export async function togglePostStatus(id: string, currentValue: boolean) {
   revalidatePath('/blog')
   revalidatePath(`/blog/${post.slug}`)
   revalidatePath('/bigbos/blog')
+  if (!currentValue) await notifyIndexNow(post.slug)
   redirect('/bigbos/blog')
 }
 
@@ -500,6 +589,36 @@ export async function deleteLesson(id: string) {
   revalidatePath('/bigbos')
 }
 
+export async function updateLesson(id: string, formData: FormData) {
+  const date = new Date(formData.get('date') as string)
+  const title = (formData.get('title') as string)?.trim() || null
+  const tag = (formData.get('tag') as string) || 'Индивидуальное'
+  const notes = (formData.get('notes') as string)?.trim() || null
+  const studentIds = formData.getAll('studentIds') as string[]
+
+  await prisma.lesson.update({ where: { id }, data: { date, title, tag, notes } })
+
+  const existing = await prisma.lessonStudent.findMany({ where: { lessonId: id } })
+  const existingIds = existing.map(e => e.studentId)
+
+  const toRemove = existingIds.filter(sid => !studentIds.includes(sid))
+  if (toRemove.length > 0) {
+    await prisma.lessonStudent.deleteMany({ where: { lessonId: id, studentId: { in: toRemove } } })
+  }
+
+  const toAdd = studentIds.filter(sid => !existingIds.includes(sid))
+  if (toAdd.length > 0) {
+    await prisma.lessonStudent.createMany({ data: toAdd.map(studentId => ({ lessonId: id, studentId })) })
+  }
+
+  revalidatePath('/bigbos')
+}
+
+export async function moveLessonDate(id: string, isoDate: string) {
+  await prisma.lesson.update({ where: { id }, data: { date: new Date(isoDate) } })
+  revalidatePath('/bigbos')
+}
+
 export async function markAttendance(lessonId: string, studentId: string, attended: boolean) {
   await prisma.lessonStudent.update({
     where: { lessonId_studentId: { lessonId, studentId } },
@@ -551,6 +670,12 @@ export type FinanceStats = {
   totalGroup: number
 }
 
+const MONTH_NAMES = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
+
+function isGroupLesson(tag: string) {
+  return tag === 'Группа' || tag === 'Групповое'
+}
+
 export async function getFinanceStats(): Promise<FinanceStats> {
   const prices = await getFinancePrices()
 
@@ -559,19 +684,23 @@ export async function getFinanceStats(): Promise<FinanceStats> {
     include: { lesson: true, student: true },
   })
 
-  // Monthly revenue (last 12 months)
+  // Monthly revenue (last 12 months) — build with numeric keys for reliable matching
   const now = new Date()
   const months: MonthlyRevenue[] = []
+  const monthKeys: Array<{ year: number; month: number }> = []
+
   for (let i = 11; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    monthKeys.push({ year: d.getFullYear(), month: d.getMonth() })
     months.push({
-      month: d.toLocaleDateString('ru-RU', { month: 'short', year: '2-digit' }),
+      month: `${MONTH_NAMES[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`,
       individual: 0,
       group: 0,
     })
   }
 
-  const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  const thisYear = now.getFullYear()
+  const thisMonthNum = now.getMonth()
   let totalThisMonth = 0
   let totalIndividual = 0
   let totalGroup = 0
@@ -581,24 +710,22 @@ export async function getFinanceStats(): Promise<FinanceStats> {
   for (const ls of lessonStudents) {
     const lessonDate = new Date(ls.lesson.date)
     const tag = ls.lesson.tag
-    const price = ls.lesson.price ?? (tag === 'Групповое' ? prices.group : prices.individual)
+    const group = isGroupLesson(tag)
+    const price = ls.lesson.price ?? (group ? prices.group : prices.individual)
 
-    // Monthly bucket
-    const mIdx = months.findIndex(m => {
-      const [mName, mYear] = m.month.split(' ')
-      const d = new Date(ls.lesson.date)
-      const label = d.toLocaleDateString('ru-RU', { month: 'short', year: '2-digit' })
-      return label === m.month
-    })
+    // Monthly bucket — match by year+month number (no locale dependency)
+    const mIdx = monthKeys.findIndex(
+      mk => mk.year === lessonDate.getFullYear() && mk.month === lessonDate.getMonth()
+    )
     if (mIdx !== -1) {
-      if (tag === 'Групповое') months[mIdx].group += price
+      if (group) months[mIdx].group += price
       else months[mIdx].individual += price
     }
 
     // This month totals
-    if (lessonDate >= thisMonth) {
+    if (lessonDate.getFullYear() === thisYear && lessonDate.getMonth() === thisMonthNum) {
       totalThisMonth += price
-      if (tag === 'Групповое') totalGroup += price
+      if (group) totalGroup += price
       else totalIndividual += price
     }
 

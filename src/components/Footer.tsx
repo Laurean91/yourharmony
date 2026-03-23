@@ -91,6 +91,11 @@ export default function Footer() {
                   Правовые документы
                 </Link>
               </li>
+              <li>
+                <a href="mailto:info@yourharmony-english.ru" className="footer-link">
+                  info@yourharmony-english.ru
+                </a>
+              </li>
             </ul>
           </div>
         </div>

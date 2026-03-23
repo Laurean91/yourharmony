@@ -56,14 +56,17 @@ export default async function BlogPostPage({ params }: Props) {
 
   if (!post || !post.isPublished) notFound()
 
+  const plainText = post.content.replace(/<[^>]+>/g, '')
   const articleSchema = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     '@id': `${SITE_URL}/blog/${post.slug}#article`,
     headline: post.title,
-    description: post.excerpt ?? post.content.replace(/<[^>]+>/g, '').slice(0, 160),
+    description: post.excerpt ?? plainText.slice(0, 160),
     datePublished: post.createdAt.toISOString(),
     dateModified: post.updatedAt.toISOString(),
+    wordCount: plainText.split(/\s+/).filter(Boolean).length,
+    articleSection: 'Обучение детей английскому',
     ...(post.coverImage && {
       image: { '@type': 'ImageObject', url: post.coverImage, width: 1200, height: 630 },
     }),
@@ -203,6 +206,26 @@ export default async function BlogPostPage({ params }: Props) {
               }),
             }}
           />
+        </div>
+
+        {/* ── Автор ── */}
+        <div className="mt-10 flex items-start gap-4 p-6 bg-white/60 backdrop-blur-sm border border-white/60 rounded-2xl shadow-sm">
+          {teacher.photoUrl ? (
+            <Image
+              src={teacher.photoUrl}
+              alt={teacher.name}
+              width={64}
+              height={64}
+              className="rounded-full object-cover shrink-0"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-orange-400 shrink-0" />
+          )}
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-purple-500 mb-1">Автор</p>
+            <p className="font-bold text-gray-900">{teacher.name}</p>
+            {teacher.bio && <p className="text-sm text-gray-600 mt-1 leading-relaxed">{teacher.bio}</p>}
+          </div>
         </div>
 
         {/* ── Навигация в конце ── */}

@@ -12,7 +12,7 @@
 ## Стек
 
 ### Frontend / Web
-- **Next.js 15** (App Router, Server Components, Server Actions)
+- **Next.js 16** (App Router, Server Components, Server Actions)
 - **Prisma** + **PostgreSQL 16**
 - **Tailwind CSS**
 - **NextAuth.js v5** — аутентификация по логину/паролю
@@ -44,6 +44,14 @@ yourharmony/
 │   ├── app/
 │   │   ├── page.tsx              # Лендинг (публичный)
 │   │   ├── blog/                 # Блог (публичный)
+│   │   ├── teacher/              # Страница преподавателя /teacher (публичная)
+│   │   ├── api/                  # Next.js Route Handlers
+│   │   │   ├── finance/          # GET /api/finance/stats|report|prices, PATCH /api/finance/prices
+│   │   │   │   └── students/[id]/report/   # GET /api/finance/students/{id}/report
+│   │   │   ├── lessons/[id]/     # PATCH /api/lessons/{id}
+│   │   │   │   └── move/         # PATCH /api/lessons/{id}/move
+│   │   │   └── openapi/          # GET /api/openapi — OpenAPI 3.0 спецификация
+│   │   ├── api-docs/             # ReDoc UI для OpenAPI спецификации
 │   │   ├── bigbos/               # Административная панель
 │   │   │   ├── layout.tsx        # Лейаут с сайдбаром (адаптивный)
 │   │   │   ├── page.tsx          # Дашборд
@@ -51,27 +59,32 @@ yourharmony/
 │   │   │   ├── schedule/         # Недельное расписание занятий
 │   │   │   ├── finance/          # Финансовая аналитика
 │   │   │   ├── blog/             # Управление блогом
+│   │   │   ├── teacher/          # Редактирование профиля и страницы преподавателя
 │   │   │   └── landing/          # Управление сайтом
 │   │   └── actions.ts            # Все server actions
 │   ├── components/
-│   │   ├── WeekSchedule.tsx      # Недельный timeline 08:00–23:00
+│   │   ├── WeekSchedule.tsx      # Недельный timeline 08:00–23:00 (drag-and-drop, edit)
 │   │   ├── LessonCalendar.tsx    # Мини-календарь
 │   │   ├── StudentCard.tsx       # Карточка ученика
 │   │   ├── FinanceChart.tsx      # График доходов (recharts)
+│   │   ├── TeacherForm.tsx       # Форма редактирования профиля + страницы преподавателя
 │   │   └── ...
 │   └── lib/
 │       ├── prisma.ts
-│       └── landingTypes.ts
+│       ├── landingTypes.ts
+│       └── financeReport.ts      # Утилита построения финансовых отчётов
 ├── api/                          # REST API (FastAPI)
 │   ├── main.py                   # FastAPI app
-│   ├── models/                   # SQLAlchemy ORM модели
-│   ├── schemas/                  # Pydantic схемы
-│   ├── repositories/             # DB-запросы
-│   ├── services/                 # Бизнес-логика
-│   ├── controllers/              # Обработка запросов
-│   ├── routers/                  # HTTP маршруты
+│   ├── models/                   # SQLAlchemy ORM модели (+ SiteSettings)
+│   ├── schemas/                  # Pydantic схемы (+ finance.py)
+│   ├── repositories/             # DB-запросы (+ finance.py)
+│   ├── services/                 # Бизнес-логика (+ finance.py)
+│   ├── controllers/              # Обработка запросов (+ finance.py)
+│   ├── routers/                  # HTTP маршруты (+ finance.py)
 │   ├── middleware/               # Обработчик ошибок
 │   └── tests/                    # Unit + integration тесты
+├── scripts/
+│   └── gen-og.mjs                # Генерация public/og-image.webp из logo.png (sharp)
 ├── nginx/
 │   ├── nginx.conf                # Основной конфиг Nginx
 │   └── conf.d/yourharmony.conf   # Виртуальные хосты + SSL
@@ -208,7 +221,13 @@ sudo certbot renew && docker compose restart nginx
 
 ---
 
-## REST API — Эндпоинты
+## API
+
+Проект имеет два независимых API.
+
+### FastAPI (`api/`) — полнофункциональный REST
+
+Аутентификация: **JWT** (`POST /api/v1/auth/login`). Все защищённые маршруты требуют `Authorization: Bearer <token>`.
 
 | Метод | Путь | Описание | Auth |
 |-------|------|----------|------|
@@ -236,6 +255,26 @@ sudo certbot renew && docker compose restart nginx
 | POST | `/api/v1/schedule/lessons/{id}/enroll` | Записать ученика | ✓ |
 | PATCH | `/api/v1/schedule/lessons/{id}/enrollments/{studentId}` | Отметить посещаемость | ✓ |
 | DELETE | `/api/v1/schedule/lessons/{id}/enrollments/{studentId}` | Отменить запись | ✓ |
+| GET | `/api/v1/finance/stats` | Статистика: 12 мес + топ учеников | ✓ |
+| GET | `/api/v1/finance/prices` | Текущие цены на занятия | ✓ |
+| PATCH | `/api/v1/finance/prices` | Обновить цены | ✓ |
+| GET | `/api/v1/finance/report` | Отчёт за период (`?period=month\|3months\|6months\|year\|all\|today\|week` или `?from=&to=&groupBy=day\|month`) | ✓ |
+| GET | `/api/v1/finance/students/{id}/report` | Отчёт по ученику за период | ✓ |
+
+### Next.js API (`src/app/api/`) — интеграции
+
+Аутентификация: **Bearer-токен** из `FASTAPI_SECRET_KEY`. OpenAPI-спецификация: `GET /api/openapi`, UI: `/api-docs`.
+
+| Метод | Путь | Описание |
+|-------|------|----------|
+| PATCH | `/api/lessons/{id}` | Редактировать занятие (поля + список учеников) |
+| PATCH | `/api/lessons/{id}/move` | Перенести занятие на другую дату/время |
+| GET | `/api/finance/stats` | Финансовая статистика (12 мес) |
+| GET | `/api/finance/report` | Отчёт за период (`?period=`, `?from=&to=`, `?groupBy=`) |
+| GET | `/api/finance/prices` | Текущие цены |
+| PATCH | `/api/finance/prices` | Обновить цены |
+| GET | `/api/finance/students/{id}/report` | Отчёт по конкретному ученику |
+| GET | `/api/bookings/count` | Кол-во новых заявок (без авторизации) |
 
 ---
 
@@ -272,12 +311,14 @@ sudo certbot renew && docker compose restart nginx
 - Недельный timeline в стиле Google Calendar (08:00–23:00)
 - 7 колонок (Пн–Вс), навигация по неделям
 - Цветные блоки: фиолетовый = индивидуальное, оранжевый = групповое
-- Боковая панель посещаемости с чекбоксами
+- **Редактирование занятия** из боковой панели (дата, время, тип, тема, ученики, заметки)
+- **Drag-and-drop** перенос занятий: тащить блок на другой слот, подсветка целевого слота
+- Посещаемость: карточки-кнопки с аватаром (инициалы), счётчик, спиннер при сохранении
 - Мобильная версия: горизонтальный скролл + панель деталей снизу
 
 ### Финансы `/bigbos/finance`
-- Настройка стоимости занятий
-- График доходов по месяцам (переключатель 3/6/12 мес)
+- Настройка стоимости занятий (индивидуальное / групповое)
+- График доходов по месяцам с разбивкой инд./групп. (переключатель 3/6/12 мес)
 - Таблица доходов по ученикам на основе посещаемости
 
 ### Блог `/bigbos/blog`
@@ -287,3 +328,37 @@ sudo certbot renew && docker compose restart nginx
 ### Управление сайтом `/bigbos/landing`
 - Редактирование секций лендинга (Hero, CTA, Форматы, Отзывы, FAQ и др.)
 - Профиль преподавателя, галерея фотографий
+
+### Преподаватель `/bigbos/teacher`
+- Редактирование профиля: имя, bio, фото, badges
+- Редактирование блоков страницы `/teacher`: «Образование и квалификация», «Подход к обучению»
+- Переключатели показа/скрытия каждого блока
+
+---
+
+## Публичная страница преподавателя `/teacher`
+
+- Герой: фото, имя, bio, badges
+- Блок «Образование и квалификация» (карточки с иконкой, заголовком, описанием)
+- Блок «Подход к обучению» (карточки с заголовком и текстом)
+- Каждый блок можно скрыть из админки
+- JSON-LD: `Person` + `BreadcrumbList` схемы
+- Ссылка «Подробнее →» на главной странице в секции `TeacherSection`
+
+---
+
+## История изменений
+
+### Страница преподавателя + редактирование, финансы API, drag-and-drop (2026-03-23)
+
+- **Публичная страница `/teacher`** — профиль преподавателя с блоками «Образование» и «Подход», JSON-LD Person schema
+- **Редактирование страницы `/teacher` из админки** — блоки сохраняются в `SiteSettings`, toggle показа/скрытия
+- **Редактирование занятий** в расписании: форма в боковой панели с предзаполненными данными
+- **Drag-and-drop перенос занятий**: блок занятия перетаскивается на другой слот, оптимистичное обновление UI
+- **Посещаемость**: переработан UI — карточки-кнопки с инициалами, счётчик, спиннер
+- **Фиксы финансов**: исправлен тег группового занятия (`"Группа"` vs `"Групповое"`), числовое сравнение месяцев вместо locale-строк
+- **FastAPI finance модуль** (`api/routers/finance.py`): stats, prices, report с группировкой по дням/месяцам, отчёт по ученику
+- **Next.js finance API** (`src/app/api/finance/`): те же эндпоинты через Bearer-токен, `src/lib/financeReport.ts` как общая утилита
+- **Next.js lessons API** (`PATCH /api/lessons/{id}`, `PATCH /api/lessons/{id}/move`) — редактирование и перенос занятий
+- **OpenAPI спецификация** обновлена: схемы `Lesson`, `FinanceReport`, `StudentRevenue` и все новые пути; ReDoc UI на `/api-docs`
+- **Очистка репозитория**: удалены `.next_trash_*/`, `.swc/`, `tsconfig.tsbuildinfo`, `playwright-report/`, `test-results/`, `screenshots/`; добавлен `.swc/` в `.gitignore`

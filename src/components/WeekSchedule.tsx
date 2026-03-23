@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { createLesson, deleteLesson, markAttendance } from '@/app/actions'
+import { useState, useRef } from 'react'
+import { createLesson, deleteLesson, markAttendance, updateLesson, moveLessonDate } from '@/app/actions'
 
 interface Student {
   id: string
@@ -74,9 +74,19 @@ export default function WeekSchedule({
   const [selected, setSelected] = useState<Lesson | null>(null)
   const [addSlot, setAddSlot] = useState<{ date: string; time: string } | null>(null)
   const [addLoading, setAddLoading] = useState(false)
+  const [pendingAttendance, setPendingAttendance] = useState<string | null>(null)
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([])
   const [studentSearch, setStudentSearch] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
+  // Edit mode
+  const [editMode, setEditMode] = useState(false)
+  const [editLoading, setEditLoading] = useState(false)
+  const [editStudentIds, setEditStudentIds] = useState<string[]>([])
+  const [editStudentSearch, setEditStudentSearch] = useState('')
+  const [editShowDropdown, setEditShowDropdown] = useState(false)
+  // Drag-and-drop
+  const dragLessonId = useRef<string | null>(null)
+  const [dragOverSlot, setDragOverSlot] = useState<{ dateKey: string; hour: number } | null>(null)
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
   const weekEnd = addDays(weekStart, 6)
@@ -132,7 +142,65 @@ export default function WeekSchedule({
     setSelected(null)
   }
 
+  function openEditMode(lesson: Lesson) {
+    setEditStudentIds(lesson.students.map(ls => ls.studentId))
+    setEditStudentSearch('')
+    setEditShowDropdown(false)
+    setEditMode(true)
+  }
+
+  function closeEditMode() {
+    setEditMode(false)
+    setEditStudentIds([])
+    setEditStudentSearch('')
+  }
+
+  async function handleEditLesson(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (!selected) return
+    setEditLoading(true)
+    const formData = new FormData(e.currentTarget)
+    const date = formData.get('date') as string
+    const time = formData.get('time') as string
+    formData.set('date', `${date}T${time}:00`)
+    editStudentIds.forEach(id => formData.append('studentIds', id))
+    await updateLesson(selected.id, formData)
+    // Reload to get updated lesson with fresh student list
+    window.location.reload()
+  }
+
+  function toggleEditStudent(id: string) {
+    setEditStudentIds(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id])
+  }
+
+  function handleDragStart(lessonId: string) {
+    dragLessonId.current = lessonId
+  }
+
+  function handleDragOver(e: React.DragEvent, dateKey: string, hour: number) {
+    e.preventDefault()
+    setDragOverSlot({ dateKey, hour })
+  }
+
+  async function handleDrop(e: React.DragEvent, day: Date, hour: number) {
+    e.preventDefault()
+    setDragOverSlot(null)
+    const id = dragLessonId.current
+    dragLessonId.current = null
+    if (!id) return
+    const lesson = lessons.find(l => l.id === id)
+    if (!lesson) return
+    const oldDate = new Date(lesson.date)
+    const newDate = new Date(day)
+    newDate.setHours(hour, oldDate.getMinutes(), 0, 0)
+    // Optimistic update
+    setLessons(ls => ls.map(l => l.id === id ? { ...l, date: newDate } : l))
+    if (selected?.id === id) setSelected(prev => prev ? { ...prev, date: newDate } : null)
+    await moveLessonDate(id, newDate.toISOString())
+  }
+
   async function handleAttendance(lessonId: string, studentId: string, attended: boolean) {
+    setPendingAttendance(studentId)
     await markAttendance(lessonId, studentId, attended)
     setLessons(ls => ls.map(l =>
       l.id === lessonId
@@ -145,6 +213,7 @@ export default function WeekSchedule({
         students: prev.students.map(ls => ls.studentId === studentId ? { ...ls, attended } : ls)
       } : null)
     }
+    setPendingAttendance(null)
   }
 
   const hours = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i)
@@ -216,16 +285,25 @@ export default function WeekSchedule({
                 return (
                   <div key={di} className="flex-1 relative border-l border-gray-100" style={{ height: gridHeight }}>
                     {/* Hour lines + click slots */}
-                    {hours.map(h => (
-                      <div
-                        key={h}
-                        className="absolute left-0 right-0 border-t border-gray-100 cursor-pointer hover:bg-purple-50/50 transition-colors group"
-                        style={{ top: (h - START_HOUR) * 60 * PX_PER_MIN, height: 60 * PX_PER_MIN }}
-                        onClick={() => handleSlotClick(day, h)}
-                      >
-                        <span className="hidden group-hover:block absolute right-1 top-1 text-[10px] text-purple-400">+</span>
-                      </div>
-                    ))}
+                    {hours.map(h => {
+                      const isDragOver = dragOverSlot?.dateKey === key && dragOverSlot?.hour === h
+                      return (
+                        <div
+                          key={h}
+                          className={`absolute left-0 right-0 border-t border-gray-100 cursor-pointer transition-colors group ${isDragOver ? 'bg-purple-100/70' : 'hover:bg-purple-50/50'}`}
+                          style={{ top: (h - START_HOUR) * 60 * PX_PER_MIN, height: 60 * PX_PER_MIN }}
+                          onClick={() => handleSlotClick(day, h)}
+                          onDragOver={e => handleDragOver(e, key, h)}
+                          onDragLeave={() => setDragOverSlot(null)}
+                          onDrop={e => handleDrop(e, day, h)}
+                        >
+                          {isDragOver
+                            ? <span className="absolute right-1 top-1 text-[10px] text-purple-500 font-bold">↓</span>
+                            : <span className="hidden group-hover:block absolute right-1 top-1 text-[10px] text-purple-400">+</span>
+                          }
+                        </div>
+                      )
+                    })}
 
                     {/* Lesson blocks */}
                     {dayLessons.map(l => {
@@ -235,10 +313,12 @@ export default function WeekSchedule({
                       const isIndividual = l.tag !== 'Группа' && l.tag !== 'Групповое'
                       const isActive = selected?.id === l.id
                       return (
-                        <button
+                        <div
                           key={l.id}
-                          onClick={e => { e.stopPropagation(); setSelected(isActive ? null : l); setAddSlot(null) }}
-                          className={`absolute left-1 right-1 rounded-lg px-2 py-1 text-left text-xs transition-all shadow-sm border ${
+                          draggable
+                          onDragStart={e => { e.stopPropagation(); handleDragStart(l.id) }}
+                          onClick={e => { e.stopPropagation(); if (isActive) { setSelected(null); closeEditMode() } else { setSelected(l); setAddSlot(null); closeEditMode() } }}
+                          className={`absolute left-1 right-1 rounded-lg px-2 py-1 text-left text-xs transition-all shadow-sm border cursor-grab active:cursor-grabbing select-none ${
                             isActive
                               ? 'ring-2 ring-offset-1 ring-purple-500 z-10'
                               : 'hover:brightness-95 z-0'
@@ -258,7 +338,7 @@ export default function WeekSchedule({
                               {l.students.map(s => s.student.name).join(', ')}
                             </div>
                           )}
-                        </button>
+                        </div>
                       )
                     })}
                   </div>
@@ -295,21 +375,47 @@ export default function WeekSchedule({
                 {/* Attendance */}
                 {selected.students.length > 0 && (
                   <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Посещаемость</p>
-                    <div className="space-y-2">
-                      {selected.students.map(ls => (
-                        <label key={ls.studentId} className={`flex items-center gap-2 text-sm cursor-pointer px-3 py-2 rounded-xl border transition-colors ${
-                          ls.attended ? 'bg-green-50 border-green-200 text-green-700' : 'bg-gray-50 border-gray-200 text-gray-600'
-                        }`}>
-                          <input
-                            type="checkbox"
-                            checked={ls.attended}
-                            onChange={e => handleAttendance(selected.id, ls.studentId, e.target.checked)}
-                            className="accent-green-600"
-                          />
-                          {ls.student.name}
-                        </label>
-                      ))}
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Посещаемость</p>
+                      <span className="text-xs font-semibold text-gray-400">
+                        {selected.students.filter(s => s.attended).length}
+                        <span className="font-normal"> / {selected.students.length}</span>
+                      </span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {selected.students.map(ls => {
+                        const initials = ls.student.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+                        const isPending = pendingAttendance === ls.studentId
+                        return (
+                          <button
+                            key={ls.studentId}
+                            onClick={() => !isPending && handleAttendance(selected.id, ls.studentId, !ls.attended)}
+                            disabled={isPending}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all text-left ${
+                              ls.attended
+                                ? 'bg-green-50 border-green-200 hover:bg-green-100'
+                                : 'bg-gray-50 border-gray-100 hover:border-gray-300 hover:bg-gray-100'
+                            } ${isPending ? 'opacity-60' : ''}`}
+                          >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 transition-colors ${
+                              ls.attended ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'
+                            }`}>
+                              {isPending ? (
+                                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                </svg>
+                              ) : initials}
+                            </div>
+                            <span className={`flex-1 text-sm font-medium truncate ${ls.attended ? 'text-green-800' : 'text-gray-600'}`}>
+                              {ls.student.name}
+                            </span>
+                            <span className={`text-base shrink-0 ${ls.attended ? 'text-green-500' : 'text-gray-300'}`}>
+                              {ls.attended ? '✓' : '○'}
+                            </span>
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
@@ -318,12 +424,115 @@ export default function WeekSchedule({
                   <p className="text-sm text-gray-400">Ученики не назначены</p>
                 )}
 
-                <button
-                  onClick={() => handleDelete(selected.id)}
-                  className="w-full py-2 text-sm text-red-500 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
-                >
-                  Удалить занятие
-                </button>
+                {!editMode && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openEditMode(selected)}
+                      className="flex-1 py-2 text-sm text-purple-600 border border-purple-200 rounded-xl hover:bg-purple-50 transition-colors font-medium"
+                    >
+                      Редактировать
+                    </button>
+                    <button
+                      onClick={() => handleDelete(selected.id)}
+                      className="flex-1 py-2 text-sm text-red-500 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
+                    >
+                      Удалить
+                    </button>
+                  </div>
+                )}
+
+                {editMode && (
+                  <form onSubmit={handleEditLesson} className="space-y-3 border-t border-gray-100 pt-3">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Редактирование</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Дата</label>
+                        <input
+                          name="date"
+                          type="date"
+                          defaultValue={new Date(selected.date).toISOString().slice(0, 10)}
+                          className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">Время</label>
+                        <input
+                          name="time"
+                          type="time"
+                          defaultValue={`${String(new Date(selected.date).getHours()).padStart(2, '0')}:${String(new Date(selected.date).getMinutes()).padStart(2, '0')}`}
+                          className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Тип</label>
+                      <select name="tag" defaultValue={selected.tag} className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400">
+                        <option value="Индивидуальное">Индивидуальное</option>
+                        <option value="Группа">Группа</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Тема</label>
+                      <input name="title" defaultValue={selected.title ?? ''} placeholder="Необязательно" className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Ученики</label>
+                      {editStudentIds.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                          {editStudentIds.map(id => {
+                            const s = students.find(s => s.id === id)
+                            if (!s) return null
+                            return (
+                              <span key={id} className="flex items-center gap-1 px-2 py-0.5 bg-purple-600 text-white rounded-full text-xs font-medium">
+                                {s.name}
+                                <button type="button" onClick={() => toggleEditStudent(id)} className="opacity-70 hover:opacity-100">×</button>
+                              </span>
+                            )
+                          })}
+                        </div>
+                      )}
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Поиск ученика..."
+                          value={editStudentSearch}
+                          onChange={e => { setEditStudentSearch(e.target.value); setEditShowDropdown(true) }}
+                          onFocus={() => setEditShowDropdown(true)}
+                          onBlur={() => setEditShowDropdown(false)}
+                          className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
+                        />
+                        {editShowDropdown && (
+                          <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg max-h-36 overflow-y-auto">
+                            {students
+                              .filter(s => !editStudentIds.includes(s.id) && s.name.toLowerCase().includes(editStudentSearch.toLowerCase()))
+                              .map(s => (
+                                <button key={s.id} type="button"
+                                  onMouseDown={e => e.preventDefault()}
+                                  onClick={() => { toggleEditStudent(s.id); setEditStudentSearch(''); setEditShowDropdown(false) }}
+                                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors"
+                                >{s.name}</button>
+                              ))}
+                            {students.filter(s => !editStudentIds.includes(s.id) && s.name.toLowerCase().includes(editStudentSearch.toLowerCase())).length === 0 && (
+                              <p className="px-3 py-2 text-sm text-gray-400">Не найдено</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Заметки</label>
+                      <textarea name="notes" rows={2} defaultValue={selected.notes ?? ''} className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 resize-none" />
+                    </div>
+                    <div className="flex gap-2">
+                      <button type="submit" disabled={editLoading} className="flex-1 py-2 bg-purple-600 text-white text-sm rounded-xl hover:bg-purple-700 disabled:opacity-60 font-medium transition-colors">
+                        {editLoading ? 'Сохранение...' : 'Сохранить'}
+                      </button>
+                      <button type="button" onClick={closeEditMode} className="px-3 py-2 border border-gray-200 text-gray-600 text-sm rounded-xl hover:bg-gray-50 transition-colors">
+                        Отмена
+                      </button>
+                    </div>
+                  </form>
+                )}
               </>
             )}
 

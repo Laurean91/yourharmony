@@ -47,6 +47,7 @@ next-env.d.ts
 
 # Next.js trash folders (auto-created by dev server)
 .next_trash*/
+.swc/
 
 # Playwright
 node_modules/

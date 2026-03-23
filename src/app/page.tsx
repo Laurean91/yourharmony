@@ -31,7 +31,7 @@ export default async function HomePage() {
     hasCourseInstance: [
       {
         '@type': 'CourseInstance',
-        courseMode: 'Onsite',
+        courseMode: 'https://schema.org/OfflineCourse',
         location: {
           '@type': 'Place',
           name: 'Языковой клуб «Гармония»',
@@ -43,11 +43,13 @@ export default async function HomePage() {
           byDay: ['Saturday'],
           startTime: '12:00',
         },
+        instructor: { '@id': `${SITE_URL}/#teacher` },
       },
       {
         '@type': 'CourseInstance',
-        courseMode: 'Online',
+        courseMode: 'https://schema.org/OnlineCourse',
         description: 'Онлайн-занятия по согласованию с преподавателем',
+        instructor: { '@id': `${SITE_URL}/#teacher` },
       },
     ],
   }
@@ -62,6 +64,13 @@ export default async function HomePage() {
     jobTitle: 'Преподаватель английского языка',
     worksFor: { '@id': `${SITE_URL}/#organization` },
     url: `${SITE_URL}/#teacher`,
+    hasCredential: {
+      '@type': 'EducationalOccupationalCredential',
+      credentialCategory: 'Certificate',
+      name: 'CELTA',
+      recognizedBy: { '@type': 'Organization', name: 'Cambridge University Press & Assessment' },
+    },
+    knowsLanguage: ['ru', 'en'],
   }
 
   return (
