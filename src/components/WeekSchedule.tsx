@@ -429,6 +429,7 @@ export default function WeekSchedule({
                           style={{
                             top,
                             height: Math.max(height, 28),
+                            touchAction: 'none',
                             background: isIndividual
                               ? (isActive ? 'rgba(124,58,237,0.2)' : 'rgba(139,92,246,0.12)')
                               : (isActive ? 'rgba(249,115,22,0.2)' : 'rgba(251,146,60,0.12)'),
