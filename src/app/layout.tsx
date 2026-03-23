@@ -39,7 +39,7 @@ const localBusinessSchema = {
   alternateName: 'Клуб Гармония',
   description: 'Детский языковой клуб «Гармония» — английский для детей от 4 лет в Москве. Групповые занятия по субботам у метро Люблино, онлайн-занятия по согласованию.',
   url: SITE_URL,
-  logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` },
+  logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png`, width: 1536, height: 1024 },
   image: `${SITE_URL}/og-image.webp`,
   telephone: '+7 (985) 150-83-00',
   address: {
