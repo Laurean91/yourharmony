@@ -342,15 +342,15 @@ export default function WeekSchedule({
                 className="w-12 shrink-0 relative"
                 style={{
                   height: gridHeight,
-                  background: 'rgba(139,92,246,0.02)',
-                  borderRight: '1px solid rgba(139,92,246,0.08)',
+                  background: 'rgba(139,92,246,0.04)',
+                  borderRight: '1px solid rgba(139,92,246,0.2)',
                 }}
               >
                 {hours.map(h => (
                   <div
                     key={h}
-                    className="absolute right-2 text-[10px] font-medium -translate-y-2"
-                    style={{ top: (h - START_HOUR) * 60 * PX_PER_MIN, color: '#c4b5fd' }}
+                    className="absolute right-2 text-[10px] font-semibold -translate-y-2"
+                    style={{ top: (h - START_HOUR) * 60 * PX_PER_MIN, color: '#a78bfa' }}
                   >
                     {h}:00
                   </div>
@@ -362,7 +362,7 @@ export default function WeekSchedule({
                 const key = toDateKey(day)
                 const dayLessons = lessonsByDate[key] ?? []
                 return (
-                  <div key={di} className="flex-1 relative border-l border-gray-100" style={{ height: gridHeight }}>
+                  <div key={di} className="flex-1 relative border-l border-gray-200" style={{ height: gridHeight }}>
                     {/* Hour lines + click slots */}
                     {hours.map(h => {
                       const isDragOver = dragOverSlot?.dateKey === key && dragOverSlot?.hour === h
@@ -371,7 +371,7 @@ export default function WeekSchedule({
                           key={h}
                           data-datekey={key}
                           data-hour={h}
-                          className={`absolute left-0 right-0 border-t border-gray-100 cursor-pointer transition-colors group ${isDragOver ? 'bg-purple-100/70' : 'hover:bg-purple-50/50'}`}
+                          className={`absolute left-0 right-0 border-t border-gray-200 cursor-pointer transition-colors group ${isDragOver ? 'bg-purple-100/70' : 'hover:bg-purple-50/50'}`}
                           style={{ top: (h - START_HOUR) * 60 * PX_PER_MIN, height: 60 * PX_PER_MIN }}
                           onClick={() => handleSlotClick(day, h)}
                           onDragOver={e => handleDragOver(e, key, h)}
