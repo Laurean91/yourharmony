@@ -4,7 +4,7 @@ import BlogCards from './BlogCards'
 
 export default async function BlogPreview() {
   const { posts } = await getPosts(1)
-  const preview = posts.slice(0, 3)
+  const preview = posts.slice(0, 6)
 
   if (preview.length === 0) return null
 

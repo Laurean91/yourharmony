@@ -30,7 +30,7 @@ export default function BlogCards({ posts }: { posts: Post[] }) {
   useEffect(() => {
     const calc = () => {
       if (!trackRef.current) return
-      const v = window.innerWidth < 640 ? 1 : 3
+      const v = window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3
       setVisibleCount(v)
       const w = trackRef.current.offsetWidth
       setCardWidth((w - GAP * (v - 1)) / v)
