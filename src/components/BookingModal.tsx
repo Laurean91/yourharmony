@@ -8,8 +8,8 @@ import { createBooking } from '../app/actions'
 function ConsentCheckbox() {
   const [checked, setChecked] = useState(false)
   return (
-    <label className="flex items-start gap-3 cursor-pointer group" onClick={() => setChecked(v => !v)}>
-      <input type="checkbox" name="pdpaConsent" required checked={checked} onChange={() => {}} className="sr-only" />
+    <label className="flex items-start gap-3 cursor-pointer group">
+      <input type="checkbox" name="pdpaConsent" required checked={checked} onChange={(e) => setChecked(e.target.checked)} className="sr-only" />
       <span className={`mt-0.5 w-5 h-5 rounded-md border-2 shrink-0 flex items-center justify-center transition-all duration-200 ${
         checked
           ? 'bg-purple-600 border-purple-600 shadow-[0_0_0_3px_rgba(147,51,234,0.15)]'
