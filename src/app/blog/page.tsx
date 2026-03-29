@@ -32,7 +32,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       url: canonical,
       siteName: 'Клуб «Гармония»',
       type: 'website',
-      images: [{ url: `${SITE_URL}/logo.png`, width: 512, height: 512, alt: 'Клуб «Гармония»' }],
+      images: [{ url: `${SITE_URL}/og-image.png`, width: 1200, height: 630, alt: 'Блог | Клуб «Гармония»' }],
     },
   }
 }
