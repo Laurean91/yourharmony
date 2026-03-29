@@ -8,17 +8,21 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
       },
       {
-        userAgent: ['GPTBot', 'OAI-SearchBot', 'ClaudeBot', 'PerplexityBot'],
+        userAgent: ['GPTBot', 'OAI-SearchBot', 'ClaudeBot', 'PerplexityBot', 'anthropic-ai'],
         allow: '/',
       },
       {
-        userAgent: ['CCBot', 'anthropic-ai'],
+        userAgent: 'CCBot',
         disallow: '/',
+      },
+      {
+        userAgent: 'Googlebot-Extended',
+        allow: '/',
       },
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/bigbos/', '/api/'],
+        disallow: ['/bigbos/', '/api/', '/api/auth/'],
       },
     ],
     sitemap: 'https://yourharmony-english.ru/sitemap.xml',

@@ -9,7 +9,7 @@ import { formatDate } from '../../lib/utils'
 
 export const revalidate = 60
 
-const SITE_URL = 'https://yourharmony-english.ru'
+import { SITE_URL } from '../../lib/config'
 
 interface Props {
   searchParams: Promise<{ page?: string }>
@@ -23,7 +23,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     : `${SITE_URL}/blog`
 
   return {
-    title: 'Блог',
+    title: 'Блог об английском для детей',
     description: 'Полезные статьи, новости клуба и советы для родителей от детского языкового клуба «Гармония».',
     alternates: { canonical },
     openGraph: {

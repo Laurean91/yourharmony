@@ -8,12 +8,12 @@ import BookingButton from '../../components/BookingButton'
 
 export const revalidate = 300
 
-const SITE_URL = 'https://yourharmony-english.ru'
+import { SITE_URL } from '../../lib/config'
 
 export async function generateMetadata(): Promise<Metadata> {
   const teacher = await getTeacherProfile()
   const title = `Преподаватель — ${teacher.name} | Клуб «Гармония»`
-  const description = teacher.bio ?? 'Преподаватель клуба «Гармония»'
+  const description = teacher.bio ?? 'Преподаватель детского языкового клуба «Гармония». Сертификат CELTA (Cambridge), IELTS 8.0, опыт 7+ лет. Английский для детей от 4 до 14 лет в Москве у метро Люблино.'
   return {
     title,
     description,
@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
       url: `${SITE_URL}/teacher`,
       siteName: 'Клуб «Гармония»',
       type: 'profile',
-      ...(teacher.photoUrl && { images: [{ url: teacher.photoUrl }] }),
+      images: [{ url: teacher.photoUrl ?? `${SITE_URL}/og-image.png`, width: 1200, height: 630 }],
     },
   }
 }

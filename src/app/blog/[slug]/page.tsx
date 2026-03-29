@@ -15,7 +15,7 @@ interface Props {
 
 export const revalidate = 300
 
-const SITE_URL = 'https://yourharmony-english.ru'
+import { SITE_URL } from '../../../lib/config'
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -76,7 +76,9 @@ export default async function BlogPostPage({ params }: Props) {
       name: teacher.name,
     },
     publisher: {
+      '@type': 'Organization',
       '@id': `${SITE_URL}/#organization`,
+      name: 'Языковой клуб «Гармония»',
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
@@ -140,10 +142,11 @@ export default async function BlogPostPage({ params }: Props) {
 
           {/* Мета */}
           <div className="flex items-center justify-center gap-3 text-sm text-gray-400 font-medium flex-wrap">
-            <span className="flex items-center gap-1.5 text-gray-600 font-semibold">
+            <Link href="/teacher" className="flex items-center gap-1.5 text-gray-600 font-semibold hover:opacity-80 transition-opacity">
               <span className="w-5 h-5 rounded-full bg-gradient-to-br from-purple-400 to-orange-400 inline-block shrink-0" />
               {teacher.name}
-            </span>
+              <span className="text-xs text-purple-600 font-medium border border-purple-200 rounded-full px-2 py-0.5">CELTA</span>
+            </Link>
             <span>·</span>
             <time dateTime={post.createdAt.toISOString()}>{formatDate(post.createdAt)}</time>
             {post.updatedAt > post.createdAt && (

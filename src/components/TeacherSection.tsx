@@ -21,8 +21,8 @@ interface TeacherSectionProps {
 }
 
 const DEFAULT_NAME = 'Анна Сергеевна'
-const DEFAULT_BIO = 'Сертифицированный преподаватель английского языка с опытом 7 лет. Специализируется на обучении детей от 6 до 14 лет — в игровой форме, без скучной зубрёжки. Каждый ребёнок уходит с занятия с улыбкой и новыми знаниями.'
-const DEFAULT_BADGES = ['Сертификат CELTA', 'Опыт 7 лет', 'IELTS 8.0', 'Дети 6–14 лет']
+const DEFAULT_BIO = 'Сертифицированный преподаватель английского языка с опытом 7 лет. Специализируется на обучении детей от 4 до 14 лет — в игровой форме, без скучной зубрёжки. Каждый ребёнок уходит с занятия с улыбкой и новыми знаниями.'
+const DEFAULT_BADGES = ['Сертификат CELTA', 'Опыт 7 лет', 'IELTS 8.0', 'Дети 4–14 лет']
 
 export default function TeacherSection({ name = DEFAULT_NAME, bio = DEFAULT_BIO, photoUrl, badges = DEFAULT_BADGES }: TeacherSectionProps) {
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
@@ -44,7 +44,6 @@ export default function TeacherSection({ name = DEFAULT_NAME, bio = DEFAULT_BIO,
               width={160}
               height={160}
               className="w-40 h-40 rounded-full object-cover shadow-lg"
-              priority
             />
           ) : (
             <div className="w-40 h-40 rounded-full bg-gradient-to-br from-purple-400 to-orange-400 flex items-center justify-center shadow-lg">

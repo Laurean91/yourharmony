@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { X, Check } from 'lucide-react'
 import { createBooking } from '../app/actions'
@@ -43,6 +43,7 @@ export default function BookingModal({ onClose }: { onClose: () => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMsg, setSuccessMsg] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -54,7 +55,7 @@ export default function BookingModal({ onClose }: { onClose: () => void }) {
       await createBooking(formData)
       setSuccessMsg(true)
       form.reset()
-      setTimeout(() => {
+      closeTimerRef.current = setTimeout(() => {
         setSuccessMsg(false)
         onClose()
       }, 2000)
@@ -70,6 +71,10 @@ export default function BookingModal({ onClose }: { onClose: () => void }) {
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
   }, [onClose])
+
+  useEffect(() => {
+    return () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current) }
+  }, [])
 
   return (
     <motion.div

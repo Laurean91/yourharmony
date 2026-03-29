@@ -44,7 +44,6 @@ function useCounter(target: number, duration = 1.5) {
   useEffect(() => {
     if (!inView || animated.current) return
     animated.current = true
-    setCount(0)
     let startTime = 0
     const animate = (time: number) => {
       if (!startTime) startTime = time
@@ -291,11 +290,14 @@ export function LandingTop({
       {/* ГАЛЕРЕЯ */}
       <section id="lessons" className="py-20 px-4 bg-white/30 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto">
-          <motion.h2
-            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-            className="text-4xl font-bold text-center mb-12">
-            <Camera className="inline mr-3" />Как проходят занятия
-          </motion.h2>
+          <div className="flex items-center justify-center gap-3 mb-12">
+            <Camera className="w-8 h-8 text-purple-600" />
+            <motion.h2
+              initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
+              className="text-4xl font-bold text-center">
+              Как проходят занятия
+            </motion.h2>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {photos.map((photo, idx) => (
               <motion.div key={photo.id} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
@@ -305,7 +307,7 @@ export function LandingTop({
                 onClick={() => setSelectedImage(photo.url)}>
                 <Image
                   src={photo.url}
-                  alt="Занятие в клубе «Гармония»"
+                  alt={`Урок английского в клубе «Гармония» — фото ${idx + 1}`}
                   fill
                   sizes="(max-width: 768px) 50vw, 25vw"
                   className="object-cover"
@@ -345,7 +347,7 @@ function YandexMapFacade() {
     if (!containerRef.current) return
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setLoaded(true); observer.disconnect() } },
-      { rootMargin: '200px' }
+      { rootMargin: '0px' }
     )
     observer.observe(containerRef.current)
     return () => observer.disconnect()

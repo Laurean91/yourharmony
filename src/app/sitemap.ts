@@ -1,9 +1,8 @@
 import type { MetadataRoute } from 'next'
 import { getAllPublishedPostSlugs } from './actions'
+import { SITE_URL } from '../lib/config'
 
-export const revalidate = 3600
-
-const SITE_URL = 'https://yourharmony-english.ru'
+export const revalidate = 300
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let posts: Awaited<ReturnType<typeof getAllPublishedPostSlugs>> = []
@@ -16,27 +15,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     {
       url: SITE_URL,
-      lastModified: new Date('2026-03-23'),
-      changeFrequency: 'monthly',
-      priority: 1,
+      lastModified: new Date(),
     },
     {
       url: `${SITE_URL}/teacher`,
-      lastModified: new Date('2026-03-23'),
-      changeFrequency: 'monthly',
-      priority: 0.7,
+      lastModified: new Date(),
     },
     {
       url: `${SITE_URL}/blog`,
-      lastModified: posts[0]?.updatedAt ?? new Date('2026-03-23'),
-      changeFrequency: 'weekly',
-      priority: 0.8,
+      lastModified: posts[0]?.updatedAt ?? new Date(),
     },
     ...posts.map((post) => ({
       url: `${SITE_URL}/blog/${post.slug}`,
       lastModified: post.updatedAt,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
     })),
   ]
 }

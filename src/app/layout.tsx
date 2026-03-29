@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Nunito } from "next/font/google";
 import "./globals.css";
+import { SITE_URL } from '../lib/config'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,8 +13,6 @@ const nunito = Nunito({
   subsets: ["latin", "cyrillic"],
   weight: ["800"],
 });
-
-const SITE_URL = 'https://yourharmony-english.ru'
 
 export const metadata: Metadata = {
   title: {
@@ -100,8 +99,46 @@ const localBusinessSchema = {
     ratingValue: '5.0',
     bestRating: '5',
     worstRating: '1',
-    reviewCount: '6',
+    reviewCount: 6,
   },
+  review: [
+    {
+      '@type': 'Review',
+      author: { '@type': 'Person', name: 'Мария К.' },
+      reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+      reviewBody: 'Первые два месяца Саша капризничал — не хотел идти. Потом что-то переключилось, и теперь сам напоминает, что сегодня английский. Словарный запас заметно вырос.',
+    },
+    {
+      '@type': 'Review',
+      author: { '@type': 'Person', name: 'Дмитрий Л.' },
+      reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+      reviewBody: 'Честно, ждал прогресса побыстрее. Но потом понял — дочь просто не замечает, что учится. Говорит фразы из мультиков, сама того не осознавая.',
+    },
+    {
+      '@type': 'Review',
+      author: { '@type': 'Person', name: 'Елена В.' },
+      reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+      reviewBody: 'Сын — интроверт, в больших группах терялся. Здесь детей мало, он освоился за пару недель. В мае сдавал Starters — прошёл.',
+    },
+    {
+      '@type': 'Review',
+      author: { '@type': 'Person', name: 'Ольга П.' },
+      reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+      reviewBody: 'До этого пробовали онлайн-платформу — бросила через месяц. Тут другое: живой человек, живая реакция. Вика иногда всё равно ленится, но с занятий не пропускает.',
+    },
+    {
+      '@type': 'Review',
+      author: { '@type': 'Person', name: 'Андрей Н.' },
+      reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+      reviewBody: 'Перешли из крупной школы — там было 15 человек в группе, Никита просто сидел тихо. Здесь приходится говорить, никуда не спрячешься. Результат почувствовался месяца через три.',
+    },
+    {
+      '@type': 'Review',
+      author: { '@type': 'Person', name: 'Светлана М.' },
+      reviewRating: { '@type': 'Rating', ratingValue: '5', bestRating: '5' },
+      reviewBody: 'Пришли попробовать — особо не рассчитывали. Даша после первого занятия сказала «мам, там весело». Пока занимаемся, смотрим что будет дальше.',
+    },
+  ],
 }
 
 const websiteSchema = {
@@ -124,7 +161,8 @@ export default function RootLayout({
     <html lang="ru">
       <head>
         <meta name="theme-color" content="#7c3aed" />
-        <link rel="preconnect" href="https://c27qjcTvvwmmVqah.public.blob.vercel-storage.com" />
+        <link rel="dns-prefetch" href="https://c27qjcTvvwmmVqah.public.blob.vercel-storage.com" />
+        <link rel="preconnect" href="https://c27qjcTvvwmmVqah.public.blob.vercel-storage.com" crossOrigin="anonymous" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
