@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Инженер-консультант: Система AI контроля преформ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #0d2137 100%);
+    border-bottom: 1px solid #2563eb44;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .header-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .header-text h1 { font-size: 17px; font-weight: 700; color: #f0f9ff; }
+  .header-text p { font-size: 12px; color: #7dd3fc; margin-top: 2px; }
+  .status-badge {
+    margin-left: auto;
+    background: #052e16;
+    border: 1px solid #16a34a;
+    color: #4ade80;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .status-dot { width: 7px; height: 7px; background: #4ade80; border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* MAIN LAYOUT */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 77px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 270px;
+    background: #111827;
+    border-right: 1px solid #1f2937;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .sidebar-section { padding: 14px 16px 8px; }
+  .sidebar-title {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    color: #6b7280; letter-spacing: .8px; margin-bottom: 8px;
+  }
+  .quick-btn {
+    width: 100%; text-align: left; padding: 9px 12px;
+    background: #1f2937; border: 1px solid #374151;
+    border-radius: 8px; color: #d1d5db; font-size: 12.5px;
+    cursor: pointer; margin-bottom: 5px; transition: all .2s;
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .quick-btn:hover { background: #2563eb22; border-color: #2563eb66; color: #93c5fd; }
+  .quick-btn .icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .doc-info {
+    background: #1f2937; border-radius: 8px; padding: 12px;
+    margin: 0 16px 14px; border: 1px solid #374151;
+  }
+  .doc-info-row { font-size: 11px; color: #9ca3af; margin-bottom: 5px; }
+  .doc-info-row span { color: #e5e7eb; }
+
+  /* CHAT */
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-track { background: transparent; }
+  .messages::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+
+  /* MESSAGE BUBBLES */
+  .msg { display: flex; gap: 12px; max-width: 860px; }
+  .msg.user { flex-direction: row-reverse; margin-left: auto; }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .avatar.bot { background: linear-gradient(135deg, #1e40af, #1d4ed8); }
+  .avatar.user { background: linear-gradient(135deg, #374151, #4b5563); }
+  .bubble {
+    padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.6;
+    max-width: 720px;
+  }
+  .bubble.bot {
+    background: #1e2d3d; border: 1px solid #2d4a6a;
+    border-top-left-radius: 4px; color: #e2e8f0;
+  }
+  .bubble.user {
+    background: #1e3a8a; border: 1px solid #2563eb55;
+    border-top-right-radius: 4px; color: #dbeafe;
+  }
+  .bubble h3 { font-size: 13px; color: #7dd3fc; margin-bottom: 8px; font-weight: 600; }
+  .bubble ul { padding-left: 18px; margin: 6px 0; }
+  .bubble ul li { margin-bottom: 4px; }
+  .bubble p { margin-bottom: 6px; }
+  .bubble p:last-child { margin-bottom: 0; }
+  .bubble strong { color: #93c5fd; }
+  .bubble .tag {
+    display: inline-block; background: #1e3a8a33; border: 1px solid #3b82f666;
+    color: #60a5fa; font-size: 11px; padding: 2px 8px; border-radius: 4px;
+    margin: 2px 3px 2px 0;
+  }
+  .bubble .warn { color: #fbbf24; }
+  .bubble .ok { color: #4ade80; }
+  .bubble .err { color: #f87171; }
+
+  .section-badge {
+    font-size: 11px; background: #0f2940; border: 1px solid #1e4976;
+    color: #60a5fa; padding: 3px 9px; border-radius: 4px; margin-bottom: 10px;
+    display: inline-block;
+  }
+
+  /* TABLE */
+  .bubble table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 8px 0; }
+  .bubble th { background: #0f2940; color: #7dd3fc; padding: 7px 10px; text-align: left; border: 1px solid #1e4976; }
+  .bubble td { padding: 6px 10px; border: 1px solid #1e3a5f; }
+  .bubble tr:nth-child(even) td { background: #162030; }
+
+  /* TYPING */
+  .typing { display: flex; gap: 5px; align-items: center; padding: 10px 14px; }
+  .typing span { width: 7px; height: 7px; border-radius: 50%; background: #3b82f6; animation: bounce .9s infinite; }
+  .typing span:nth-child(2) { animation-delay: .15s; }
+  .typing span:nth-child(3) { animation-delay: .3s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+  /* INPUT */
+  .input-area {
+    padding: 16px 24px;
+    background: #111827;
+    border-top: 1px solid #1f2937;
+  }
+  .input-row {
+    display: flex; gap: 10px;
+    background: #1f2937; border: 1px solid #374151;
+    border-radius: 12px; padding: 8px 8px 8px 16px;
+    transition: border-color .2s;
+  }
+  .input-row:focus-within { border-color: #2563eb; }
+  textarea {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: #e2e8f0; font-size: 14px; resize: none;
+    font-family: inherit; max-height: 120px; min-height: 24px;
+    padding-top: 3px; line-height: 1.5;
+  }
+  textarea::placeholder { color: #6b7280; }
+  .send-btn {
+    width: 38px; height: 38px; background: #2563eb;
+    border: none; border-radius: 8px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0; transition: background .2s;
+    align-self: flex-end;
+  }
+  .send-btn:hover { background: #1d4ed8; }
+  .send-btn:disabled { background: #374151; cursor: not-allowed; }
+  .input-hint { font-size: 11px; color: #4b5563; margin-top: 7px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">🔬</div>
+  <div class="header-text">
+    <h1>Инженер-консультант: AI Vision Inspection System</h1>
+    <p>Система технического зрения для отбраковки преформ | Руководство по эксплуатации (48 стр.)</p>
+  </div>
+  <div class="status-badge">
+    <div class="status-dot"></div>
+    Документ загружен
+  </div>
+</div>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">📖 Разделы документа</div>
+      <button class="quick-btn" onclick="askQuestion('Расскажи об общей структуре машины и её компонентах')">
+        <span class="icon">⚙️</span> Гл. 2 — Устройство машины
+      </button>
+      <button class="quick-btn" onclick="askQuestion('Каковы требования к установке и условиям эксплуатации?')">
+        <span class="icon">🏭</span> Гл. 3 — Условия установки
+      </button>
+      <button class="quick-btn" onclick="askQuestion('Как запустить и настроить программное обеспечение верхнего уровня?')">
+        <span class="icon">💻</span> Гл. 4 — Программное обеспечение
+      </button>
+      <button class="quick-btn" onclick="askQuestion('Как работать с облачной платформой для обучения моделей?')">
+        <span class="icon">☁️</span> Гл. 5 — Облачная платформа
+      </button>
+      <button class="quick-btn" onclick="askQuestion('Какие требования к техническому обслуживанию системы?')">
+        <span class="icon">🔧</span> Гл. 6 — Обслуживание
+      </button>
+      <button class="quick-btn" onclick="askQuestion('Перечисли все коды ошибок и способы их устранения')">
+        <span class="icon">🚨</span> Гл. 7 — Коды ошибок
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">⚡ Быстрые вопросы</div>
+      <button class="quick-btn" onclick="askQuestion('Как добавить камеру в систему?')">
+        <span class="icon">📷</span> Добавить камеру
+      </button>
+      <button class="quick-btn" onclick="askQuestion('Как настроить белый баланс камеры? (E10015)')">
+        <span class="icon">⚖️</span> Белый баланс
+      </button>
+      <button class="quick-btn" onclick="askQuestion('Как загрузить AI-модель и алгоритм?')">
+        <span class="icon">🤖</span> Загрузка AI модели
+      </button>
+      <button class="quick-btn" onclick="askQuestion('Что делать если камера не срабатывает? E10009')">
+        <span class="icon">❌</span> Камера не срабатывает
+      </button>
+      <button class="quick-btn" onclick="askQuestion('Как настроить задержку камеры (динамическую и статическую)?')">
+        <span class="icon">⏱️</span> Задержка камеры
+      </button>
+      <button class="quick-btn" onclick="askQuestion('Бракованные преформы не отбраковываются. Что делать? E10020')">
+        <span class="icon">🔴</span> Не отбраковывает брак
+      </button>
+      <button class="quick-btn" onclick="askQuestion('Расскажи о мерах безопасности при работе с оборудованием')">
+        <span class="icon">🛡️</span> Безопасность
+      </button>
+      <button class="quick-btn" onclick="askQuestion('Какие технические характеристики системы?')">
+        <span class="icon">📊</span> Техспецификации
+      </button>
+    </div>
+
+    <div class="doc-info">
+      <div class="sidebar-title" style="margin-bottom:8px">📄 О документе</div>
+      <div class="doc-info-row">Тип: <span>System Operation Manual</span></div>
+      <div class="doc-info-row">Язык оригинала: <span>Китайский / Английский</span></div>
+      <div class="doc-info-row">Страниц: <span>48</span></div>
+      <div class="doc-info-row">Оборудование: <span>AI Vision Inspection System</span></div>
+      <div class="doc-info-row">Назначение: <span>Отбраковка преформ</span></div>
+    </div>
+  </div>
+
+  <div class="chat-area">
+    <div class="messages" id="messages">
+      <!-- Welcome message -->
+      <div class="msg">
+        <div class="avatar bot">🔬</div>
+        <div class="bubble bot">
+          <div class="section-badge">Система инициализирована</div>
+          <h3>Добро пожаловать! Я ваш инженер-консультант по системе AI Vision Inspection.</h3>
+          <p>Я полностью изучил руководство по эксплуатации системы технического зрения для отбраковки преформ (48 страниц). Документ охватывает:</p>
+          <ul>
+            <li>🏗️ <strong>Устройство машины</strong> — конвейер, клапаны, система подачи воздуха, блок камер</li>
+            <li>⚙️ <strong>Установка и условия эксплуатации</strong> — электропитание, давление воздуха, температура</li>
+            <li>💻 <strong>Программное обеспечение верхнего уровня</strong> — настройка камер, алгоритмов, AI-моделей</li>
+            <li>☁️ <strong>Облачная платформа</strong> — создание датасетов, обучение моделей</li>
+            <li>🔧 <strong>Техническое обслуживание</strong> — регламент и профилактика</li>
+            <li>🚨 <strong>Коды ошибок</strong> — E10001–E10020 + неисправности сервомотора</li>
+          </ul>
+          <p>Задавайте любые вопросы по оборудованию — я отвечу, опираясь на документ.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-row">
+        <textarea id="userInput" placeholder="Задайте вопрос по оборудованию..." rows="1"
+          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+      </div>
+      <div class="input-hint">Enter — отправить &nbsp;|&nbsp; Shift+Enter — новая строка</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== KNOWLEDGE BASE =====================
+const KB = {
+
+  safety: {
+    keywords: ['безопасность','меры безопасности','предупреждение','охрана','знаки','распаковка'],
+    answer: () => `
+<div class="section-badge">Глава 1 — Меры безопасности</div>
+<h3>🛡️ Меры безопасности и предупредительные знаки</h3>
+
+<p><strong>При распаковке:</strong></p>
+<ul>
+  <li>Вскрывать коробку аккуратно, уделять внимание безопасности</li>
+  <li>Пересчитать детали по списку, избегать повреждений при распаковке</li>
+  <li>Сохранять детали в коробке согласно списку во избежание потерь</li>
+</ul>
+
+<p><strong>При установке:</strong></p>
+<ul>
+  <li>Проверить, что все части машины целы</li>
+  <li class="warn">⚠️ Не устанавливать в местах с сильными магнитными полями, ярким светом или высокой запылённостью</li>
+  <li class="ok">✓ Оборудование AI-визуального контроля должно иметь надёжное заземление</li>
+</ul>
+
+<p><strong>Предупредительные таблички на машине:</strong></p>
+<table>
+  <tr><th>Знак</th><th>Описание</th></tr>
+  <tr><td>⚡</td><td>Главный ввод питания</td></tr>
+  <tr><td>⚠️</td><td>Опасность защемления ремнём — не касаться движущихся частей</td></tr>
+  <tr><td>📋</td><td>Обслуживание маслоотделителя — следуйте инструкции</td></tr>
+  <tr><td>🖥️</td><td>При обслуживании оборудование должно быть отключено от питания</td></tr>
+</table>
+`},
+
+  structure: {
+    keywords: ['устройство','структура','конструкция','компоненты','машина','конвейер','клапан','воздух','камера','подача'],
+    answer: () => `
+<div class="section-badge">Глава 2 — Устройство машины</div>
+<h3>⚙️ Конструкция системы AI-визуального контроля</h3>
+
+<p><strong>2.1 Система подачи материала:</strong></p>
+<ul>
+  <li>Конвейерная лента подаёт преформы к зоне контроля</li>
+  <li>Сортировочное устройство в начале ленты ориентирует изделия в одном направлении и равномерно распределяет их</li>
+</ul>
+
+<p><strong>2.1.1 Выходное отверстие:</strong><br>
+Состоит из одного выхода для брака и двух выходов для годных изделий, а также счётчика изделий.</p>
+
+<p><strong>2.1.2 Высокочастотный электромагнитный клапан:</strong><br>
+При получении команды на отбраковку открывается и выдувает сжатый воздух через выходное отверстие, направляя бракованную преформу в зону отбраковки.</p>
+
+<p><strong>2.1.3 Пневматическая система:</strong><br>
+Установлена сбоку машины. Оснащена фильтрующим клапаном, распределительным клапаном и регулятором давления для подачи чистого сжатого воздуха.</p>
+
+<p><strong>2.1.3 Рама (корпус):</strong><br>
+Полностью закрытый корпус, содержащий схемы, электродвигатели, электрооборудование и пр.</p>
+
+<p><strong>2.2 Система визуализации:</strong></p>
+<ul>
+  <li>Подсистема освещения с регулируемыми углом, цветом и яркостью</li>
+  <li>Высокоскоростная высококачественная промышленная камера</li>
+  <li>Высокоточный датчик — управляет съёмкой и отбраковкой</li>
+  <li>Передаёт изображения в компьютерную систему по сети для AI-обработки</li>
+</ul>
+`},
+
+  specs: {
+    keywords: ['характеристик','технические','спецификаци','напряжение','мощность','давление','температура','питание','вольт','ватт','мпа'],
+    answer: () => `
+<div class="section-badge">Глава 3 — Условия установки</div>
+<h3>📊 Технические характеристики системы</h3>
+
+<table>
+  <tr><th>Параметр</th><th>Значение</th></tr>
+  <tr><td>Габариты</td><td>По чертежам проекта</td></tr>
+  <tr><td>Мощность</td><td>1–8 кВт</td></tr>
+  <tr><td>Напряжение питания</td><td>220В – 380В</td></tr>
+  <tr><td>Сжатый воздух</td><td>0,5 – 0,8 МПа</td></tr>
+  <tr><td>Температура окружающей среды</td><td>-20°C до +60°C</td></tr>
+  <tr><td>Относительная влажность</td><td>До 80%</td></tr>
+</table>
+
+<p><strong>Требования к установке:</strong></p>
+<ul>
+  <li>Устанавливать горизонтально на прочном основании</li>
+  <li>Вокруг машины не должно быть строительного мусора — для удобства обслуживания</li>
+  <li class="ok">✓ Лучший эффект обнаружения — в условиях чистой комнаты</li>
+</ul>
+`},
+
+  software: {
+    keywords: ['программ','софт','интерфейс','запуск','кнопки','меню','панель','экран','работа','режим','статус','план','схема'],
+    answer: () => `
+<div class="section-badge">Глава 4 — Программное обеспечение верхнего уровня</div>
+<h3>💻 Описание программного обеспечения</h3>
+
+<p>Это распределённое ПО верхнего уровня, которое обменивается данными с нижними компьютерами через <strong>TCP</strong>, а с главной управляющей платой — через <strong>RS232</strong>.</p>
+
+<p><strong>(1) Строка состояния (вверху экрана):</strong></p>
+<ul>
+  <li><strong>a) Свободное место на диске</strong> — показывает % свободного места</li>
+  <li><strong>b) Режим ПО:</strong>
+    <ul>
+      <li>🔵 <em>Рабочий режим</em> — нижний компьютер получает только NG-изображения</li>
+      <li>🟡 <em>Отладочный режим</em> — нижний компьютер получает все изображения</li>
+    </ul>
+  </li>
+  <li><strong>c) Управление планами</strong> — набор параметров конфигурации камер, алгоритмов, главной платы</li>
+  <li><strong>d) Правая часть строки</strong> — текущее системное время и счётчик работы</li>
+</ul>
+
+<p><strong>(2) Область отображения (центр):</strong><br>
+Показывает изображения с камер, гистограммы, статистику.</p>
+
+<p><strong>(3) Панель кнопок:</strong></p>
+<table>
+  <tr><th>Кнопка</th><th>Функция</th></tr>
+  <tr><td>💾 Save scheme</td><td>Сохранить схему параметров</td></tr>
+  <tr><td>📊 Graphs</td><td>Гистограмма пикселей по центру изображения</td></tr>
+  <tr><td>📸 Capture</td><td>Захват изображений</td></tr>
+  <tr><td>🗂️ Template</td><td>Шаблоны для полуавтоматической генерации параметров</td></tr>
+  <tr><td>🏠 Desktop / Home</td><td>Вернуться на рабочий стол / главный экран</td></tr>
+  <tr><td>⚙️ Reject settings</td><td>Настройки отбраковки</td></tr>
+  <tr><td>🔧 System settings</td><td>Параметры главной платы и оборудования</td></tr>
+  <tr><td>📈 Statistics</td><td>Интерфейс статистики</td></tr>
+  <tr><td>🖼️ Defect wall</td><td>Изображения последних обнаруженных дефектов</td></tr>
+  <tr><td>▶️ Start</td><td>Запустить визуальный контроль и отбраковку</td></tr>
+  <tr><td>🎯 Calibration</td><td>Калибровка (не отправляет параметры в нижний компьютер)</td></tr>
+</table>
+`},
+
+  camera_add: {
+    keywords: ['добавить камеру','добавление камеры','подключить камеру','camera','новая камера','удалить камеру'],
+    answer: () => `
+<div class="section-badge">Раздел 4.4 — Конфигурация камер</div>
+<h3>📷 Добавление/удаление камеры</h3>
+
+<p><strong>Добавление камеры:</strong></p>
+<ul>
+  <li>1️⃣ Выбрать нижний компьютер, на котором установлена камера. Если его нет — сначала добавить нижний компьютер</li>
+  <li>2️⃣ Нажать <strong>Add Camera → Camera Type</strong>, выбрать тип камеры и нажать <strong>Finish</strong></li>
+  <li>3️⃣ Настроить IP-адрес камеры, частоту кадров, группу камер согласно схеме подключения</li>
+</ul>
+
+<p><strong>Удаление камеры:</strong></p>
+<ul>
+  <li>Выбрать нужную камеру и нажать <strong>Delete Camera</strong></li>
+</ul>
+
+<p><strong>Сохранение настроек (раздел 4.4.3):</strong></p>
+<ul>
+  <li>Нажать <strong>Save</strong>, подтвердить на экране наблюдения</li>
+  <li>Перезапустить нижний компьютер — параметры вступят в силу</li>
+  <li class="warn">⚠️ Если отправка не удалась — проверить сетевое подключение между верхним и нижними компьютерами</li>
+</ul>
+`},
+
+  camera_params: {
+    keywords: ['параметры камеры','экспозиция','разрешение','gain','усиление','ширина изображения','высота изображения','частота кадров','fps'],
+    answer: () => `
+<div class="section-badge">Раздел 4.5 — Параметры камеры</div>
+<h3>🎛️ Настройка параметров камеры</h3>
+
+<p>Путь: <strong>Главный экран → Camera n → Configure Camera</strong></p>
+
+<table>
+  <tr><th>Параметр</th><th>Описание</th></tr>
+  <tr><td>Image Width (Ширина изображения)</td><td class="warn">⚠️ Должна быть кратна 64, иначе — ошибка обработки</td></tr>
+  <tr><td>Image Height (Высота изображения)</td><td>Задаётся по необходимости</td></tr>
+  <tr><td>Width Offset (Смещение по ширине)</td><td>Смещение области захвата</td></tr>
+  <tr><td>Height Offset (Смещение по высоте)</td><td>Смещение области захвата</td></tr>
+  <tr><td>Frame Rate (Частота кадров)</td><td>Кадров в секунду</td></tr>
+  <tr><td>Exposure Time (Время экспозиции)</td><td>Время выдержки</td></tr>
+  <tr><td>Digital Gain (Цифровое усиление)</td><td>Уровень усиления</td></tr>
+  <tr><td>White Balance (Баланс белого)</td><td>Открыть/закрыть</td></tr>
+  <tr><td>Red/Green/Blue Component</td><td>RGB компоненты</td></tr>
+</table>
+
+<p><strong>Важные замечания:</strong></p>
+<ul>
+  <li>Параметры вступают в силу <strong>немедленно</strong></li>
+  <li>Для сохранения — использовать <strong>схему сохранения параметров</strong></li>
+</ul>
+`},
+
+  white_balance: {
+    keywords: ['белый баланс','white balance','e10015','баланс цвета','цвет','rgb'],
+    answer: () => `
+<div class="section-badge">E10015 — Настройка баланса белого</div>
+<h3>⚖️ Как настроить баланс белого</h3>
+
+<p><strong>Причина необходимости:</strong> Обнаружение требует равномерных оптических стандартов.</p>
+
+<p><strong>Процедура настройки:</strong></p>
+<ul>
+  <li>1️⃣ Разместить стандартный белый объект (например, тефлоновая плата или лист А4) так, чтобы он полностью заполнял поле зрения камеры</li>
+  <li>2️⃣ Для многокамерных систем — сфокусироваться на одном источнике света за раз</li>
+  <li>3️⃣ Перейти на страницу управления кривой и переключиться на страницу цветовой кривой</li>
+  <li>4️⃣ Сделать снимок через камеру белого образца, заполняющего весь кадр</li>
+  <li>5️⃣ Нажать на диаграмму кривой — убедиться, что три кривые RGB не перекрываются</li>
+  <li>6️⃣ Отрегулировать значения трёх цветовых компонентов RGB так, чтобы нижняя кривая совпала с высшей</li>
+</ul>
+
+<p><strong class="warn">⚠️ Примечание:</strong> После выравнивания RGB — регулировка аппаратных параметров (положение/угол источника света, камеры, объектива) недоступна. Используйте только время экспозиции и цифровое усиление.</p>
+`},
+
+  main_board: {
+    keywords: ['главная плата','управляющая плата','boardv6','io конфигурация','триггер','задержка','клапан','соленоид','сервомотор','счётчик','фотоэлектр'],
+    answer: () => `
+<div class="section-badge">Раздел 4.6 — Конфигурация главной платы</div>
+<h3>🔌 Настройка главной управляющей платы</h3>
+
+<p><strong>Включение плагина:</strong><br>
+<code>Account → Configuration Settings → BoardV6 Plugin</code></p>
+
+<p><strong>Основные параметры IO (разделы настройки):</strong></p>
+<table>
+  <tr><th>Параметр</th><th>Описание</th></tr>
+  <tr><td>Camera Trigger Delay</td><td>Задержка срабатывания камеры</td></tr>
+  <tr><td>Set camera station position delay</td><td>Задержка позиции захвата камеры</td></tr>
+  <tr><td>Good product blow station delay</td><td>Задержка выдува годных изделий (станция 1)</td></tr>
+  <tr><td>Defective product blow station delay</td><td>Задержка выдува брака</td></tr>
+  <tr><td>Good product blow valve station 0 delay</td><td>Задержка клапана годных изделий</td></tr>
+  <tr><td>Good product export count</td><td>Счётчик выхода годных</td></tr>
+  <tr><td>Air blower</td><td>Управление воздуходувкой</td></tr>
+  <tr><td>Multi frame trigger settings</td><td>Настройка многокадрового триггера</td></tr>
+  <tr><td>Defective product exports count</td><td>Счётчик выхода бракованных</td></tr>
+  <tr><td>Set stepper motor parameters</td><td>Параметры шагового двигателя</td></tr>
+  <tr><td>Valve 1/2 Delay</td><td>Задержка клапанов 1 и 2</td></tr>
+  <tr><td>Photoel. Counting Enable</td><td>Включение фотоэлектрического счётчика</td></tr>
+  <tr><td>Photoel. Counting Port</td><td>Порт фотоэлектрического счётчика</td></tr>
+</table>
+
+<p><strong>Последовательный порт (раздел 4.6):</strong></p>
+<ul>
+  <li>a) Обновить список портов</li>
+  <li>b) Выбрать порт: com1=ttyS0, com2=ttyS1</li>
+  <li>c) Нажать <strong>Открыть последовательный порт</strong></li>
+</ul>
+`},
+
+  model_algo: {
+    keywords: ['модель','алгоритм','ai','загрузить','нейросеть','классификация','обнаружение','дефект','modules','aimodels','Release'],
+    answer: () => `
+<div class="section-badge">Раздел 4.7 — Настройка AI-моделей и алгоритмов</div>
+<h3>🤖 Загрузка AI-моделей и алгоритмов</h3>
+
+<p><strong>Ключевые понятия:</strong></p>
+<ul>
+  <li><strong>Модель</strong> — файл классификационной модели, полученный после AI-обучения на образцах</li>
+  <li><strong>Алгоритм</strong> — плагин для обработки изображений, использующий модель для визуального контроля</li>
+</ul>
+
+<p><strong>Типы моделей:</strong></p>
+<ul>
+  <li>📍 <em>Localization model</em> — модель локализации</li>
+  <li>⚠️ <em>Abnormality detection model</em> — модель обнаружения аномалий</li>
+  <li>🏷️ <em>Classification model</em> — классификационная модель</li>
+  <li>📂 <em>Category model</em> — категориальная модель</li>
+  <li>🔍 <em>Defect detection model</em> — модель обнаружения дефектов</li>
+  <li>⬛ <em>Black spot area model</em> — модель обнаружения чёрных пятен</li>
+</ul>
+
+<p><strong>Загрузка алгоритма:</strong></p>
+<ul>
+  <li>1️⃣ Скопировать файлы алгоритма в папку <code>Release/modules</code></li>
+  <li>2️⃣ Главный экран → Camera n → Detection Settings → Algorithm Management → выбрать алгоритм</li>
+</ul>
+
+<p><strong>Загрузка модели:</strong></p>
+<ul>
+  <li>1️⃣ Скопировать файлы модели в папку <code>Release/aimodels</code></li>
+  <li>2️⃣ Главный экран → Camera n → Detection Settings → Browse → Select Model → выбрать модель</li>
+  <li>3️⃣ Нажать Add → Import Model</li>
+  <li>4️⃣ Добавить описание, найти файл модели → OK</li>
+  <li>5️⃣ Нажать <strong>Apply</strong> для применения модели к соответствующей камере</li>
+</ul>
+`},
+
+  reject_settings: {
+    keywords: ['отбраковка','reject','настройки отбраковки','ok','ng','нормальный','принудительно','all ok','all ng'],
+    answer: () => `
+<div class="section-badge">Раздел 4.10 — Настройки отбраковки</div>
+<h3>🗑️ Настройки режимов отбраковки</h3>
+
+<p>Нажать <strong>Reject Settings</strong> для открытия интерфейса конфигурации.</p>
+
+<p><strong>Режимы работы для всех камер одновременно:</strong></p>
+<table>
+  <tr><th>Режим</th><th>Описание</th></tr>
+  <tr><td class="ok">OK</td><td>Принудительно считать все изображения годными (хорошее/плохое = хорошее)</td></tr>
+  <tr><td class="err">NG</td><td>Принудительно считать все изображения браком</td></tr>
+  <tr><td>Нормальный (Normal)</td><td>Алгоритм оценивает изображения в штатном режиме</td></tr>
+</table>
+
+<p><strong>Установка для каждой камеры независимо:</strong><br>
+Каждая камера (Camera 1–8) может иметь свой режим результата, настроенный независимо.</p>
+
+<p><strong class="warn">⚠️ Внимание:</strong> Не нажимать "Set All OK" при нормальной работе оборудования!</p>
+`},
+
+  image_save: {
+    keywords: ['сохранение изображений','image saving','capture','ftp','хранение','папка','saveimages'],
+    answer: () => `
+<div class="section-badge">Разделы 4.11–4.12 — Сохранение изображений</div>
+<h3>💾 Режимы сохранения изображений</h3>
+
+<p>Нажать <strong>Capture</strong> → перейти к настройкам сохранения изображений.</p>
+
+<p><strong>Два режима хранения (одновременно не могут работать):</strong></p>
+<ul>
+  <li><strong>Классификационное хранение:</strong> можно сохранять любую комбинацию — годные, бракованные и маркированные изображения. Сохраняются оригинальные и обрезанные изображения</li>
+  <li><strong>Количественное хранение:</strong> сохраняются только оригинальные изображения в фиксированном количестве</li>
+</ul>
+
+<p><strong>Процесс сохранения (FTP):</strong></p>
+<ul>
+  <li>Нижний компьютер сохраняет изображение как файл и передаёт его верхнему через FTP</li>
+  <li>При сохранении изображения — закрыть его для снижения нагрузки на полосу пропускания</li>
+</ul>
+
+<p><strong>Структура папки Release:</strong></p>
+<ul>
+  <li><code>aimodels</code> — файлы AI-моделей</li>
+  <li><code>aiplugins</code> — плагины ПО</li>
+  <li><code>assets</code> — ресурсные файлы</li>
+  <li><code>downMcConfigFiles</code> — конфигурация нижних компьютеров</li>
+  <li><code>logFiles</code> — журналы</li>
+  <li><code>modules</code> — файлы алгоритмов</li>
+  <li><code>NewSoftwareFolder</code> — обновления ПО</li>
+  <li><code>saveImages</code> — сохранённые изображения</li>
+</ul>
+`},
+
+  cloud: {
+    keywords: ['облако','cloud','обучение','датасет','dataset','тренировка','модель обуч','keyetech','платформа'],
+    answer: () => `
+<div class="section-badge">Глава 5 — Облачная платформа</div>
+<h3>☁️ Работа с облачной платформой для обучения AI-моделей</h3>
+
+<p><strong>Доступ:</strong><br>
+Открыть Google Chrome → перейти на <code>https://cloud.keyetech.com/train-service/en/#/login</code></p>
+
+<p><strong>Данные для входа:</strong></p>
+<ul>
+  <li>Логин: <strong>nbxijie</strong></li>
+  <li>Пароль: <strong>123456</strong></li>
+</ul>
+
+<p><strong>Процесс создания датасета и обучения:</strong></p>
+<ul>
+  <li>1️⃣ Войти в систему → Data Overview</li>
+  <li>2️⃣ Create a dataset → заполнить название, метку данных, тип алгоритма, описание</li>
+  <li>3️⃣ После сохранения — нажать <strong>Manage</strong></li>
+  <li>4️⃣ Create Directory → выбрать автоматическое или ручное создание</li>
+  <li>5️⃣ Нажать на папку → Upload picture → загрузить изображения</li>
+  <li>6️⃣ После загрузки → Model Training → Add → заполнить параметры</li>
+  <li>7️⃣ Нажать <strong>Start training</strong></li>
+  <li>8️⃣ После завершения → More → Download model</li>
+</ul>
+
+<p><strong>Параметры обучения классификатора:</strong></p>
+<table>
+  <tr><th>Параметр</th><th>Значение</th></tr>
+  <tr><td>Тип сетевой модели</td><td>Network 1</td></tr>
+  <tr><td>Количество категорий</td><td>Определяется кол-вом типов загруженных изображений (≥2)</td></tr>
+  <tr><td>Частота обучения</td><td>200</td></tr>
+  <tr><td>Размер изображения</td><td>512×512</td></tr>
+  <tr><td>Поворотное улучшение</td><td>Y — только если форма сохраняется при повороте</td></tr>
+  <tr><td>Цветовое улучшение</td><td>Y — только если дефекты чёрно-белые</td></tr>
+</table>
+
+<p><strong>Параметры для модели дефектов/малых структур:</strong> Те же, но размер изображения 512×512 или 512×768.</p>
+`},
+
+  maintenance: {
+    keywords: ['обслуживание','техническое обслуживание','уход','техобслуж','чистка','чистить','уборка','профилактика'],
+    answer: () => `
+<div class="section-badge">Глава 6 — Техническое обслуживание</div>
+<h3>🔧 Регламент технического обслуживания</h3>
+
+<ul>
+  <li>1️⃣ <strong>Установить защитное заземление</strong> — обязательно для вашей безопасности</li>
+  <li>2️⃣ <strong>Чистить внутри и снаружи машины</strong> до и после работы</li>
+  <li>3️⃣ <strong>Поддерживать чистоту во время работы</strong></li>
+  <li>4️⃣ <strong>Отключать питание</strong> при уходе от машины во избежание поражения током и несчастных случаев</li>
+  <li>5️⃣ <strong>Регулярно осматривать движущиеся части</strong> на наличие отклонений</li>
+  <li>6️⃣ <strong>Держать объектив в чистоте</strong>, электрические части защищать от пыли и влаги</li>
+  <li>7️⃣ <strong>Если цепи или ремни заклинили при запуске</strong> — отключить питание, устранить неисправность, затем возобновить работу</li>
+  <li>8️⃣ <strong>При аномальных звуках, вибрации, протечках</strong> — немедленно остановить машину для осмотра</li>
+</ul>
+`},
+
+  errors_all: {
+    keywords: ['коды ошибок','все ошибки','список ошибок','e1000','перечис','коды'],
+    answer: () => `
+<div class="section-badge">Глава 7 — Коды ошибок</div>
+<h3>🚨 Все коды ошибок системы</h3>
+
+<table>
+  <tr><th>Код</th><th>Проблема</th></tr>
+  <tr><td class="err">E10001</td><td>Компьютер не запускается (пром. версия)</td></tr>
+  <tr><td class="err">E10002</td><td>Сигнальная лампа не зелёная или сигнал тревоги во время работы</td></tr>
+  <tr><td class="err">E10003</td><td>Ошибка промышленного компьютера</td></tr>
+  <tr><td class="err">E10004</td><td>Компьютер показывает "Failed to start, repairing"</td></tr>
+  <tr><td class="err">E10005</td><td>Сенсорный экран не реагирует после долгого простоя</td></tr>
+  <tr><td class="err">E10009</td><td>Камера не может быть запущена</td></tr>
+  <tr><td class="err">E10010</td><td>Нестабильный триггер камеры</td></tr>
+  <tr><td class="err">E10011</td><td>Свет мигает, но ID изображения не меняется</td></tr>
+  <tr><td class="err">E10012</td><td>Потеря кадров камеры (jumbo frames)</td></tr>
+  <tr><td class="err">E10013</td><td>Как настроить динамическую задержку камеры</td></tr>
+  <tr><td class="err">E10014</td><td>Как настроить статическую задержку камеры</td></tr>
+  <tr><td class="err">E10015</td><td>Как настроить баланс белого</td></tr>
+  <tr><td class="err">E10016</td><td>Неточный подсчёт изделий</td></tr>
+  <tr><td class="err">E10017</td><td>Электромагнитный клапан включён и не останавливает дутьё</td></tr>
+  <tr><td class="err">E10019</td><td>Все образцы отбраковываются во время тестового прогона</td></tr>
+  <tr><td class="err">E10020</td><td>Бракованные изделия не отбраковываются (нет действия отбраковки)</td></tr>
+</table>
+`},
+
+  e10001: {
+    keywords: ['e10001','компьютер не запускается','не запуск','не включается компьютер'],
+    answer: () => `
+<div class="section-badge">E10001 — Компьютер не запускается</div>
+<h3>🖥️ E10001: Компьютер не запускается</h3>
+
+<p><strong>Возможные причины:</strong></p>
+<ul>
+  <li>1. Аппаратное повреждение устройства</li>
+  <li>2. Файл конфигурации ОС не сохранён корректно</li>
+  <li>3. Материнская плата или компоненты повреждены из-за сырости</li>
+  <li>4. Материнская плата или компоненты закорочены от пыли при длительном использовании</li>
+  <li>5. Видеокарта GPU неплотно установлена (у пром. компьютеров)</li>
+</ul>
+
+<p><strong>Решения:</strong></p>
+<ul>
+  <li>1️⃣ При запуске слушать звук зуммера пром. компьютера. Если непрерывные короткие гудки — это сигнал тревоги материнской платы</li>
+  <li>2️⃣ Если компьютер не запускается — извлечь GPU, продуть сжатым воздухом, проверить надёжность установки карты</li>
+  <li>3️⃣ Если не помогло — снять батарею материнской платы на 1 минуту, установить обратно</li>
+  <li>4️⃣ Если проблема не решена — обратитесь к нам. Смотрите также E10004, E10005</li>
+</ul>
+`},
+
+  e10002: {
+    keywords: ['e10002','сигнальная лампа','лампа тревоги','зуммер','зелёный','красный','мигает'],
+    answer: () => `
+<div class="section-badge">E10002 — Сигнальная лампа не зелёная</div>
+<h3>🚦 E10002: Расшифровка световых сигналов</h3>
+
+<p>Это сигнал платы управления. Значения:</p>
+<table>
+  <tr><th>Сигнал</th><th>Значение</th></tr>
+  <tr><td class="err">Красный постоянно</td><td>Система остановлена</td></tr>
+  <tr><td class="ok">Зелёный постоянно</td><td>Система работает нормально</td></tr>
+  <tr><td class="warn">Жёлтый постоянно</td><td>Блокировка материала — система ждёт ручного вмешательства</td></tr>
+  <tr><td>Красный мигает 1Гц</td><td>Система заблокирована длительное время — требуется ручное вмешательство</td></tr>
+  <tr><td>Красный+Зелёный мигают 1Гц</td><td>Программная ошибка</td></tr>
+  <tr><td>Красный мигает 2Гц</td><td>Прерывание связи или коммуникации при работе</td></tr>
+  <tr><td>Красный мигает 3Гц</td><td>Система слишком часто срабатывает (пауза и продолжение)</td></tr>
+  <tr><td>Красный мигает 4Гц</td><td>Таймаут алгоритма, выброс крышки, большая нагрузка CPU</td></tr>
+  <tr><td>Красный мигает 5Гц</td><td>Окно передачи сдвинуто, образец вне центра</td></tr>
+</table>
+`},
+
+  e10009: {
+    keywords: ['e10009','камера не сраб','не срабатывает','триггер камеры','камера не','нет изображения от камеры'],
+    answer: () => `
+<div class="section-badge">E10009 — Камера не запускается</div>
+<h3>📷 E10009: Камера не может быть запущена</h3>
+
+<p><strong>Аппаратные причины:</strong></p>
+<ul>
+  <li>A) Ослабленный кабель камеры (нет питания, индикатор сети красный)</li>
+  <li>B) Ослабленное соединение последовательного порта с компьютером или платой (USB синий провод)</li>
+  <li>C) Это камера HK (P4) — возможно, версия 20GC/GM</li>
+</ul>
+
+<p><strong>Программные причины:</strong></p>
+<ul>
+  <li>A) Последовательный порт нельзя открыть, компьютер не подключён к плате</li>
+  <li>B) Порт триггера и целевой порт неверные</li>
+  <li>C) Неверно выбран порт камеры</li>
+  <li>D) Задержка передачи неверна</li>
+  <li>E) Ширина образца задана неверно</li>
+</ul>
+
+<p><strong>Решения:</strong></p>
+<ul>
+  <li>1️⃣ Откалибровать систему:
+    <ul>
+      <li>Если камера имеет изображение — остановить систему, обратиться к E100015</li>
+      <li>Если нет изображения — проверить камеру и оборудование</li>
+    </ul>
+  </li>
+  <li>2️⃣ Настройки ПО: проверить порт камеры, порты триггера и целевого, задержку, ширину образца</li>
+  <li>3️⃣ Если камер много — оставить только главную камеру для проверки</li>
+</ul>
+`},
+
+  e10020: {
+    keywords: ['e10020','не отбраков','брак не отбраков','дефект не','клапан не','нет отбраковки','rejection'],
+    answer: () => `
+<div class="section-badge">E10020 — Бракованные изделия не отбраковываются</div>
+<h3>🔴 E10020: Нет действия отбраковки</h3>
+
+<p><strong>Возможные причины:</strong></p>
+<ul>
+  <li>1. Нет давления воздуха или давление недостаточное</li>
+  <li>2. Алгоритм не добавлен в ПО, или камера установлена в режим "All OK"</li>
+  <li>3. Уставка силы клапанного порта в ПО слишком мала (≈0)</li>
+  <li>4. Электромагнитный клапан повреждён</li>
+</ul>
+
+<p><strong>Решения:</strong></p>
+<ul>
+  <li>1️⃣ Проверить, показывает ли регулятор давления > 0,5 МПа и вентилируется ли клапан</li>
+  <li>2️⃣ Не нажимать "All OK" при нормальной работе ПО</li>
+  <li>3️⃣ Уставка силы порта в ПО должна быть не менее 200</li>
+  <li>4️⃣ Протестировать электромагнитный клапан, заменить если повреждён</li>
+</ul>
+`},
+
+  e10016: {
+    keywords: ['e10016','подсчёт','счётчик','неточный','счёт','считает неверно'],
+    answer: () => `
+<div class="section-badge">E10016 — Неточный подсчёт</div>
+<h3>🔢 E10016: Счётчик работает неточно</h3>
+
+<p><strong>Причины:</strong></p>
+<ul>
+  <li>1. Энкодер ослаблен</li>
+  <li>2. Ремень и вал скользят</li>
+  <li>3. Параметры подсчёта и боксирования настроены неточно (чем выше скорость — тем больше отклонение)</li>
+</ul>
+
+<p><strong>Решения:</strong></p>
+<ul>
+  <li>1️⃣ Проверить, не ослаблен ли энкодер, при необходимости затянуть</li>
+  <li>2️⃣ Проверить, не скользит ли ремень и вал</li>
+  <li>3️⃣ Сбросить параметры подсчёта и боксирования</li>
+</ul>
+`},
+
+  e10013_14: {
+    keywords: ['e10013','e10014','задержка','delay','динамическая задержка','статическая задержка','camera delay'],
+    answer: () => `
+<div class="section-badge">E10013 / E10014 — Задержка камеры</div>
+<h3>⏱️ Настройка задержки камеры</h3>
+
+<p><strong>E10013 — Динамическая задержка (Dynamic Camera Delay):</strong><br>
+Триггер рассчитывается на основе расстояния поворота энкодера — когда образец достигает заданной позиции.</p>
+
+<p><strong>Если образец движется по прямой линии (конвейер):</strong></p>
+<ul>
+  <li>1. Измерить расстояние L от датчика до камеры</li>
+  <li>2. Рассчитать диаметр D ролика-энкодера</li>
+  <li>3. Понять показания энкодера A</li>
+  <li>4. Рассчитать: <strong>X = L * A / (3,14 * D)</strong></li>
+  <li>5. Отпустить образец, отрегулировать значение вверх/вниз до появления в центре экрана</li>
+</ul>
+
+<p><strong>Если образец движется по кругу (поворотный стол):</strong></p>
+<ul>
+  <li>1. Измерить расстояние T от датчика до камеры</li>
+  <li>2. Понять показания энкодера A</li>
+  <li>3. Рассчитать: <strong>X = T * A / 360</strong></li>
+  <li>5. Отрегулировать до появления изображения в центре</li>
+</ul>
+
+<p><strong class="warn">⚠️ Примечание:</strong> Если X &lt; 4095 — некоторые платы не имеют функции удвоения и нужно обратиться к R&D.</p>
+
+<p><strong>E10014 — Статическая задержка (Still Camera Delay):</strong><br>
+Триггер полностью рассчитывается по временному интервалу.</p>
+<ul>
+  <li>1. Наблюдать интервал от прохождения образца мимо датчика до камеры</li>
+  <li>2. Установить приблизительное значение задержки</li>
+  <li>3. Отпустить образец и отрегулировать до центра экрана</li>
+</ul>
+`},
+
+  e10017: {
+    keywords: ['e10017','клапан постоянно','дует постоянно','электромагнитный клапан','соленоид'],
+    answer: () => `
+<div class="section-badge">E10017 — Клапан постоянно дует</div>
+<h3>💨 E10017: Электромагнитный клапан включён и не останавливает дутьё</h3>
+
+<p><strong>Причины:</strong></p>
+<ul>
+  <li>1. Электромагнитный клапан повреждён</li>
+  <li>2. При изготовлении клапан был установлен перевёрнуто (вход/выход поменяны местами)</li>
+</ul>
+
+<p><strong>Решения:</strong></p>
+<ul>
+  <li>1️⃣ Проверить, не повреждён ли электромагнитный клапан, при необходимости — заменить</li>
+  <li>2️⃣ Проверить, правильно ли установлены входной и выходной патрубки клапана</li>
+</ul>
+`},
+
+  e10019: {
+    keywords: ['e10019','все отбраков','все образцы','тестовый прогон','test run'],
+    answer: () => `
+<div class="section-badge">E10019 — Все образцы отбраковываются</div>
+<h3>🔴 E10019: Все образцы отбраковываются во время тестового прогона</h3>
+
+<p><strong>Причины:</strong></p>
+<ul>
+  <li>1. Образец перекрывает камеру, камера наклонена или посторонние предметы блокируют нормальный угол съёмки</li>
+  <li>2. Ошибка функции камеры — ID не работает или не перепрыгивает</li>
+  <li>3. Некоторые параметры ПО установлены некорректно</li>
+</ul>
+
+<p><strong>Решение:</strong><br>
+Не нажимать "Set All OK" при нормальной работе ПО.</p>
+`},
+
+  servo: {
+    keywords: ['сервомотор','сервопривод','двигатель','servo','перегрузка','перегрев','overcurrent','стал','motor'],
+    answer: () => `
+<div class="section-badge">Раздел 7.3 — Сервомотор</div>
+<h3>⚡ Неисправности сервомотора и их устранение</h3>
+
+<p><strong>Компоненты сервомотора:</strong></p>
+<table>
+  <tr><th>№</th><th>Название</th></tr>
+  <tr><td>1</td><td>Разъём энкодера</td></tr>
+  <tr><td>2</td><td>Силовой разъём</td></tr>
+  <tr><td>3</td><td>Сквозные отверстия для крепёжных винтов</td></tr>
+  <tr><td>4</td><td>Монтажный фланец</td></tr>
+  <tr><td>5</td><td>Вал с шпонкой</td></tr>
+  <tr><td>6</td><td>Редуктор</td></tr>
+</table>
+
+<p><strong>Типичные неисправности:</strong></p>
+<table>
+  <tr><th>Неисправность</th><th>Причины</th><th>Решение</th></tr>
+  <tr><td class="warn">Перегрузка по току</td><td>Плохой контакт кабеля, заземление кабеля, неисправность привода</td><td>Подтянуть кабели, заменить двигатель, заменить сервопривод</td></tr>
+  <tr><td class="warn">Заклинивание</td><td>Выходной сигнал UVW отсутствует, ошибка подключения, механическое заклинивание</td><td>Перепроверить проводку UVW, устранить мех. причину</td></tr>
+  <tr><td class="warn">Перегрузка</td><td>Нагрузка слишком велика, двигатель заблокирован, длительная работа выше номинального момента</td><td>Установить более мощные привод и двигатель, устранить мех. причины</td></tr>
+  <tr><td class="warn">Высокое напряжение</td><td>Слишком высокое входное напряжение</td><td>Заменить или настроить источник питания (220В ±10%)</td></tr>
+  <tr><td class="warn">Пропадание фазы</td><td>Плохое подключение трёхпроводного входа</td><td>Заменить кабель, правильно подключить</td></tr>
+  <tr><td class="warn">Отключение питания двигателя</td><td>Фактический ток < 10% номинала, но реальная скорость мала, внутренний крутящий момент велик</td><td>Проверить проводку фазы двигателя, заменить кабель</td></tr>
+</table>
+`},
+
+  e10012: {
+    keywords: ['e10012','потеря кадров','jumbo','гигабит','сетевая карта','frame'],
+    answer: () => `
+<div class="section-badge">E10011 / E10012 — Проблемы с изображением</div>
+<h3>📡 E10011/E10012: Потеря кадров, ID не меняется</h3>
+
+<p><strong>E10011 — ID изображения не меняется:</strong></p>
+<ul>
+  <li><strong>Причина:</strong> После включения KVIS свет мигает, но изображение не приходит, ID не меняется</li>
+  <li><strong>Решение:</strong> Зайти в настройки сетевой карты и включить Gigabit Jumbo Frames</li>
+</ul>
+
+<p><strong>E10012 — Потеря кадров камеры:</strong></p>
+<ul>
+  <li><strong>Причина:</strong> Гигабитные jumbo frames отключены в особых обстоятельствах</li>
+  <li><strong>Решение:</strong></li>
+  <ul>
+    <li>1️⃣ Войти в настройки интерфейса сетевой карты, включить Gigabit Jumbo Frames</li>
+    <li>2️⃣ Корректно настроить параметры драйвера сетевой карты (Properties → Configuration → Advanced)</li>
+    <li>3️⃣ Если скорость > 1500 шт/мин или 8 камер > 1000 шт/мин — эта проблема не возникнет</li>
+    <li>4️⃣ Определить модель и версию прошивки камеры</li>
+  </ul>
+</ul>
+`},
+
+  folder_structure: {
+    keywords: ['папка','release','структура папок','директория','файлы','где находится'],
+    answer: () => `
+<div class="section-badge">Раздел 4.12 — Структура папки Release</div>
+<h3>📁 Структура папки установки (Release)</h3>
+
+<table>
+  <tr><th>Папка</th><th>Назначение</th></tr>
+  <tr><td><code>aimodels</code></td><td>Файлы AI-моделей ПО</td></tr>
+  <tr><td><code>aiplugins</code></td><td>Плагины ПО</td></tr>
+  <tr><td><code>assets</code></td><td>Ресурсные файлы</td></tr>
+  <tr><td><code>downMcConfigFiles</code></td><td>Файлы конфигурации нижних компьютеров</td></tr>
+  <tr><td><code>logFiles</code></td><td>Журналы событий</td></tr>
+  <tr><td><code>modules</code></td><td>Файлы развёртывания алгоритмов</td></tr>
+  <tr><td><code>NewSoftwareFolder</code></td><td>Папка обновлений ПО</td></tr>
+  <tr><td><code>saveImages</code></td><td>Сохранённые изображения</td></tr>
+  <tr><td>Остальные файлы</td><td>Библиотечные файлы, необходимые для ПО</td></tr>
+</table>
+`},
+};
+
+// ===================== MATCHING ENGINE =====================
+function findAnswer(question) {
+  const q = question.toLowerCase();
+
+  // Score each KB entry
+  let best = null, bestScore = 0;
+  for (const [key, entry] of Object.entries(KB)) {
+    let score = 0;
+    for (const kw of entry.keywords) {
+      if (q.includes(kw.toLowerCase())) score += kw.length;
+    }
+    if (score > bestScore) { bestScore = score; best = entry; }
+  }
+
+  if (best && bestScore > 0) return best.answer();
+
+  // Fallback — generic response
+  return generateGenericAnswer(question);
+}
+
+function generateGenericAnswer(question) {
+  const q = question.toLowerCase();
+
+  // Detect topic from keywords
+  if (q.includes('как') || q.includes('что делать') || q.includes('настро')) {
+    return `
+<div class="section-badge">Ответ инженера</div>
+<h3>🔧 По вашему вопросу</h3>
+<p>На основе руководства по эксплуатации AI Vision Inspection System (48 страниц) могу сказать следующее:</p>
+<p>Уточните, пожалуйста, о каком именно разделе или функции идёт речь? Система охватывает:</p>
+<ul>
+  <li>📷 Настройку и управление камерами (разделы 4.4–4.5)</li>
+  <li>⚙️ Конфигурацию главной управляющей платы (раздел 4.6)</li>
+  <li>🤖 Загрузку AI-моделей и алгоритмов (раздел 4.7)</li>
+  <li>☁️ Работу с облачной платформой обучения (глава 5)</li>
+  <li>🚨 Устранение ошибок E10001–E10020 (глава 7)</li>
+</ul>
+<p>Используйте кнопки быстрого доступа слева или задайте более конкретный вопрос.</p>`;
+  }
+
+  return `
+<div class="section-badge">Ответ инженера</div>
+<h3>📋 По данному вопросу</h3>
+<p>В руководстве по эксплуатации системы AI-визуального контроля преформ данная тема специально не выделена в отдельный раздел.</p>
+<p>Попробуйте переформулировать вопрос или воспользуйтесь кнопками быстрого доступа в боковой панели для навигации по основным разделам документа.</p>
+<p><strong>Доступные разделы:</strong> Устройство машины, Условия установки, ПО верхнего уровня, Облачная платформа, Техобслуживание, Коды ошибок E10001–E10020.</p>`;
+}
+
+// ===================== UI LOGIC =====================
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+
+function scrollToBottom() {
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function addMessage(html, isUser) {
+  const div = document.createElement('div');
+  div.className = 'msg' + (isUser ? ' user' : '');
+  div.innerHTML = `
+    <div class="avatar ${isUser ? 'user' : 'bot'}">${isUser ? '👤' : '🔬'}</div>
+    <div class="bubble ${isUser ? 'user' : 'bot'}">${html}</div>
+  `;
+  messagesEl.appendChild(div);
+  scrollToBottom();
+  return div;
+}
+
+function addTyping() {
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.id = 'typing';
+  div.innerHTML = `
+    <div class="avatar bot">🔬</div>
+    <div class="bubble bot">
+      <div class="typing"><span></span><span></span><span></span></div>
+    </div>`;
+  messagesEl.appendChild(div);
+  scrollToBottom();
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+function sendMessage() {
+  const text = inputEl.value.trim();
+  if (!text) return;
+  inputEl.value = '';
+  autoResize(inputEl);
+  sendBtn.disabled = true;
+
+  addMessage(text, true);
+  addTyping();
+
+  setTimeout(() => {
+    removeTyping();
+    const answer = findAnswer(text);
+    addMessage(answer, false);
+    sendBtn.disabled = false;
+    inputEl.focus();
+  }, 600 + Math.random() * 400);
+}
+
+function askQuestion(q) {
+  inputEl.value = q;
+  sendMessage();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+inputEl.focus();
+</script>
+</body>
+</html>

@@ -31,7 +31,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const data: { date?: Date; title?: string | null; tag?: string; notes?: string | null; price?: number | null } = {}
+  const data: { date?: Date; title?: string | null; tag?: string; notes?: string | null; homework?: string | null; price?: number | null } = {}
 
   if (body.date !== undefined) {
     const d = new Date(body.date as string)
@@ -41,6 +41,7 @@ export async function PATCH(
   if (body.title !== undefined) data.title = body.title ? String(body.title) : null
   if (body.tag !== undefined) data.tag = String(body.tag)
   if (body.notes !== undefined) data.notes = body.notes ? String(body.notes) : null
+  if (body.homework !== undefined) data.homework = body.homework ? String(body.homework) : null
   if (body.price !== undefined) data.price = body.price !== null ? Number(body.price) : null
 
   await prisma.lesson.update({ where: { id }, data })

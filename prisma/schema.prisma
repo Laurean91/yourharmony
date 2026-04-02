@@ -34,6 +34,7 @@ model Student {
   notes     String?
   createdAt DateTime        @default(now())
   lessons   LessonStudent[]
+  parents   ParentStudent[]
 
   @@index([tag])
 }
@@ -44,17 +45,33 @@ model Lesson {
   title     String?
   tag       String          @default("Индивидуальное")
   notes     String?
+  homework  String?
   price     Float?
   students  LessonStudent[]
+  files     LessonFile[]
   createdAt DateTime        @default(now())
 
   @@index([date])
+}
+
+model LessonFile {
+  id        String   @id @default(uuid())
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  url       String
+  name      String
+  size      Int
+  createdAt DateTime @default(now())
+
+  @@index([lessonId])
 }
 
 model LessonStudent {
   lessonId  String
   studentId String
   attended  Boolean @default(false)
+  grade     Int?
+  comment   String?
   lesson    Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
@@ -99,4 +116,42 @@ model Post {
   @@index([isPublished])
   @@index([categoryId])
   @@index([createdAt])
+}
+
+// ─── Auth & Roles ────────────────────────────────────────────────────────────
+
+enum Role {
+  TEACHER
+  PARENT
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  role         Role     @default(PARENT)
+  parent       Parent?
+  createdAt    DateTime @default(now())
+
+  @@index([username])
+}
+
+model Parent {
+  id        String          @id @default(uuid())
+  userId    String          @unique
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  phone     String?
+  email     String?
+  students  ParentStudent[]
+  createdAt DateTime        @default(now())
+}
+
+model ParentStudent {
+  parentId  String
+  studentId String
+  parent    Parent  @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([parentId, studentId])
 }

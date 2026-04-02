@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { X } from 'lucide-react'
+import { X, FileText } from 'lucide-react'
 import StudentEditForm from './StudentEditForm'
 import DeleteStudentButton from './DeleteStudentButton'
 
@@ -127,14 +127,26 @@ export default function StudentModal({
 
         {/* Actions */}
         {!editing && (
-          <div className="px-5 pb-5 flex gap-2">
-            <button
-              onClick={() => setEditing(true)}
-              className="flex-1 py-2.5 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"
+          <div className="px-5 pb-5 space-y-2">
+            <a
+              href={`/bigbos/students/${student.id}/report`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+              style={{ background: 'linear-gradient(90deg, #7c3aed, #6d28d9)', boxShadow: '0 2px 10px rgba(124,58,237,0.2)' }}
             >
-              Изменить
-            </button>
-            <DeleteStudentButton id={student.id} />
+              <FileText size={14} />
+              Отчёт PDF
+            </a>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setEditing(true)}
+                className="flex-1 py-2.5 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"
+              >
+                Изменить
+              </button>
+              <DeleteStudentButton id={student.id} />
+            </div>
           </div>
         )}
       </div>
