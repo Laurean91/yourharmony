@@ -66,23 +66,12 @@ export default async function ParentDashboard() {
 
           return (
             <div key={student.id}
-              className="rounded-2xl overflow-hidden animate-fade-slide-up"
+              className="student-card rounded-2xl overflow-hidden animate-fade-slide-up"
               style={{
                 background: '#fff',
                 boxShadow: '0 4px 24px rgba(5,150,105,0.08)',
                 border: '1px solid #d1fae5',
                 animationDelay: `${idx * 120}ms`,
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-              }}
-              onMouseEnter={e => {
-                const el = e.currentTarget as HTMLDivElement
-                el.style.transform = 'translateY(-2px)'
-                el.style.boxShadow = '0 8px 32px rgba(5,150,105,0.14)'
-              }}
-              onMouseLeave={e => {
-                const el = e.currentTarget as HTMLDivElement
-                el.style.transform = 'translateY(0)'
-                el.style.boxShadow = '0 4px 24px rgba(5,150,105,0.08)'
               }}>
 
               {/* Student header */}
@@ -154,23 +143,12 @@ export default async function ParentDashboard() {
               {/* Quick links */}
               <div className="grid grid-cols-3 divide-x divide-gray-100">
                 {[
-                  { href: `/parent/schedule?studentId=${student.id}`,   label: 'Расписание', icon: Calendar,    color: '#059669' },
-                  { href: `/parent/grades?studentId=${student.id}`,     label: 'Оценки',     icon: Star,        color: '#f59e0b' },
-                  { href: `/parent/attendance?studentId=${student.id}`, label: 'Посещения',  icon: CheckSquare, color: '#3b82f6' },
-                ].map(({ href, label, icon: Icon, color }) => (
+                  { href: `/parent/schedule?studentId=${student.id}`,   label: 'Расписание', icon: Calendar },
+                  { href: `/parent/grades?studentId=${student.id}`,     label: 'Оценки',     icon: Star },
+                  { href: `/parent/attendance?studentId=${student.id}`, label: 'Посещения',  icon: CheckSquare },
+                ].map(({ href, label, icon: Icon }) => (
                   <Link key={href} href={href}
-                    className="group flex flex-col items-center gap-1.5 py-4 text-xs font-medium text-gray-500 transition-all min-h-[44px]"
-                    style={{ transition: 'background 0.15s, color 0.15s' }}
-                    onMouseEnter={e => {
-                      const el = e.currentTarget as HTMLAnchorElement
-                      el.style.background = `${color}10`
-                      el.style.color = color
-                    }}
-                    onMouseLeave={e => {
-                      const el = e.currentTarget as HTMLAnchorElement
-                      el.style.background = 'transparent'
-                      el.style.color = '#6b7280'
-                    }}>
+                    className="quick-link flex flex-col items-center gap-1.5 py-4 text-xs font-medium text-gray-500 min-h-[44px]">
                     <Icon size={18} />
                     {label}
                   </Link>

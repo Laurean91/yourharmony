@@ -53,6 +53,22 @@ body {
   animation: glow-pulse 2.5s ease-in-out infinite;
 }
 
+.student-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.student-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(5,150,105,0.14) !important;
+}
+
+.quick-link {
+  transition: background 0.15s, color 0.15s;
+}
+.quick-link:hover {
+  background: rgba(5,150,105,0.06);
+  color: #059669;
+}
+
 @keyframes fadeSlideUp {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
