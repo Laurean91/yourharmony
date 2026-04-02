@@ -109,11 +109,11 @@ export default function Navbar() {
         {/* Parent Cabinet Button — desktop */}
         <Link
           href="/parent"
-          className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-lg"
-          style={{ background: 'linear-gradient(90deg, #8B5CF6 0%, #F97316 100%)', boxShadow: '0 2px 12px rgba(139,92,246,0.35)' }}
+          className="hidden md:flex items-center justify-center w-9 h-9 rounded-full text-white transition-all hover:scale-110 hover:shadow-lg"
+          style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #F97316 100%)', boxShadow: '0 2px 12px rgba(139,92,246,0.35)' }}
+          aria-label="Кабинет родителя"
         >
-          <UserCircle size={16} />
-          Кабинет родителя
+          <UserCircle size={18} />
         </Link>
 
         {/* Mobile Toggle */}
