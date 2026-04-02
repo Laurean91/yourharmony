@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, UserCircle } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import '../app/nav-footer.css'
@@ -106,8 +106,18 @@ export default function Navbar() {
           ))}
         </nav>
 
+        {/* Parent Cabinet Button — desktop */}
+        <Link
+          href="/parent"
+          className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-white transition-all hover:scale-105 hover:shadow-lg"
+          style={{ background: 'linear-gradient(90deg, #8B5CF6 0%, #F97316 100%)', boxShadow: '0 2px 12px rgba(139,92,246,0.35)' }}
+        >
+          <UserCircle size={16} />
+          Кабинет родителя
+        </Link>
+
         {/* Mobile Toggle */}
-        <button 
+        <button
           className="md:hidden p-2 text-gray-600 focus:outline-none"
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle menu"
@@ -150,6 +160,15 @@ export default function Navbar() {
                   {item.name}
                 </a>
               ))}
+              <Link
+                href="/parent"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 mt-2 px-4 py-3 rounded-xl text-base font-semibold text-white justify-center"
+                style={{ background: 'linear-gradient(90deg, #8B5CF6 0%, #F97316 100%)' }}
+              >
+                <UserCircle size={18} />
+                Кабинет родителя
+              </Link>
             </div>
           </motion.div>
         )}
