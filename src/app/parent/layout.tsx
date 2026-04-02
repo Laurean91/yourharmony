@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { Home, Calendar, Star, CheckSquare, LogOut } from 'lucide-react'
@@ -12,6 +13,9 @@ const NAV = [
   { href: '/parent/attendance', label: 'Посещаемость', icon: CheckSquare },
 ]
 
+// Subtle dot-grid pattern as inline SVG data URL
+const dotPattern = `url("data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='rgba(5%2C150%2C105%2C0.07)'/%3E%3C/svg%3E")`
+
 export default function ParentLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
@@ -22,13 +26,22 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
 
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-56 shrink-0 min-h-screen py-6 px-4"
-        style={{ background: '#fff', borderRight: '1px solid #d1fae5', boxShadow: '2px 0 12px rgba(5,150,105,0.06)' }}>
+        style={{
+          background: '#fff',
+          borderRight: '1px solid #d1fae5',
+          boxShadow: '2px 0 12px rgba(5,150,105,0.06)',
+          borderTop: '3px solid #34d399',
+        }}>
 
         <div className="flex items-center gap-2.5 px-2 mb-8">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0"
-            style={{ background: 'linear-gradient(135deg, #34d399, #3b82f6)' }}>Г</div>
+          <div className="shrink-0 rounded-xl overflow-hidden" style={{ width: 40, height: 40 }}>
+            <Image src="/logo.png" width={40} height={40} alt="Гармония" className="object-cover w-full h-full" />
+          </div>
           <div>
-            <p className="text-sm font-extrabold text-gray-800 leading-tight">Гармония</p>
+            <p className="text-sm font-extrabold text-gray-800 leading-tight"
+              style={{ textShadow: '0 0 12px rgba(5,150,105,0.25)' }}>
+              Гармония
+            </p>
             <p className="text-[10px] text-emerald-500 font-medium">Кабинет родителя</p>
           </div>
         </div>
@@ -43,6 +56,8 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
                   background: active ? 'linear-gradient(90deg, #d1fae5, #dbeafe)' : 'transparent',
                   color: active ? '#065f46' : '#6b7280',
                   fontWeight: active ? 700 : 500,
+                  borderLeft: active ? '3px solid #059669' : '3px solid transparent',
+                  boxShadow: active ? '0 2px 8px rgba(5,150,105,0.1)' : 'none',
                 }}>
                 <Icon size={16} />
                 {label}
@@ -59,8 +74,13 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
       </aside>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-1 pt-1 pb-safe"
-        style={{ background: '#fff', borderTop: '1px solid #d1fae5', boxShadow: '0 -4px 20px rgba(5,150,105,0.08)', paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around px-1 pt-1"
+        style={{
+          background: '#fff',
+          borderTop: '1px solid #d1fae5',
+          boxShadow: '0 -4px 20px rgba(5,150,105,0.08)',
+          paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
+        }}>
         {NAV.map(({ href, label, icon: Icon }) => {
           const active = pathname === href
           return (
@@ -74,8 +94,12 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
         })}
       </nav>
 
-      {/* Main content — padded above bottom nav + safe area */}
-      <main className="flex-1 pb-20 md:pb-0" style={{ paddingBottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
+      {/* Main content */}
+      <main className="flex-1 pb-20 md:pb-0"
+        style={{
+          backgroundImage: dotPattern,
+          paddingBottom: 'calc(64px + env(safe-area-inset-bottom, 0px))',
+        }}>
         {children}
       </main>
     </div>

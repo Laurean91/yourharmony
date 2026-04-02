@@ -53,7 +53,27 @@ body {
   animation: glow-pulse 2.5s ease-in-out infinite;
 }
 
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-slide-up {
+  animation: fadeSlideUp 0.45s ease both;
+}
+
+@keyframes floatPulse {
+  0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.18; }
+  50%       { transform: scale(1.08) translate(8px, -8px); opacity: 0.26; }
+}
+
+.animate-float-pulse {
+  animation: floatPulse 7s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-blob { animation: none; }
   .animate-glow-pulse { animation: none; }
+  .animate-fade-slide-up { animation: none; }
+  .animate-float-pulse { animation: none; }
 }

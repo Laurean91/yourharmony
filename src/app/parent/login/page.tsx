@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, LogIn } from 'lucide-react'
+import Image from 'next/image'
 
 export default function ParentLoginPage() {
   const [error, setError]       = useState('')
@@ -40,33 +41,20 @@ export default function ParentLoginPage() {
       className="min-h-screen flex"
       style={{ background: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)' }}
     >
-      {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between p-12 w-[420px] shrink-0 relative overflow-hidden">
-        <div className="absolute top-20 left-10 w-64 h-64 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%)' }} />
-        <div className="absolute bottom-32 right-0 w-48 h-48 rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 70%)' }} />
+      {/* Animated background orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="animate-float-pulse absolute top-1/4 left-1/6 w-72 h-72 rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%)' }} />
+        <div className="animate-float-pulse absolute bottom-1/4 right-1/4 w-56 h-56 rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)', animationDelay: '3.5s' }} />
+      </div>
 
+      {/* Left panel — desktop only */}
+      <div className="hidden lg:flex flex-col justify-between p-12 w-[420px] shrink-0 relative overflow-hidden">
         <div className="flex items-center gap-3 relative z-10">
-          <svg width="44" height="44" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="pl-gA" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#34d399"/>
-                <stop offset="100%" stopColor="#059669"/>
-              </linearGradient>
-              <linearGradient id="pl-gB" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#60a5fa"/>
-                <stop offset="100%" stopColor="#3b82f6"/>
-              </linearGradient>
-            </defs>
-            <rect x="4" y="4" width="64" height="48" rx="14" fill="url(#pl-gA)"/>
-            <polygon points="52,52 65,52 61,64" fill="#059669"/>
-            <rect x="36" y="54" width="58" height="40" rx="12" fill="url(#pl-gB)"/>
-            <polygon points="40,54 52,54 43,44" fill="#3b82f6"/>
-            <path d="M22 28 L23.1 24.9 L26 23.8 L23.1 22.7 L22 19.6 L20.9 22.7 L18 23.8 L20.9 24.9Z" fill="white" opacity="0.95"/>
-            <path d="M36 28 L37.1 24.9 L40 23.8 L37.1 22.7 L36 19.6 L34.9 22.7 L32 23.8 L34.9 24.9Z" fill="white" opacity="0.88"/>
-            <path d="M50 70 Q65 80 80 70" stroke="white" strokeWidth="2.8" fill="none" strokeLinecap="round" opacity="0.85"/>
-          </svg>
+          <div className="rounded-2xl overflow-hidden" style={{ width: 56, height: 56, filter: 'drop-shadow(0 0 18px rgba(52,211,153,0.5))' }}>
+            <Image src="/logo.png" width={56} height={56} alt="Гармония" className="object-cover w-full h-full" />
+          </div>
           <div>
             <p className="text-xl font-extrabold leading-tight"
               style={{ background: 'linear-gradient(90deg, #34d399 0%, #60a5fa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -93,14 +81,14 @@ export default function ParentLoginPage() {
       </div>
 
       {/* Right: form */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-sm rounded-2xl p-8"
+      <div className="flex-1 flex items-center justify-center p-6 relative z-10">
+        <div className="w-full max-w-sm rounded-2xl p-8 animate-fade-slide-up"
           style={{ background: 'rgba(255,255,255,0.97)', boxShadow: '0 24px 80px rgba(0,0,0,0.35)' }}>
 
+          {/* Mobile logo */}
           <div className="lg:hidden flex justify-center mb-6">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #34d399, #3b82f6)' }}>
-              <span className="text-white text-xl font-bold">Г</span>
+            <div className="rounded-2xl overflow-hidden shadow-lg" style={{ width: 56, height: 56 }}>
+              <Image src="/logo.png" width={56} height={56} alt="Гармония" className="object-cover w-full h-full" />
             </div>
           </div>
 
@@ -122,8 +110,8 @@ export default function ParentLoginPage() {
               </label>
               <input
                 id="username" name="username" type="text" required autoComplete="username"
-                className="w-full rounded-xl px-4 py-3 text-sm text-gray-800 transition-all outline-none"
-                style={{ border: '1.5px solid #e5e7eb', background: '#fafafa' }}
+                className="w-full rounded-xl px-4 py-3 text-sm text-gray-800 outline-none"
+                style={{ border: '1.5px solid #e5e7eb', background: '#fafafa', transition: 'border-color 0.15s, box-shadow 0.15s, background 0.15s' }}
                 onFocus={e => { e.currentTarget.style.borderColor = '#059669'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(5,150,105,0.12)'; e.currentTarget.style.background = '#fff' }}
                 onBlur={e  => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.background = '#fafafa' }}
               />
@@ -136,8 +124,8 @@ export default function ParentLoginPage() {
               <div className="relative">
                 <input
                   id="password" name="password" type={showPass ? 'text' : 'password'} required autoComplete="current-password"
-                  className="w-full rounded-xl px-4 py-3 pr-11 text-sm text-gray-800 transition-all outline-none"
-                  style={{ border: '1.5px solid #e5e7eb', background: '#fafafa' }}
+                  className="w-full rounded-xl px-4 py-3 pr-11 text-sm text-gray-800 outline-none"
+                  style={{ border: '1.5px solid #e5e7eb', background: '#fafafa', transition: 'border-color 0.15s, box-shadow 0.15s, background 0.15s' }}
                   onFocus={e => { e.currentTarget.style.borderColor = '#059669'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(5,150,105,0.12)'; e.currentTarget.style.background = '#fff' }}
                   onBlur={e  => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.background = '#fafafa' }}
                 />
@@ -149,12 +137,15 @@ export default function ParentLoginPage() {
             </div>
 
             <button type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-bold text-white transition-all mt-2"
+              className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-sm font-bold text-white mt-2"
               style={{
                 background: loading ? '#9ca3af' : 'linear-gradient(90deg, #059669 0%, #3b82f6 100%)',
                 boxShadow: loading ? 'none' : '0 4px 20px rgba(5,150,105,0.3)',
                 cursor: loading ? 'not-allowed' : 'pointer',
-              }}>
+                transition: 'transform 0.15s, box-shadow 0.15s',
+              }}
+              onMouseEnter={e => { if (!loading) { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(5,150,105,0.4)' } }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = loading ? 'none' : '0 4px 20px rgba(5,150,105,0.3)' }}>
               {loading ? (
                 <><svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
