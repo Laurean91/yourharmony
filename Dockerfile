@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY prisma ./prisma
 COPY prisma.config.ts ./
-CMD ["node_modules/.bin/prisma", "migrate", "deploy"]
+CMD ["node_modules/.bin/prisma", "db", "push", "--skip-generate"]
 
 # ── Production ────────────────────────────────────────────────────────────────
 FROM base AS runner
