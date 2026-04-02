@@ -89,7 +89,33 @@
 - Bottom nav: `flex-1 min-h-[44px]` на каждый пункт, `env(safe-area-inset-bottom)` для iPhone notch
 - Main: `padding-bottom: calc(64px + env(safe-area-inset-bottom))`
 
-### 6. TypeScript проверка
+### 6. Визуальные улучшения кабинета родителя
+
+**Логотип** (`public/logo.svg`):
+- Создан правильный SVG-логотип (два прямоугольника: фиолетовый + оранжево-розовый, белые звёзды)
+- Удалён старый `public/logo.png` с театральными масками
+- Логотип используется через `<Image src="/logo.svg">` в layout, login, dashboard
+
+**OG-изображение**:
+- `public/og-image.png` и `public/og-image.webp` — заменены на новые с правильным брендингом
+- Тёмный градиентный фон, логотип, текст «Гармония / Английский для детей и взрослых»
+
+**Кабинет родителя** — визуальный polish:
+- `src/app/parent/layout.tsx`: dot-grid фон в main, изумрудный border-top в сайдбаре, активный пункт с левой полоской
+- `src/app/parent/page.tsx`: приветственный блок с gradient-фоном, staggered анимация карточек, цветные полоски stats
+- `src/app/parent/login/page.tsx`: анимированные фоновые орбы (`animate-float-pulse`), hover на кнопке
+- `src/app/globals.css`: `.student-card`, `.quick-link`, `@keyframes fadeSlideUp`, `@keyframes floatPulse`
+
+**Navbar** (`src/components/Navbar.tsx`):
+- Кнопка-иконка `UserCircle` (градиент фиолетовый→оранжевый) ведёт на `/parent`
+- Desktop: круглая иконка без текста; Mobile: кнопка с текстом «Кабинет родителя» в меню
+
+### 7. Docker / Production fixes
+- `Dockerfile`: migrator использует `db push --skip-generate` вместо `migrate deploy`
+- `docker-compose.yml`: сервис `nextjs` зависит от `migrator: condition: service_completed_successfully`
+- Страницы `/parent/attendance`, `/parent/grades`, `/parent/schedule` обёрнуты в `<Suspense>` (требование Next.js 16 для `useSearchParams()`)
+
+### 8. TypeScript проверка
 - Все файлы: `npx tsc --noEmit` → 0 ошибок
 - Prisma Client перегенерирован после `db push`
 
@@ -117,11 +143,18 @@
 - `src/app/bigbos/students/[id]/report/page.tsx` — новый, PDF отчёт
 - `src/app/bigbos/students/[id]/report/PrintButton.tsx` — новый, клиентская кнопка
 - `src/components/StudentModal.tsx` — кнопка PDF отчёта
-- `src/app/parent/schedule/page.tsx` — отображение homework
-- `src/app/parent/grades/page.tsx` — отображение homework + files
-- `src/app/parent/page.tsx` — мобильная оптимизация
-- `src/app/parent/attendance/page.tsx` — мобильная оптимизация, pie chart
-- `src/app/parent/layout.tsx` — мобильная оптимизация bottom nav
+- `src/components/Navbar.tsx` — кнопка кабинета родителя
+- `src/app/parent/schedule/page.tsx` — Suspense wrapper, отображение homework
+- `src/app/parent/grades/page.tsx` — Suspense wrapper, homework + files
+- `src/app/parent/page.tsx` — визуальный polish, мобильная оптимизация
+- `src/app/parent/attendance/page.tsx` — Suspense wrapper, мобильная оптимизация
+- `src/app/parent/layout.tsx` — визуальный polish, мобильная оптимизация
+- `src/app/parent/login/page.tsx` — визуальный polish, анимации
+- `src/app/globals.css` — анимации и hover-классы
+- `public/logo.svg` — новый правильный логотип
+- `public/og-image.png` / `public/og-image.webp` — новые OG-изображения
+- `Dockerfile` — db push вместо migrate deploy
+- `docker-compose.yml` — depends_on migrator
 
 ---
 
