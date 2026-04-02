@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { CheckSquare, Check, X } from 'lucide-react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
@@ -17,7 +17,7 @@ type AttendanceData = {
   lessons: { lessonId: string; date: string; title: string | null; tag: string; attended: boolean }[]
 }
 
-export default function AttendancePage() {
+function AttendancePageInner() {
   const { toast } = useToast()
   const searchParams = useSearchParams()
   const [children, setChildren] = useState<Student[]>([])
@@ -169,5 +169,13 @@ export default function AttendancePage() {
         />
       )}
     </div>
+  )
+}
+
+export default function AttendancePage() {
+  return (
+    <Suspense>
+      <AttendancePageInner />
+    </Suspense>
   )
 }
