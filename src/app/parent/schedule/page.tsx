@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Calendar, Clock, BookOpen, BookMarked } from 'lucide-react'
 import { useToast } from '@/components/ui/toast'
@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 type Student = { id: string; name: string; tag: string }
 type Lesson  = { id: string; date: string; title: string | null; tag: string; notes: string | null; homework: string | null }
 
-export default function SchedulePage() {
+function SchedulePageInner() {
   const { toast } = useToast()
   const searchParams = useSearchParams()
   const [children,   setChildren]   = useState<Student[]>([])
@@ -128,5 +128,13 @@ export default function SchedulePage() {
         ))}
       </div>
     </div>
+  )
+}
+
+export default function SchedulePage() {
+  return (
+    <Suspense>
+      <SchedulePageInner />
+    </Suspense>
   )
 }

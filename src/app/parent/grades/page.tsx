@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Star, BookMarked, FileText, Download } from 'lucide-react'
 import { useToast } from '@/components/ui/toast'
@@ -29,7 +29,7 @@ const GRADE_COLORS: Record<number, { bg: string; text: string; label: string }> 
   1: { bg: '#fce7f3', text: '#9d174d', label: 'Плохо' },
 }
 
-export default function GradesPage() {
+function GradesPageInner() {
   const { toast } = useToast()
   const searchParams = useSearchParams()
   const [children, setChildren] = useState<Student[]>([])
@@ -200,5 +200,13 @@ export default function GradesPage() {
         })}
       </div>
     </div>
+  )
+}
+
+export default function GradesPage() {
+  return (
+    <Suspense>
+      <GradesPageInner />
+    </Suspense>
   )
 }
