@@ -3,7 +3,6 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { Calendar, Star, CheckSquare } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 export default async function ParentDashboard() {
   const session = await auth()
@@ -43,8 +42,27 @@ export default async function ParentDashboard() {
           boxShadow: '0 4px 20px rgba(5,150,105,0.08)',
         }}>
         <div className="flex items-center gap-4">
-          <div className="shrink-0 rounded-2xl overflow-hidden shadow-md" style={{ width: 52, height: 52 }}>
-            <Image src="/logo.png" width={52} height={52} alt="Гармония" className="object-cover w-full h-full" />
+          <div className="shrink-0">
+            <svg width="44" height="44" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="ph-gA" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#8B5CF6"/>
+                  <stop offset="100%" stopColor="#7C3AED"/>
+                </linearGradient>
+                <linearGradient id="ph-gB" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#F97316"/>
+                  <stop offset="100%" stopColor="#EC4899"/>
+                </linearGradient>
+              </defs>
+              <rect x="4" y="4" width="64" height="48" rx="14" fill="url(#ph-gA)"/>
+              <polygon points="52,52 65,52 61,64" fill="#7C3AED"/>
+              <rect x="36" y="54" width="58" height="40" rx="12" fill="url(#ph-gB)"/>
+              <polygon points="40,54 52,54 43,44" fill="#F97316"/>
+              <path d="M22 28 L23.1 24.9 L26 23.8 L23.1 22.7 L22 19.6 L20.9 22.7 L18 23.8 L20.9 24.9Z" fill="white" opacity="0.95"/>
+              <path d="M36 28 L37.1 24.9 L40 23.8 L37.1 22.7 L36 19.6 L34.9 22.7 L32 23.8 L34.9 24.9Z" fill="white" opacity="0.88"/>
+              <path d="M50 28 L51.1 24.9 L54 23.8 L51.1 22.7 L50 19.6 L48.9 22.7 L46 23.8 L48.9 24.9Z" fill="white" opacity="0.75"/>
+              <path d="M50 70 Q65 80 80 70" stroke="white" strokeWidth="2.8" fill="none" strokeLinecap="round" opacity="0.85"/>
+            </svg>
           </div>
           <div>
             <h1 className="text-2xl font-extrabold text-gray-900">
