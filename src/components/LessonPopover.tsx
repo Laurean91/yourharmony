@@ -40,7 +40,11 @@ export default function LessonPopover({
   const popoverHeight = editMode ? 480 : 300
   const pos = calcPopoverPosition(
     anchorRect, POPOVER_WIDTH, popoverHeight,
-    { width: window.innerWidth, height: window.innerHeight, scrollY: window.scrollY }
+    {
+      width: typeof window !== 'undefined' ? window.innerWidth : 1280,
+      height: typeof window !== 'undefined' ? window.innerHeight : 800,
+      scrollY: typeof window !== 'undefined' ? window.scrollY : 0,
+    }
   )
 
   const lDate = new Date(lesson.date)
@@ -65,12 +69,15 @@ export default function LessonPopover({
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setEditLoading(true)
-    const formData = new FormData(e.currentTarget)
-    const date = formData.get('date') as string
-    const time = formData.get('time') as string
-    formData.set('date', `${date}T${time}:00`)
-    await onEdit(lesson.id, formData, editStudentIds)
-    setEditLoading(false)
+    try {
+      const formData = new FormData(e.currentTarget)
+      const date = formData.get('date') as string
+      const time = formData.get('time') as string
+      formData.set('date', `${date}T${time}:00`)
+      await onEdit(lesson.id, formData, editStudentIds)
+    } finally {
+      setEditLoading(false)
+    }
   }
 
   function toggleEditStudent(id: string) {
