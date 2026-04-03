@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
-import { Calendar, Star, CheckSquare } from 'lucide-react'
+import { Calendar, Star, CheckSquare, Library, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import StudentPhotoUpload from '../../components/StudentPhotoUpload'
@@ -138,6 +138,19 @@ export default async function ParentDashboard() {
 
   if (!parent) redirect('/parent/login')
 
+  const studentTags = [...new Set(parent.students.map(ps => ps.student.tag))]
+  const [libraryCount, libraryRecent] = await Promise.all([
+    prisma.libraryFile.count({
+      where: { OR: [{ targetTag: 'Все' }, ...(studentTags.length ? [{ targetTag: { in: studentTags } }] : [])] },
+    }),
+    prisma.libraryFile.findMany({
+      where: { OR: [{ targetTag: 'Все' }, ...(studentTags.length ? [{ targetTag: { in: studentTags } }] : [])] },
+      orderBy: { createdAt: 'desc' },
+      take: 3,
+      select: { title: true, category: true },
+    }),
+  ])
+
   const now = new Date()
 
   return (
@@ -162,76 +175,6 @@ export default async function ParentDashboard() {
           </div>
         </div>
       </div>
-
-      {/* ── Star miniature teaser ── */}
-      {parent.students.length > 0 && (
-        <Link href="/parent/stars" className="block mb-5 animate-fade-slide-up">
-          <div
-            className="rounded-2xl overflow-hidden flex items-stretch transition-shadow hover:shadow-md active:scale-[0.99]"
-            style={{
-              background: '#fff',
-              border: '1.5px solid #d1fae5',
-              boxShadow: '0 4px 20px rgba(5,150,105,0.08)',
-            }}
-          >
-            {/* Space portal — left accent panel */}
-            <div
-              className="relative flex items-center justify-center flex-shrink-0"
-              style={{
-                width: 76,
-                background: 'linear-gradient(160deg, #1e1b4b 0%, #2d1b69 60%, #0f172a 100%)',
-              }}
-            >
-              {/* tiny star dots */}
-              <svg className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true">
-                {[5,18,32,48,62,74,88,95,12,55,78,38,65,25,42,85].map((x, i) => (
-                  <circle key={i} cx={`${x}%`} cy={`${[15,65,30,80,10,50,25,70,45,5,85,55,35,90,20,60][i]}%`}
-                    r={i % 3 === 0 ? 0.9 : 0.5} fill="white" opacity={0.15 + (i % 4) * 0.07} />
-                ))}
-              </svg>
-              {/* 3 mini planets */}
-              <div className="relative z-10" style={{ width: 40, height: 40 }}>
-                <div className="absolute rounded-full"
-                  style={{ top: 0, left: 8, width: 20, height: 20, background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)', boxShadow: '0 0 8px rgba(139,92,246,0.6)' }} />
-                <div className="absolute rounded-full"
-                  style={{ bottom: 0, right: 0, width: 15, height: 15, background: 'linear-gradient(135deg, #F97316, #EF4444)', boxShadow: '0 0 6px rgba(249,115,22,0.5)' }} />
-                <div className="absolute rounded-full"
-                  style={{ top: 14, left: 0, width: 11, height: 11, background: 'linear-gradient(135deg, #06B6D4, #3B82F6)', boxShadow: '0 0 5px rgba(6,182,212,0.4)' }} />
-              </div>
-            </div>
-
-            {/* Main info */}
-            <div className="flex-1 px-3 py-3.5 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#F59E0B" aria-hidden="true">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-                <span className="font-extrabold text-gray-800 whitespace-nowrap" style={{ fontSize: 13 }}>Звёздная карта</span>
-              </div>
-              <p className="text-xs text-gray-400 mt-0.5 leading-tight">Посмотри место среди учеников</p>
-            </div>
-
-            {/* Star counts per child */}
-            <div className="flex items-center gap-2 pr-4 flex-shrink-0">
-              {parent.students.map(({ student }) => {
-                const stars = calcStars(student.lessons)
-                return (
-                  <div key={student.id} className="flex flex-col items-center">
-                    <span className="font-black text-xl leading-none" style={{ color: '#D97706' }}>{stars}</span>
-                    <span className="text-[10px] text-gray-400 mt-0.5 max-w-[44px] truncate">
-                      {student.name.split(' ')[0]}
-                    </span>
-                  </div>
-                )
-              })}
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d1fae5" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"
-                style={{ color: '#9ca3af' }}>
-                <path d="M9 18l6-6-6-6" stroke="#9ca3af"/>
-              </svg>
-            </div>
-          </div>
-        </Link>
-      )}
 
       <div className="space-y-5">
         {parent.students.map(({ student }, idx) => {
@@ -436,6 +379,80 @@ export default async function ParentDashboard() {
           )
         })}
       </div>
+
+      {/* ── Quick-access teasers: Stars + Library ── */}
+      {(parent.students.length > 0 || libraryCount > 0) && (
+        <div className={`grid gap-3 mt-5 animate-fade-slide-up ${parent.students.length > 0 && libraryCount > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+
+          {/* Stars card */}
+          {parent.students.length > 0 && (
+            <Link href="/parent/stars" className="block group">
+              <div className="rounded-2xl p-4 h-full flex flex-col gap-3 transition-all hover:shadow-md active:scale-[0.98]"
+                style={{ background: '#fff', border: '1.5px solid #d1fae5', boxShadow: '0 4px 20px rgba(5,150,105,0.07)' }}>
+
+                <div className="flex items-center justify-between">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)' }}>
+                    <Sparkles size={17} style={{ color: '#d97706' }} />
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round">
+                    <path d="M9 18l6-6-6-6" stroke="#d1fae5" className="group-hover:stroke-emerald-400 transition-colors"/>
+                  </svg>
+                </div>
+
+                <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                  {parent.students.map(({ student }) => {
+                    const stars = calcStars(student.lessons)
+                    return (
+                      <div key={student.id} className="flex items-baseline gap-1">
+                        <span className="text-2xl font-black leading-none" style={{ color: '#d97706' }}>{stars}</span>
+                        <span className="text-[10px] text-gray-400">⭐</span>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <div>
+                  <p className="text-xs font-bold text-gray-700 leading-tight">Звёздная карта</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">Рейтинг среди учеников</p>
+                </div>
+              </div>
+            </Link>
+          )}
+
+          {/* Library card */}
+          {libraryCount > 0 && (
+            <Link href="/parent/library" className="block group">
+              <div className="rounded-2xl p-4 h-full flex flex-col gap-3 transition-all hover:shadow-md active:scale-[0.98]"
+                style={{ background: '#fff', border: '1.5px solid #d1fae5', boxShadow: '0 4px 20px rgba(5,150,105,0.07)' }}>
+
+                <div className="flex items-center justify-between">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: 'linear-gradient(135deg, #d1fae5, #a7f3d0)' }}>
+                    <Library size={17} style={{ color: '#059669' }} />
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round">
+                    <path d="M9 18l6-6-6-6" stroke="#d1fae5" className="group-hover:stroke-emerald-400 transition-colors"/>
+                  </svg>
+                </div>
+
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-black leading-none" style={{ color: '#059669' }}>{libraryCount}</span>
+                  <span className="text-[10px] text-gray-400">{libraryCount < 5 ? 'файла' : 'файлов'}</span>
+                </div>
+
+                <div>
+                  <p className="text-xs font-bold text-gray-700 leading-tight">Литература</p>
+                  {libraryRecent[0] && (
+                    <p className="text-[10px] text-gray-400 mt-0.5 truncate leading-tight">{libraryRecent[0].title}</p>
+                  )}
+                </div>
+              </div>
+            </Link>
+          )}
+
+        </div>
+      )}
 
       {parent.students.length === 0 && (
         <div className="text-center py-16 text-gray-400 animate-fade-slide-up">

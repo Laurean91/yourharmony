@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Users, CalendarDays, FileText,
-  Globe, TrendingUp, X, ExternalLink, BookOpen, UserCheck
+  Globe, TrendingUp, X, ExternalLink, BookOpen, UserCheck, Library
 } from 'lucide-react'
 import SignOutButton from './SignOutButton'
 
@@ -16,6 +16,7 @@ const navItems = [
   { label: 'Родители',         href: '/bigbos/parents',  icon: UserCheck,       exact: false },
   { label: 'Финансы',          href: '/bigbos/finance',  icon: TrendingUp,      exact: false },
   { label: 'Блог',             href: '/bigbos/blog',     icon: FileText,        exact: false },
+  { label: 'Библиотека',       href: '/bigbos/library',  icon: Library,         exact: false },
   { label: 'Управление сайтом',href: '/bigbos/landing',  icon: Globe,           exact: false },
 ]
 

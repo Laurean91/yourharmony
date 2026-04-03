@@ -119,6 +119,20 @@ model Post {
   @@index([createdAt])
 }
 
+model LibraryFile {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  url         String
+  name        String
+  size        Int
+  category    String?
+  targetTag   String   @default("Все")
+  createdAt   DateTime @default(now())
+
+  @@index([targetTag])
+}
+
 // ─── Auth & Roles ────────────────────────────────────────────────────────────
 
 enum Role {

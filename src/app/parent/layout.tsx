@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
-import { Home, Calendar, Star, CheckSquare, LogOut, Sparkles } from 'lucide-react'
+import { Home, Calendar, Star, CheckSquare, LogOut, Sparkles, Library } from 'lucide-react'
 
 const NAV = [
   { href: '/parent',            label: 'Главная',      mobile: 'Главная',   icon: Home },
@@ -12,6 +12,7 @@ const NAV = [
   { href: '/parent/grades',     label: 'Успеваемость', mobile: 'Оценки',    icon: Star },
   { href: '/parent/attendance', label: 'Посещаемость', mobile: 'Посещения', icon: CheckSquare },
   { href: '/parent/stars',      label: 'Звёзды',       mobile: 'Звёзды',   icon: Sparkles },
+  { href: '/parent/library',    label: 'Литература',   mobile: 'Книги',    icon: Library },
 ]
 
 // Subtle dot-grid pattern as inline SVG data URL
@@ -84,10 +85,10 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
           const active = pathname === href
           return (
             <Link key={href} href={href}
-              className="flex flex-col items-center gap-0.5 flex-1 py-2 rounded-xl transition-all min-h-[44px] justify-center"
+              className="flex flex-col items-center gap-0.5 flex-1 py-1.5 rounded-xl transition-all min-h-[44px] justify-center"
               style={{ color: active ? '#059669' : '#9ca3af' }}>
-              <Icon size={20} />
-              <span className="text-[9px] font-medium truncate max-w-full px-0.5">{mobile}</span>
+              <Icon size={18} />
+              <span className="text-[8px] font-medium truncate max-w-full px-0.5">{mobile}</span>
             </Link>
           )
         })}
