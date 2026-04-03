@@ -4,13 +4,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
-import { Home, Calendar, Star, CheckSquare, LogOut } from 'lucide-react'
+import { Home, Calendar, Star, CheckSquare, LogOut, Sparkles } from 'lucide-react'
 
 const NAV = [
-  { href: '/parent',            label: 'Главная',      icon: Home },
-  { href: '/parent/schedule',   label: 'Расписание',   icon: Calendar },
-  { href: '/parent/grades',     label: 'Успеваемость', icon: Star },
-  { href: '/parent/attendance', label: 'Посещаемость', icon: CheckSquare },
+  { href: '/parent',            label: 'Главная',      mobile: 'Главная',   icon: Home },
+  { href: '/parent/schedule',   label: 'Расписание',   mobile: 'Расписание', icon: Calendar },
+  { href: '/parent/grades',     label: 'Успеваемость', mobile: 'Оценки',    icon: Star },
+  { href: '/parent/attendance', label: 'Посещаемость', mobile: 'Посещения', icon: CheckSquare },
+  { href: '/parent/stars',      label: 'Звёзды',       mobile: 'Звёзды',   icon: Sparkles },
 ]
 
 // Subtle dot-grid pattern as inline SVG data URL
@@ -79,14 +80,14 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
           boxShadow: '0 -4px 20px rgba(5,150,105,0.08)',
           paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
         }}>
-        {NAV.map(({ href, label, icon: Icon }) => {
+        {NAV.map(({ href, mobile, icon: Icon }) => {
           const active = pathname === href
           return (
             <Link key={href} href={href}
               className="flex flex-col items-center gap-0.5 flex-1 py-2 rounded-xl transition-all min-h-[44px] justify-center"
               style={{ color: active ? '#059669' : '#9ca3af' }}>
-              <Icon size={22} />
-              <span className="text-[10px] font-medium">{label}</span>
+              <Icon size={20} />
+              <span className="text-[9px] font-medium truncate max-w-full px-0.5">{mobile}</span>
             </Link>
           )
         })}

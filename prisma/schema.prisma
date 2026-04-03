@@ -32,6 +32,7 @@ model Student {
   phone     String?
   tag       String          @default("Индивидуальное")
   notes     String?
+  photoUrl  String?
   createdAt DateTime        @default(now())
   lessons   LessonStudent[]
   parents   ParentStudent[]
