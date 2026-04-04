@@ -119,7 +119,7 @@ export function LandingHero({ data = DEFAULT_HERO }: { data?: HeroSettings }) {
           onClick={() => setShowModal(true)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="px-8 py-4 bg-gradient-to-r from-purple-500 to-orange-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow ring-2 ring-white/30 animate-glow-pulse"
+          className="px-8 py-4 bg-gradient-to-r from-purple-500 to-orange-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-shadow animate-glow-pulse"
         >
           Записаться на занятие
         </motion.button>

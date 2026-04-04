@@ -70,7 +70,7 @@ export default async function StudentReportPage({ params }: { params: Promise<{ 
           style={{ background: '#f3f4f6' }}>
           ← Назад
         </a>
-        <PrintButton />
+        <PrintButton studentId={id} studentName={student.name} />
       </div>
 
       <div className="report-page max-w-[780px] mx-auto px-6 py-10 md:py-12 bg-white min-h-screen">

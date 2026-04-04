@@ -78,55 +78,83 @@ export default async function AdminDashboard() {
         prevRevenue={prevRevenue}
       />
 
-      {/* ── Finance quick block ── */}
-      <div className="rounded-2xl p-6 mb-5" style={card(true)}>
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-2.5">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: 'rgba(124,58,237,.1)' }}
-            >
-              <TrendingUp size={17} style={{ color: '#7c3aed' }} />
+      {/* ── Finance + Students grid ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+
+        {/* Finance quick block */}
+        <div className="rounded-2xl p-6" style={card(true)}>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2.5">
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{ background: 'rgba(124,58,237,.1)' }}
+              >
+                <TrendingUp size={17} style={{ color: '#7c3aed' }} />
+              </div>
+              <h2 className="text-base font-semibold text-gray-800">Финансы</h2>
             </div>
-            <h2 className="text-base font-semibold text-gray-800">Финансы</h2>
+            <Link
+              href="/bigbos/finance"
+              className="flex items-center gap-1 text-xs font-semibold hover:opacity-70 transition-opacity"
+              style={{ color: '#7c3aed' }}
+            >
+              Аналитика <ArrowUpRight size={13} />
+            </Link>
           </div>
-          <Link
-            href="/bigbos/finance"
-            className="flex items-center gap-1 text-xs font-semibold hover:opacity-70 transition-opacity"
-            style={{ color: '#7c3aed' }}
-          >
-            Аналитика <ArrowUpRight size={13} />
-          </Link>
+
+          <div className="flex flex-col gap-4">
+            <div>
+              <p className="text-xs text-gray-400 mb-1 uppercase tracking-wide font-medium">Доход в этом месяце</p>
+              <p className="text-4xl font-extrabold" style={{ color: '#7c3aed' }}>
+                {financeStats.totalThisMonth.toLocaleString('ru-RU')}{' '}
+                <span className="text-2xl">₽</span>
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <div
+                className="flex-1 px-4 py-2.5 rounded-xl"
+                style={{ background: 'rgba(124,58,237,.06)', border: '1px solid rgba(124,58,237,.1)' }}
+              >
+                <p className="text-[10px] text-gray-400 mb-0.5 uppercase tracking-wide">Индивидуальные</p>
+                <p className="text-lg font-bold text-gray-800">
+                  {financeStats.totalIndividual.toLocaleString('ru-RU')} ₽
+                </p>
+              </div>
+              <div
+                className="flex-1 px-4 py-2.5 rounded-xl"
+                style={{ background: 'rgba(249,115,22,.06)', border: '1px solid rgba(249,115,22,.12)' }}
+              >
+                <p className="text-[10px] text-gray-400 mb-0.5 uppercase tracking-wide">Групповые</p>
+                <p className="text-lg font-bold text-gray-800">
+                  {financeStats.totalGroup.toLocaleString('ru-RU')} ₽
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-end gap-5">
-          <div>
-            <p className="text-xs text-gray-400 mb-1 uppercase tracking-wide font-medium">Доход в этом месяце</p>
-            <p className="text-4xl font-extrabold" style={{ color: '#7c3aed' }}>
-              {financeStats.totalThisMonth.toLocaleString('ru-RU')}{' '}
-              <span className="text-2xl">₽</span>
+        {/* Students */}
+        <div className="rounded-2xl p-6" style={card()}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-semibold text-gray-800">Мои ученики</h2>
+            <Link
+              href="/bigbos/students"
+              className="flex items-center gap-1 text-xs font-semibold hover:opacity-70 transition-opacity"
+              style={{ color: '#7c3aed' }}
+            >
+              Все ученики <ArrowUpRight size={13} />
+            </Link>
+          </div>
+          {students.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">
+              Учеников пока нет.{' '}
+              <Link href="/bigbos/students" className="font-semibold hover:underline" style={{ color: '#7c3aed' }}>
+                Добавить →
+              </Link>
             </p>
-          </div>
-          <div className="flex gap-4 pb-1">
-            <div
-              className="px-4 py-2.5 rounded-xl"
-              style={{ background: 'rgba(124,58,237,.06)', border: '1px solid rgba(124,58,237,.1)' }}
-            >
-              <p className="text-[10px] text-gray-400 mb-0.5 uppercase tracking-wide">Индивидуальные</p>
-              <p className="text-lg font-bold text-gray-800">
-                {financeStats.totalIndividual.toLocaleString('ru-RU')} ₽
-              </p>
-            </div>
-            <div
-              className="px-4 py-2.5 rounded-xl"
-              style={{ background: 'rgba(249,115,22,.06)', border: '1px solid rgba(249,115,22,.12)' }}
-            >
-              <p className="text-[10px] text-gray-400 mb-0.5 uppercase tracking-wide">Групповые</p>
-              <p className="text-lg font-bold text-gray-800">
-                {financeStats.totalGroup.toLocaleString('ru-RU')} ₽
-              </p>
-            </div>
-          </div>
+          ) : (
+            <DashboardStudentGrid students={students as any} />
+          )}
         </div>
       </div>
 
@@ -186,29 +214,6 @@ export default async function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── Students ── */}
-      <div className="rounded-2xl p-6" style={card()}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-gray-800">Мои ученики</h2>
-          <Link
-            href="/bigbos/students"
-            className="flex items-center gap-1 text-xs font-semibold hover:opacity-70 transition-opacity"
-            style={{ color: '#7c3aed' }}
-          >
-            Все ученики <ArrowUpRight size={13} />
-          </Link>
-        </div>
-        {students.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-8">
-            Учеников пока нет.{' '}
-            <Link href="/bigbos/students" className="font-semibold hover:underline" style={{ color: '#7c3aed' }}>
-              Добавить →
-            </Link>
-          </p>
-        ) : (
-          <DashboardStudentGrid students={students as any} />
-        )}
-      </div>
     </div>
   )
 }

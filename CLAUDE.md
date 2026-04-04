@@ -370,6 +370,48 @@ cd api && pytest tests/ -v --cov=api
 
 ## История изменений
 
+### UX-фиксы, PDF-отчёт на сервере (2026-04-04)
+
+#### Видимость текста в полях ввода
+- **Проблема**: текст в `input`, `select`, `textarea` был серым на всех страницах
+- **Решение**: глобальные правила в `src/app/globals.css`:
+  ```css
+  input, select, textarea { color: #111827; }
+  input::placeholder, textarea::placeholder { color: #9ca3af; }
+  ```
+- Применяется ко всей админке `/bigbos` и кабинету родителя `/parent`
+
+#### Кнопка «Записаться» на лендинге
+- Убрана белая обводка `ring-2 ring-white/30` с кнопки Hero в `src/components/LandingClient.tsx`
+
+#### Дашборд админки — сетка Финансы + Ученики
+- Блоки «Финансы» и «Мои ученики» перенесены в общий `grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5` в `src/app/bigbos/page.tsx`
+- На `lg+` — рядом, на мобильном — стопкой
+- `DashboardStudentGrid` сужен до `grid-cols-1 sm:grid-cols-2` (карточки в половине ширины)
+- Старый отдельный блок учеников удалён
+
+#### PDF-отчёт ученика — полная переработка
+- **Проблема 1**: `PrintButton` вызывал `window.print()` → открывался диалог принтера вместо скачивания
+- **Проблема 2**: `html2canvas` падал с ошибкой `"Attempting to parse an unsupported color function 'lab'"` — Tailwind v4 использует `oklch()`/`lab()` цвета, несовместимые с `html2canvas`
+- **Проблема 3**: Кириллица в PDF отображалась иероглифами — встроенные PDF-шрифты (`Helvetica`) не содержат кириллические глифы
+
+**Решение**: серверная генерация PDF через `@react-pdf/renderer`:
+- `src/app/api/admin/students/[id]/report/route.tsx` — новый Route Handler (`GET`)
+- Шрифт Roboto с кириллицей зарегистрирован через `Font.register()`:
+  ```ts
+  Font.register({
+    family: 'Roboto',
+    fonts: [
+      { src: path.join(process.cwd(), 'public/fonts/Roboto-Regular.ttf'), fontWeight: 400 },
+      { src: path.join(process.cwd(), 'public/fonts/Roboto-Bold.ttf'),    fontWeight: 700 },
+    ],
+  })
+  ```
+- Шрифты: `public/fonts/Roboto-Regular.ttf` (503 КБ) и `public/fonts/Roboto-Bold.ttf` (502 КБ) — **должны быть в git и задеплоены на VPS**
+- `PrintButton.tsx` переписан как `<a href="/api/admin/students/{id}/report" download="...">` — браузер скачивает без диалога
+- Ответ: `Content-Type: application/pdf` + `Content-Disposition: attachment; filename*=UTF-8''...`
+- Жирный текст требует явного `fontWeight: 700` в `@react-pdf/renderer` (helper: `const bold = { fontFamily: 'Roboto', fontWeight: 700 } as const`)
+
 ### Полезная литература — библиотека файлов (2026-04-03)
 
 #### Архитектура
