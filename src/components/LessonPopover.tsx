@@ -84,12 +84,19 @@ export default function LessonPopover({
     setEditStudentIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
   }
 
+  const vh = typeof window !== 'undefined' ? window.innerHeight : 800
+  // Clamp top so popover never goes above viewport; compute available height from anchor
+  const safeTop = Math.max(8, pos.top)
+  const desktopMaxHeight = pos.showAbove
+    ? Math.min(anchorRect.top - 18, vh * 0.85)   // space above anchor
+    : Math.min(vh - anchorRect.bottom - 18, vh * 0.85) // space below anchor
+
   const desktopWrapperStyle: React.CSSProperties = {
     position: 'fixed', inset: 0, zIndex: 50, pointerEvents: 'none',
   }
   const desktopPopoverStyle: React.CSSProperties = {
     position: 'fixed',
-    top: pos.top,
+    top: safeTop,
     left: pos.left,
     width: POPOVER_WIDTH,
     background: 'white',
@@ -97,7 +104,7 @@ export default function LessonPopover({
     borderRadius: 14,
     boxShadow: '0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08)',
     padding: 14,
-    maxHeight: '80vh',
+    maxHeight: Math.max(desktopMaxHeight, 200),
     overflowY: 'auto',
     zIndex: 51,
     pointerEvents: 'all',

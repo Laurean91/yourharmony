@@ -132,6 +132,8 @@ export default function WeekSchedule({
 
   function handleDragStart(lessonId: string) {
     dragLessonId.current = lessonId
+    setSelected(null)
+    setAnchorRect(null)
   }
 
   function handleDragOver(e: React.DragEvent, dateKey: string, hour: number) {
@@ -164,6 +166,10 @@ export default function WeekSchedule({
       const dx = touch.clientX - touchStartPos.current.x
       const dy = touch.clientY - touchStartPos.current.y
       if (!touchDragging.current && Math.sqrt(dx * dx + dy * dy) < 10) return
+      if (!touchDragging.current) {
+        setSelected(null)
+        setAnchorRect(null)
+      }
       touchDragging.current = true
       e.preventDefault()
       // Temporarily disable pointer events on the dragged element so elementFromPoint finds what's underneath
@@ -395,11 +401,17 @@ export default function WeekSchedule({
                           background: isIndividual
                             ? (isActive ? 'rgba(124,58,237,0.2)' : 'rgba(139,92,246,0.12)')
                             : (isActive ? 'rgba(249,115,22,0.2)' : 'rgba(251,146,60,0.12)'),
-                          border: isActive
+                          borderTop: isActive
                             ? `2px solid ${isIndividual ? '#7c3aed' : '#f97316'}`
                             : `1px solid ${isIndividual ? 'rgba(124,58,237,0.25)' : 'rgba(249,115,22,0.25)'}`,
-                          color: isIndividual ? '#5b21b6' : '#c2410c',
+                          borderRight: isActive
+                            ? `2px solid ${isIndividual ? '#7c3aed' : '#f97316'}`
+                            : `1px solid ${isIndividual ? 'rgba(124,58,237,0.25)' : 'rgba(249,115,22,0.25)'}`,
+                          borderBottom: isActive
+                            ? `2px solid ${isIndividual ? '#7c3aed' : '#f97316'}`
+                            : `1px solid ${isIndividual ? 'rgba(124,58,237,0.25)' : 'rgba(249,115,22,0.25)'}`,
                           borderLeft: `3px solid ${isIndividual ? '#7c3aed' : '#f97316'}`,
+                          color: isIndividual ? '#5b21b6' : '#c2410c',
                           boxShadow: isActive
                             ? `0 2px 12px ${isIndividual ? 'rgba(124,58,237,0.25)' : 'rgba(249,115,22,0.25)'}`
                             : 'none',
