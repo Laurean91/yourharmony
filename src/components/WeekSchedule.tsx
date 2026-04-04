@@ -75,7 +75,6 @@ export default function WeekSchedule({
   const [lessons, setLessons] = useState<Lesson[]>(initialLessons)
   const [selected, setSelected] = useState<Lesson | null>(null)
   const [addSlot, setAddSlot] = useState<{ date: string; time: string } | null>(null)
-  const [addLoading, setAddLoading] = useState(false)
   const [pendingAttendance, setPendingAttendance] = useState<string | null>(null)
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null)
   // Mouse drag-and-drop
@@ -455,16 +454,11 @@ export default function WeekSchedule({
           students={students}
           onClose={() => { setAddSlot(null); setAnchorRect(null) }}
           onSubmit={async (formData, studentIds) => {
-            setAddLoading(true)
-            try {
-              studentIds.forEach(id => formData.append('studentIds', id))
-              await createLesson(formData)
-              setAddSlot(null)
-              setAnchorRect(null)
-              window.location.reload()
-            } finally {
-              setAddLoading(false)
-            }
+            studentIds.forEach(id => formData.append('studentIds', id))
+            await createLesson(formData)
+            setAddSlot(null)
+            setAnchorRect(null)
+            window.location.reload()
           }}
         />
       )}
