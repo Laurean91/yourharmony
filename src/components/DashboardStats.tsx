@@ -2,9 +2,10 @@
 
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, CartesianGrid, Legend,
+  ResponsiveContainer, CartesianGrid,
 } from 'recharts'
 import { CalendarDays, BarChart2, GraduationCap, TrendingUp } from 'lucide-react'
+import { useAdminTheme } from '@/contexts/AdminThemeContext'
 
 interface Booking  { createdAt: Date | string; status: string }
 interface Lesson   { date: Date | string }
@@ -18,7 +19,6 @@ interface Props {
   prevRevenue:  number
 }
 
-/* ── helpers ── */
 function getLast6Months() {
   const months: { label: string; key: string }[] = []
   const now = new Date()
@@ -58,49 +58,71 @@ function getThisMonthCount(
   }).length
 }
 
-/* ── custom tooltip ── */
-function CustomTooltip({ active, payload, label }: any) {
+function CustomTooltip({ active, payload, label, isDark }: any) {
   if (!active || !payload?.length) return null
   return (
     <div style={{
-      background: '#fff',
-      border: '1px solid rgba(139,92,246,0.15)',
+      background: isDark ? 'rgba(28,16,69,0.95)' : '#fff',
+      border: `1px solid ${isDark ? 'rgba(167,139,250,0.2)' : 'rgba(139,92,246,0.15)'}`,
       borderRadius: 12,
       padding: '10px 14px',
       boxShadow: '0 8px 24px rgba(109,40,217,0.12)',
       fontSize: 12,
     }}>
-      <p style={{ color: '#6b7280', marginBottom: 4, fontWeight: 600 }}>{label}</p>
+      <p style={{ color: isDark ? 'rgba(167,139,250,0.7)' : '#6b7280', marginBottom: 4, fontWeight: 600 }}>{label}</p>
       {payload.map((p: any) => (
         <p key={p.name} style={{ color: p.color, fontWeight: 600, margin: '2px 0' }}>
-          {p.name}: <span style={{ color: '#111' }}>{p.value}</span>
+          {p.name}: <span style={{ color: isDark ? '#fff' : '#111' }}>{p.value}</span>
         </p>
       ))}
     </div>
   )
 }
 
-/* ── delta badge ── */
-function DeltaBadge({ current, prev }: { current: number; prev: number }) {
-  if (prev === 0) return null
-  const pct = Math.round(((current - prev) / prev) * 100)
-  const up = pct >= 0
-  return (
-    <span
-      className="inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-md"
-      style={{
-        background: up ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
-        color: up ? '#16a34a' : '#dc2626',
-      }}
-    >
-      {up ? '▲' : '▼'} {Math.abs(pct)}%
-    </span>
-  )
-}
+const kpiConfig = [
+  {
+    key: 'revenue',
+    label: 'Доход за месяц',
+    icon: TrendingUp,
+    topBorder: 'linear-gradient(90deg, #7c3aed, #a78bfa)',
+    iconBg: (isDark: boolean) => isDark ? 'rgba(124,58,237,0.2)' : 'rgba(124,58,237,0.1)',
+    iconColor: '#7c3aed',
+    glowColor: 'rgba(124,58,237,0.25)',
+  },
+  {
+    key: 'weekLessons',
+    label: 'Занятий на неделе',
+    icon: CalendarDays,
+    topBorder: 'linear-gradient(90deg, #f97316, #fb923c)',
+    iconBg: (isDark: boolean) => isDark ? 'rgba(249,115,22,0.2)' : 'rgba(249,115,22,0.1)',
+    iconColor: '#f97316',
+    glowColor: 'rgba(249,115,22,0.2)',
+  },
+  {
+    key: 'monthLessons',
+    label: 'Занятий в месяце',
+    icon: BarChart2,
+    topBorder: 'linear-gradient(90deg, #10b981, #34d399)',
+    iconBg: (isDark: boolean) => isDark ? 'rgba(16,185,129,0.2)' : 'rgba(16,185,129,0.1)',
+    iconColor: '#10b981',
+    glowColor: 'rgba(16,185,129,0.2)',
+  },
+  {
+    key: 'newStudents',
+    label: 'Новых учеников',
+    icon: GraduationCap,
+    topBorder: 'linear-gradient(90deg, #3b82f6, #60a5fa)',
+    iconBg: (isDark: boolean) => isDark ? 'rgba(59,130,246,0.2)' : 'rgba(59,130,246,0.1)',
+    iconColor: '#3b82f6',
+    glowColor: 'rgba(59,130,246,0.2)',
+  },
+]
 
 export default function DashboardStats({ bookings, lessons, students, monthRevenue, prevRevenue }: Props) {
-  const months = getLast6Months()
+  const { theme } = useAdminTheme()
+  const isDark = theme === 'dark'
 
+  const months = getLast6Months()
   const chartData = months.map(m => ({
     name: m.label,
     Заявки: bookings.filter(b => {
@@ -117,64 +139,82 @@ export default function DashboardStats({ bookings, lessons, students, monthReven
   const monthLessons = getThisMonthCount(lessons.map(l => ({ date: l.date })), 'date')
   const newStudents  = getThisMonthCount(students.map(s => ({ createdAt: s.createdAt })), 'createdAt')
 
-  const kpiCards = [
-    {
-      label: 'Доход за месяц',
-      value: `${monthRevenue.toLocaleString('ru-RU')} ₽`,
-      icon: TrendingUp,
-      gradient: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
-      glow: 'rgba(124,58,237,0.28)',
-      extra: <DeltaBadge current={monthRevenue} prev={prevRevenue} />,
-    },
-    {
-      label: 'Занятий на неделе',
-      value: weekLessons,
-      icon: CalendarDays,
-      gradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-      glow: 'rgba(139,92,246,0.25)',
-      extra: null,
-    },
-    {
-      label: 'Занятий в месяце',
-      value: monthLessons,
-      icon: BarChart2,
-      gradient: 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)',
-      glow: 'rgba(167,139,250,0.25)',
-      extra: null,
-    },
-    {
-      label: 'Новых учеников',
-      value: newStudents,
-      icon: GraduationCap,
-      gradient: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-      glow: 'rgba(249,115,22,0.28)',
-      extra: null,
-    },
-  ]
+  const prevPct = prevRevenue > 0
+    ? Math.round(((monthRevenue - prevRevenue) / prevRevenue) * 100)
+    : null
+
+  const values: Record<string, string | number> = {
+    revenue:      `${monthRevenue.toLocaleString('ru-RU')} ₽`,
+    weekLessons,
+    monthLessons,
+    newStudents,
+  }
 
   return (
     <div className="space-y-4 mb-6">
       {/* ── KPI row ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {kpiCards.map(({ label, value, icon: Icon, gradient, glow, extra }) => (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpiConfig.map(({ key, label, icon: Icon, topBorder, iconBg, iconColor, glowColor }) => (
           <div
-            key={label}
-            className="rounded-2xl p-4 flex items-center gap-3"
-            style={{ background: gradient, boxShadow: `0 4px 20px ${glow}` }}
+            key={key}
+            className="rounded-2xl p-5 relative overflow-hidden transition-all duration-300 cursor-default"
+            style={{
+              background: 'var(--adm-bg-card)',
+              border: '1px solid var(--adm-border-card)',
+              boxShadow: 'var(--adm-shadow-card)',
+            }}
+            onMouseEnter={e => {
+              const el = e.currentTarget as HTMLDivElement
+              el.style.transform = 'translateY(-4px)'
+              el.style.boxShadow = `0 12px 32px ${glowColor}`
+            }}
+            onMouseLeave={e => {
+              const el = e.currentTarget as HTMLDivElement
+              el.style.transform = ''
+              el.style.boxShadow = 'var(--adm-shadow-card)'
+            }}
           >
+            {/* Colored top border */}
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: 'rgba(255,255,255,0.18)' }}
+              className="absolute top-0 left-0 right-0 h-[3px] rounded-t-2xl"
+              style={{ background: topBorder }}
+            />
+            {/* Subtle corner glow in dark mode */}
+            {isDark && (
+              <div
+                className="absolute top-[-10px] right-[-10px] w-[60px] h-[60px] rounded-full pointer-events-none"
+                style={{ background: glowColor, filter: 'blur(18px)', opacity: 0.5 }}
+              />
+            )}
+            {/* Icon */}
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+              style={{ background: iconBg(isDark) }}
             >
-              <Icon size={19} className="text-white" />
+              <Icon size={18} style={{ color: iconColor }} />
             </div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-medium text-white/70 leading-tight truncate">{label}</p>
-              <div className="flex items-baseline gap-1.5 mt-0.5 flex-wrap">
-                <p className="text-2xl font-extrabold text-white leading-none">{value}</p>
-                {extra}
-              </div>
-            </div>
+            {/* Value */}
+            <p
+              className="text-[26px] font-extrabold leading-none"
+              style={{ color: 'var(--adm-text-primary)', letterSpacing: '-0.04em' }}
+            >
+              {values[key]}
+            </p>
+            <p
+              className="text-[12px] mt-1 font-medium"
+              style={{ color: 'var(--adm-text-muted)' }}
+            >
+              {label}
+            </p>
+            {/* Delta — only on revenue card */}
+            {key === 'revenue' && prevPct !== null && (
+              <p
+                className="text-[11px] font-semibold mt-2 flex items-center gap-1"
+                style={{ color: prevPct >= 0 ? (isDark ? '#34d399' : '#10b981') : (isDark ? '#fb923c' : '#f97316') }}
+              >
+                {prevPct >= 0 ? '▲' : '▼'} {Math.abs(prevPct)}% vs прошлый месяц
+              </p>
+            )}
           </div>
         ))}
       </div>
@@ -183,14 +223,16 @@ export default function DashboardStats({ bookings, lessons, students, monthReven
       <div
         className="rounded-2xl p-5"
         style={{
-          background: '#fff',
-          border: '1px solid rgba(139,92,246,0.12)',
-          boxShadow: '0 2px 16px rgba(109,40,217,0.05)',
+          background: 'var(--adm-bg-card)',
+          border: '1px solid var(--adm-border-card)',
+          boxShadow: 'var(--adm-shadow-card)',
         }}
       >
         <div className="flex items-center justify-between mb-4">
-          <p className="text-sm font-semibold text-gray-800">Активность за 6 месяцев</p>
-          <div className="flex items-center gap-4 text-xs text-gray-400">
+          <p className="text-sm font-semibold" style={{ color: 'var(--adm-text-primary)' }}>
+            Активность за 6 месяцев
+          </p>
+          <div className="flex items-center gap-4 text-xs" style={{ color: 'var(--adm-text-muted)' }}>
             <span className="flex items-center gap-1.5">
               <span className="inline-block w-3 h-0.5 rounded-full bg-purple-500" />
               Заявки
@@ -204,37 +246,41 @@ export default function DashboardStats({ bookings, lessons, students, monthReven
         <ResponsiveContainer width="100%" height={140}>
           <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
             <defs>
-              <linearGradient id="gradBookings" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#7c3aed" stopOpacity={0.18} />
+              <linearGradient id="gradBookings2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%"  stopColor="#7c3aed" stopOpacity={isDark ? 0.35 : 0.18} />
                 <stop offset="95%" stopColor="#7c3aed" stopOpacity={0.01} />
               </linearGradient>
-              <linearGradient id="gradLessons" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#f97316" stopOpacity={0.15} />
+              <linearGradient id="gradLessons2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%"  stopColor="#f97316" stopOpacity={isDark ? 0.25 : 0.15} />
                 <stop offset="95%" stopColor="#f97316" stopOpacity={0.01} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(139,92,246,0.07)" vertical={false} />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={isDark ? 'rgba(167,139,250,0.08)' : 'rgba(139,92,246,0.07)'}
+              vertical={false}
+            />
             <XAxis
               dataKey="name"
-              tick={{ fontSize: 11, fill: '#9ca3af' }}
+              tick={{ fontSize: 11, fill: isDark ? 'rgba(167,139,250,0.5)' : '#9ca3af' }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
               allowDecimals={false}
-              tick={{ fontSize: 11, fill: '#9ca3af' }}
+              tick={{ fontSize: 11, fill: isDark ? 'rgba(167,139,250,0.5)' : '#9ca3af' }}
               axisLine={false}
               tickLine={false}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip isDark={isDark} />} />
             <Area
               type="monotone"
               dataKey="Заявки"
-              stroke="#7c3aed"
-              strokeWidth={2.5}
-              fill="url(#gradBookings)"
-              dot={{ r: 3, fill: '#7c3aed', strokeWidth: 0 }}
-              activeDot={{ r: 5, fill: '#7c3aed', strokeWidth: 2, stroke: '#fff' }}
+              stroke={isDark ? '#a78bfa' : '#7c3aed'}
+              strokeWidth={2}
+              fill="url(#gradBookings2)"
+              dot={{ r: 3, fill: isDark ? '#a78bfa' : '#7c3aed', strokeWidth: 0 }}
+              activeDot={{ r: 5, fill: isDark ? '#a78bfa' : '#7c3aed', strokeWidth: 2, stroke: isDark ? '#1c1045' : '#fff' }}
             />
             <Area
               type="monotone"
@@ -242,9 +288,9 @@ export default function DashboardStats({ bookings, lessons, students, monthReven
               stroke="#f97316"
               strokeWidth={2}
               strokeDasharray="5 3"
-              fill="url(#gradLessons)"
+              fill="url(#gradLessons2)"
               dot={{ r: 3, fill: '#f97316', strokeWidth: 0 }}
-              activeDot={{ r: 5, fill: '#f97316', strokeWidth: 2, stroke: '#fff' }}
+              activeDot={{ r: 5, fill: '#f97316', strokeWidth: 2, stroke: isDark ? '#1c1045' : '#fff' }}
             />
           </AreaChart>
         </ResponsiveContainer>
