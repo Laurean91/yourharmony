@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { createLesson, deleteLesson, markAttendance, updateLesson, moveLessonDate } from '@/app/actions'
 import LessonPopover from './LessonPopover'
 import AddLessonPopover from './AddLessonPopover'
+import { useAdminTheme } from '@/contexts/AdminThemeContext'
 
 interface Student {
   id: string
@@ -71,6 +72,9 @@ export default function WeekSchedule({
   lessons: Lesson[]
   students: Student[]
 }) {
+  const { theme } = useAdminTheme()
+  const isDark = theme === 'dark'
+
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
   const [lessons, setLessons] = useState<Lesson[]>(initialLessons)
   const [selected, setSelected] = useState<Lesson | null>(null)
@@ -253,12 +257,12 @@ export default function WeekSchedule({
     <div className="p-4 md:p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-gray-900">Расписание</h1>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--adm-text-primary)' }}>Расписание</h1>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
-            <button onClick={prevWeek} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-colors text-lg">←</button>
-            <span className="text-sm font-medium text-gray-700 min-w-[200px] text-center">{formatWeekRange()}</span>
-            <button onClick={nextWeek} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-600 transition-colors text-lg">→</button>
+            <button onClick={prevWeek} className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors text-lg" style={{ color: 'var(--adm-text-muted)' }}>←</button>
+            <span className="text-sm font-medium min-w-[200px] text-center" style={{ color: 'var(--adm-text-primary)' }}>{formatWeekRange()}</span>
+            <button onClick={nextWeek} className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors text-lg" style={{ color: 'var(--adm-text-muted)' }}>→</button>
           </div>
           <button
             onClick={e => {
@@ -282,10 +286,16 @@ export default function WeekSchedule({
               const isToday = key === todayKey
               return (
                 <div key={i} className="flex-1 text-center">
-                  <div className={`text-xs font-medium ${isToday ? 'text-purple-600' : 'text-gray-400'}`}>
+                  <div className="text-xs font-medium" style={{ color: isToday ? '#7c3aed' : 'var(--adm-text-muted)' }}>
                     {WEEKDAYS_SHORT[i]}
                   </div>
-                  <div className={`text-sm font-bold w-8 h-8 mx-auto flex items-center justify-center rounded-full ${isToday ? 'bg-purple-600 text-white' : 'text-gray-700'}`}>
+                  <div
+                    className="text-sm font-bold w-8 h-8 mx-auto flex items-center justify-center rounded-full"
+                    style={isToday
+                      ? { background: '#7c3aed', color: '#fff' }
+                      : { color: 'var(--adm-text-primary)' }
+                    }
+                  >
                     {day.getDate()}
                   </div>
                 </div>
@@ -320,7 +330,7 @@ export default function WeekSchedule({
               const key = toDateKey(day)
               const dayLessons = lessonsByDate[key] ?? []
               return (
-                <div key={di} className="flex-1 relative border-l border-gray-200" style={{ height: gridHeight }}>
+                <div key={di} className="flex-1 relative" style={{ height: gridHeight, borderLeft: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(139,92,246,0.12)'}` }}>
                   {/* Hour lines + click slots */}
                   {hours.map(h => {
                     const isDragOver = dragOverSlot?.dateKey === key && dragOverSlot?.hour === h
@@ -329,8 +339,15 @@ export default function WeekSchedule({
                         key={h}
                         data-datekey={key}
                         data-hour={h}
-                        className={`absolute left-0 right-0 border-t border-gray-200 cursor-pointer transition-colors group ${isDragOver ? 'bg-purple-100/70' : 'hover:bg-purple-50/50'}`}
-                        style={{ top: (h - START_HOUR) * 60 * PX_PER_MIN, height: 60 * PX_PER_MIN }}
+                        className={`absolute left-0 right-0 cursor-pointer transition-colors group`}
+                        style={{
+                          top: (h - START_HOUR) * 60 * PX_PER_MIN,
+                          height: 60 * PX_PER_MIN,
+                          borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(139,92,246,0.08)'}`,
+                          background: isDragOver
+                            ? (isDark ? 'rgba(124,58,237,0.2)' : 'rgba(139,92,246,0.1)')
+                            : undefined,
+                        }}
                         onClick={e => handleSlotClick(e, day, h)}
                         onDragOver={e => handleDragOver(e, key, h)}
                         onDragLeave={() => setDragOverSlot(null)}
@@ -399,19 +416,21 @@ export default function WeekSchedule({
                           height: Math.max(height, 28),
                           touchAction: 'none',
                           background: isIndividual
-                            ? (isActive ? 'rgba(124,58,237,0.2)' : 'rgba(139,92,246,0.12)')
-                            : (isActive ? 'rgba(249,115,22,0.2)' : 'rgba(251,146,60,0.12)'),
+                            ? (isActive ? 'rgba(124,58,237,0.25)' : (isDark ? 'rgba(139,92,246,0.22)' : 'rgba(139,92,246,0.12)'))
+                            : (isActive ? 'rgba(249,115,22,0.25)' : (isDark ? 'rgba(251,146,60,0.22)' : 'rgba(251,146,60,0.12)')),
                           borderTop: isActive
                             ? `2px solid ${isIndividual ? '#7c3aed' : '#f97316'}`
-                            : `1px solid ${isIndividual ? 'rgba(124,58,237,0.25)' : 'rgba(249,115,22,0.25)'}`,
+                            : `1px solid ${isIndividual ? 'rgba(124,58,237,0.3)' : 'rgba(249,115,22,0.3)'}`,
                           borderRight: isActive
                             ? `2px solid ${isIndividual ? '#7c3aed' : '#f97316'}`
-                            : `1px solid ${isIndividual ? 'rgba(124,58,237,0.25)' : 'rgba(249,115,22,0.25)'}`,
+                            : `1px solid ${isIndividual ? 'rgba(124,58,237,0.3)' : 'rgba(249,115,22,0.3)'}`,
                           borderBottom: isActive
                             ? `2px solid ${isIndividual ? '#7c3aed' : '#f97316'}`
-                            : `1px solid ${isIndividual ? 'rgba(124,58,237,0.25)' : 'rgba(249,115,22,0.25)'}`,
+                            : `1px solid ${isIndividual ? 'rgba(124,58,237,0.3)' : 'rgba(249,115,22,0.3)'}`,
                           borderLeft: `3px solid ${isIndividual ? '#7c3aed' : '#f97316'}`,
-                          color: isIndividual ? '#5b21b6' : '#c2410c',
+                          color: isDark
+                            ? (isIndividual ? '#c4b5fd' : '#fdba74')
+                            : (isIndividual ? '#5b21b6' : '#c2410c'),
                           boxShadow: isActive
                             ? `0 2px 12px ${isIndividual ? 'rgba(124,58,237,0.25)' : 'rgba(249,115,22,0.25)'}`
                             : 'none',

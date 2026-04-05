@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Users, CalendarDays, FileText,
@@ -41,36 +42,10 @@ export default function AdminNav() {
     >
       {/* Logo */}
       <Link href="/bigbos" className="flex items-center gap-2.5 mr-4 shrink-0">
-        <svg width="30" height="26" viewBox="0 0 54 46" fill="none">
-          <defs>
-            <linearGradient id="nav-gA" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#a78bfa"/>
-              <stop offset="100%" stopColor="#7c3aed"/>
-            </linearGradient>
-            <linearGradient id="nav-gB" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#fb923c"/>
-              <stop offset="100%" stopColor="#f97316"/>
-            </linearGradient>
-          </defs>
-          <rect x="0" y="2" width="30" height="30" rx="7" fill="url(#nav-gA)"/>
-          <polygon points="28,10 32,10 32,24 28,24" fill="url(#nav-gA)"/>
-          <rect x="22" y="14" width="32" height="30" rx="6" fill="url(#nav-gB)"/>
-          <path d="M9 11 L9 19 M6 11 L12 11" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
-          <path d="M18 11 L18 19 M15 11 L21 11" stroke="white" strokeWidth="2.2" strokeLinecap="round"/>
-          <circle cx="13.5" cy="23" r="2" fill="white" opacity="0.7"/>
-          <path d="M34 28 Q39 35 46 28" stroke="white" strokeWidth="2.2" strokeLinecap="round" fill="none"/>
-          <circle cx="34" cy="24" r="1.5" fill="white" opacity="0.8"/>
-          <circle cx="46" cy="24" r="1.5" fill="white" opacity="0.8"/>
-        </svg>
+        <Image src="/logo.svg" width={30} height={30} alt="Гармония" />
         <span
           className="text-[17px] font-extrabold tracking-tight hidden sm:block"
-          style={{
-            background: isDark
-              ? 'linear-gradient(90deg, #c4b5fd, #fb923c)'
-              : 'linear-gradient(90deg, #7c3aed, #f97316)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}
+          style={{ color: isDark ? '#c4b5fd' : '#7c3aed' }}
         >
           Гармония
         </span>
