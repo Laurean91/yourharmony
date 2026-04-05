@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { ArrowUpRight, Clock } from 'lucide-react'
+import { useAdminTheme } from '@/contexts/AdminThemeContext'
 
 interface LessonStudent {
   studentId: string
@@ -43,6 +44,8 @@ function initials(name: string) {
 }
 
 export default function UpcomingLessons({ lessons }: { lessons: Lesson[] }) {
+  const { theme } = useAdminTheme()
+  const isDark = theme === 'dark'
   const now = new Date()
   const in7days = new Date(now)
   in7days.setDate(now.getDate() + 7)
@@ -75,15 +78,15 @@ export default function UpcomingLessons({ lessons }: { lessons: Lesson[] }) {
     <div
       className="rounded-2xl"
       style={{
-        background: '#fff',
-        border: '1px solid rgba(139,92,246,0.12)',
-        boxShadow: '0 1px 10px rgba(109,40,217,0.04)',
+        background: 'var(--adm-bg-card)',
+        border: '1px solid var(--adm-border-card)',
+        boxShadow: 'var(--adm-shadow-card)',
         overflow: 'hidden',
       }}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-5 pb-4">
-        <h2 className="text-base font-semibold text-gray-800">Ближайшие занятия</h2>
+        <h2 className="text-base font-semibold" style={{ color: 'var(--adm-text-primary)' }}>Ближайшие занятия</h2>
         <Link
           href="/bigbos/schedule"
           className="flex items-center gap-1 text-xs font-semibold transition-opacity hover:opacity-70"
@@ -96,7 +99,7 @@ export default function UpcomingLessons({ lessons }: { lessons: Lesson[] }) {
       {/* Content */}
       {upcoming.length === 0 ? (
         <div className="px-5 pb-5 text-center py-8">
-          <p className="text-sm text-gray-400">Занятий на ближайшую неделю нет</p>
+          <p className="text-sm" style={{ color: 'var(--adm-text-muted)' }}>Занятий на ближайшую неделю нет</p>
           <Link
             href="/bigbos/schedule"
             className="inline-block mt-2 text-xs font-semibold hover:underline"
@@ -112,7 +115,7 @@ export default function UpcomingLessons({ lessons }: { lessons: Lesson[] }) {
               {/* Day separator */}
               <div
                 className="px-5 py-1.5 text-[10px] font-bold uppercase tracking-widest"
-                style={{ background: 'rgba(139,92,246,0.04)', color: '#9ca3af' }}
+                style={{ background: isDark ? 'rgba(167,139,250,0.06)' : 'rgba(139,92,246,0.04)', color: 'var(--adm-text-muted)' }}
               >
                 {label}
               </div>
@@ -130,14 +133,14 @@ export default function UpcomingLessons({ lessons }: { lessons: Lesson[] }) {
                   <div
                     key={lesson.id}
                     className="flex items-center gap-3 px-5 py-3 transition-colors"
-                    style={{ borderBottom: '1px solid rgba(139,92,246,0.06)' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(139,92,246,0.035)')}
+                    style={{ borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(139,92,246,0.06)'}` }}
+                    onMouseEnter={e => (e.currentTarget.style.background = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(139,92,246,0.035)')}
                     onMouseLeave={e => (e.currentTarget.style.background = '')}
                   >
                     {/* Time block */}
                     <div className="shrink-0 w-14 text-right">
-                      <p className="text-xs font-bold text-gray-700">{timeStr}</p>
-                      <p className="text-[10px] text-gray-400">{endStr}</p>
+                      <p className="text-xs font-bold" style={{ color: 'var(--adm-text-primary)' }}>{timeStr}</p>
+                      <p className="text-[10px]" style={{ color: 'var(--adm-text-muted)' }}>{endStr}</p>
                     </div>
 
                     {/* Color bar */}

@@ -113,8 +113,8 @@ export default async function AdminDashboard() {
                 className="flex-1 px-4 py-2.5 rounded-xl"
                 style={{ background: 'rgba(124,58,237,.06)', border: '1px solid rgba(124,58,237,.1)' }}
               >
-                <p className="text-[10px] text-gray-400 mb-0.5 uppercase tracking-wide">Индивидуальные</p>
-                <p className="text-lg font-bold text-gray-800">
+                <p className="text-[10px] mb-0.5 uppercase tracking-wide" style={{ color: 'var(--adm-text-muted)' }}>Индивидуальные</p>
+                <p className="text-lg font-bold" style={{ color: 'var(--adm-text-primary)' }}>
                   {financeStats.totalIndividual.toLocaleString('ru-RU')} ₽
                 </p>
               </div>
@@ -122,8 +122,8 @@ export default async function AdminDashboard() {
                 className="flex-1 px-4 py-2.5 rounded-xl"
                 style={{ background: 'rgba(249,115,22,.06)', border: '1px solid rgba(249,115,22,.12)' }}
               >
-                <p className="text-[10px] text-gray-400 mb-0.5 uppercase tracking-wide">Групповые</p>
-                <p className="text-lg font-bold text-gray-800">
+                <p className="text-[10px] mb-0.5 uppercase tracking-wide" style={{ color: 'var(--adm-text-muted)' }}>Групповые</p>
+                <p className="text-lg font-bold" style={{ color: 'var(--adm-text-primary)' }}>
                   {financeStats.totalGroup.toLocaleString('ru-RU')} ₽
                 </p>
               </div>
