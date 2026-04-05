@@ -101,3 +101,38 @@ input::placeholder, textarea::placeholder {
   .animate-fade-slide-up { animation: none; }
   .animate-float-pulse { animation: none; }
 }
+
+/* ── Admin panel theme variables ── */
+[data-admin-theme="light"] {
+  --adm-bg-base:      #faf9ff;
+  --adm-bg-card:      #ffffff;
+  --adm-bg-card2:     rgba(124,58,237,0.04);
+  --adm-border-card:  rgba(124,58,237,0.08);
+  --adm-shadow-card:  0 2px 12px rgba(124,58,237,0.06);
+  --adm-text-primary: #111827;
+  --adm-text-muted:   #9ca3af;
+  --adm-nav-bg:       rgba(255,255,255,0.95);
+  --adm-nav-border:   rgba(124,58,237,0.10);
+  --adm-nav-item:     #6b7280;
+  --adm-nav-item-hover-bg: rgba(124,58,237,0.06);
+  --adm-nav-item-hover:    #7c3aed;
+  --adm-nav-active-bg:     rgba(124,58,237,0.10);
+  --adm-nav-active:        #7c3aed;
+}
+
+[data-admin-theme="dark"] {
+  --adm-bg-base:      transparent;
+  --adm-bg-card:      rgba(255,255,255,0.04);
+  --adm-bg-card2:     rgba(255,255,255,0.03);
+  --adm-border-card:  rgba(255,255,255,0.07);
+  --adm-shadow-card:  none;
+  --adm-text-primary: #ffffff;
+  --adm-text-muted:   rgba(167,139,250,0.5);
+  --adm-nav-bg:       rgba(28,16,69,0.85);
+  --adm-nav-border:   rgba(167,139,250,0.12);
+  --adm-nav-item:     rgba(167,139,250,0.6);
+  --adm-nav-item-hover-bg: rgba(167,139,250,0.08);
+  --adm-nav-item-hover:    rgba(167,139,250,0.9);
+  --adm-nav-active-bg:     rgba(124,58,237,0.25);
+  --adm-nav-active:        #c4b5fd;
+}
