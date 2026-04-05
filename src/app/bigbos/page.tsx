@@ -12,13 +12,11 @@ import Link from 'next/link'
 import { TrendingUp, ArrowUpRight, Bell } from 'lucide-react'
 
 /* ─── tiny helpers ─────────────────────────────────────── */
-function card(accent = false) {
+function card() {
   return {
-    background: '#fff',
-    border: '1px solid rgba(139,92,246,0.12)',
-    boxShadow: accent
-      ? '0 2px 20px rgba(109,40,217,0.08)'
-      : '0 1px 10px rgba(109,40,217,0.04)',
+    background: 'var(--adm-bg-card)',
+    border: '1px solid var(--adm-border-card)',
+    boxShadow: 'var(--adm-shadow-card)',
   }
 }
 
@@ -82,7 +80,7 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
 
         {/* Finance quick block */}
-        <div className="rounded-2xl p-6" style={card(true)}>
+        <div className="rounded-2xl p-6" style={card()}>
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2.5">
               <div
