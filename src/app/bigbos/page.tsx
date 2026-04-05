@@ -49,8 +49,8 @@ export default async function AdminDashboard() {
       {/* ── Header ── */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 leading-tight">Дашборд</h1>
-          <p className="text-sm text-gray-400 mt-0.5">{todayFormatted}</p>
+          <h1 className="text-2xl font-extrabold leading-tight" style={{ color: 'var(--adm-text-primary)' }}>Дашборд</h1>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--adm-text-muted)' }}>{todayFormatted}</p>
         </div>
         {newBookings.length > 0 && (
           <div
@@ -89,7 +89,7 @@ export default async function AdminDashboard() {
               >
                 <TrendingUp size={17} style={{ color: '#7c3aed' }} />
               </div>
-              <h2 className="text-base font-semibold text-gray-800">Финансы</h2>
+              <h2 className="text-base font-semibold" style={{ color: 'var(--adm-text-primary)' }}>Финансы</h2>
             </div>
             <Link
               href="/bigbos/finance"
@@ -102,7 +102,7 @@ export default async function AdminDashboard() {
 
           <div className="flex flex-col gap-4">
             <div>
-              <p className="text-xs text-gray-400 mb-1 uppercase tracking-wide font-medium">Доход в этом месяце</p>
+              <p className="text-xs mb-1 uppercase tracking-wide font-medium" style={{ color: 'var(--adm-text-muted)' }}>Доход в этом месяце</p>
               <p className="text-4xl font-extrabold" style={{ color: '#7c3aed' }}>
                 {financeStats.totalThisMonth.toLocaleString('ru-RU')}{' '}
                 <span className="text-2xl">₽</span>
@@ -134,7 +134,7 @@ export default async function AdminDashboard() {
         {/* Students */}
         <div className="rounded-2xl p-6" style={card()}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-gray-800">Мои ученики</h2>
+            <h2 className="text-base font-semibold" style={{ color: 'var(--adm-text-primary)' }}>Мои ученики</h2>
             <Link
               href="/bigbos/students"
               className="flex items-center gap-1 text-xs font-semibold hover:opacity-70 transition-opacity"
@@ -168,7 +168,7 @@ export default async function AdminDashboard() {
             className="flex items-center justify-between px-5 pt-5 pb-4"
             style={{ borderBottom: '1px solid rgba(139,92,246,0.08)' }}
           >
-            <h2 className="text-base font-semibold text-gray-800">Заявки</h2>
+            <h2 className="text-base font-semibold" style={{ color: 'var(--adm-text-primary)' }}>Заявки</h2>
             {newBookings.length > 0 && (
               <span
                 className="text-xs font-bold px-2.5 py-1 rounded-full"

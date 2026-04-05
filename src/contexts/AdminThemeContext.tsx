@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 
 type Theme = 'light' | 'dark'
 
@@ -17,15 +17,11 @@ const AdminThemeContext = createContext<AdminThemeContextValue>({
 const STORAGE_KEY = 'harmony-admin-theme'
 
 export function AdminThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light')
-
-  // Load from localStorage on mount
-  useEffect(() => {
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === 'undefined') return 'light'
     const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored === 'dark' || stored === 'light') {
-      setTheme(stored)
-    }
-  }, [])
+    return stored === 'dark' ? 'dark' : 'light'
+  })
 
   function toggleTheme() {
     setTheme(prev => {

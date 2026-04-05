@@ -16,6 +16,7 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   return (
     <div
       data-admin-theme={theme}
+      suppressHydrationWarning
       className="min-h-screen flex flex-col"
       style={
         isDark
