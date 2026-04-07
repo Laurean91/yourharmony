@@ -5,6 +5,7 @@ import { BookOpen, Save, Check, ChevronDown, BookMarked, Paperclip, X, FileText,
 import { useToast } from '@/components/ui/toast'
 import { JournalEntrySkeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/ui/empty-state'
+import { useAdminTheme } from '@/contexts/AdminThemeContext'
 
 type Lesson = { id: string; date: string; title: string | null; tag: string }
 type JournalEntry = { studentId: string; name: string; attended: boolean; grade: number | null; comment: string }
@@ -12,6 +13,8 @@ type LessonFile = { id: string; url: string; name: string; size: number }
 
 export default function JournalPage() {
   const { toast } = useToast()
+  const { theme } = useAdminTheme()
+  const isDark = theme === 'dark'
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [lessons,      setLessons]      = useState<Lesson[]>([])
   const [lessonId,     setLessonId]     = useState<string>('')
@@ -23,7 +26,6 @@ export default function JournalPage() {
   const [saving,       setSaving]       = useState(false)
   const [saved,        setSaved]        = useState(false)
 
-  // Load past lessons
   useEffect(() => {
     fetch('/api/admin/lessons/past')
       .then(r => r.json())
@@ -119,6 +121,18 @@ export default function JournalPage() {
 
   const selectedLesson = lessons.find(l => l.id === lessonId)
 
+  const selectStyle = {
+    width: '100%',
+    borderRadius: 12,
+    padding: '12px 40px 12px 16px',
+    fontSize: 14,
+    outline: 'none',
+    appearance: 'none' as const,
+    background: isDark ? 'rgba(255,255,255,0.06)' : '#fafafa',
+    border: `1.5px solid ${isDark ? 'rgba(167,139,250,0.2)' : '#ede9fe'}`,
+    color: isDark ? '#ffffff' : '#1f2937',
+  }
+
   return (
     <div className="p-4 md:p-8 max-w-3xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
@@ -127,23 +141,23 @@ export default function JournalPage() {
           <BookOpen size={18} className="text-white" />
         </div>
         <div>
-          <h1 className="text-xl font-extrabold text-gray-900">Журнал</h1>
-          <p className="text-xs text-gray-400">Отметить посещаемость и поставить оценки</p>
+          <h1 className="text-xl font-extrabold" style={{ color: 'var(--adm-text-primary)' }}>Журнал</h1>
+          <p className="text-xs" style={{ color: 'var(--adm-text-muted)' }}>Отметить посещаемость и поставить оценки</p>
         </div>
       </div>
 
       {/* Lesson selector */}
       <div className="rounded-2xl p-5 mb-6"
-        style={{ background: '#fff', border: '1px solid #ede9fe', boxShadow: '0 2px 12px rgba(124,58,237,0.06)' }}>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+        style={{
+          background: 'var(--adm-bg-card)',
+          border: '1px solid var(--adm-border-card)',
+          boxShadow: 'var(--adm-shadow-card)',
+        }}>
+        <label className="block text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--adm-text-muted)' }}>
           Выберите урок
         </label>
         <div className="relative">
-          <select
-            value={lessonId}
-            onChange={e => setLessonId(e.target.value)}
-            className="w-full rounded-xl px-4 py-3 pr-10 text-sm text-gray-800 appearance-none outline-none transition-all"
-            style={{ border: '1.5px solid #ede9fe', background: '#fafafa' }}>
+          <select value={lessonId} onChange={e => setLessonId(e.target.value)} style={selectStyle}>
             <option value="">— выберите урок —</option>
             {lessons.map(l => (
               <option key={l.id} value={l.id}>
@@ -156,7 +170,7 @@ export default function JournalPage() {
               </option>
             ))}
           </select>
-          <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+          <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--adm-text-muted)' }} />
         </div>
       </div>
 
@@ -175,10 +189,13 @@ export default function JournalPage() {
           {selectedLesson && (
             <div className="flex items-center gap-2 mb-4">
               <span className="px-2.5 py-1 rounded-full text-xs font-bold"
-                style={{ background: '#ede9fe', color: '#5b21b6' }}>
+                style={{
+                  background: isDark ? 'rgba(124,58,237,0.2)' : '#ede9fe',
+                  color: isDark ? '#c4b5fd' : '#5b21b6',
+                }}>
                 {selectedLesson.tag}
               </span>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm" style={{ color: 'var(--adm-text-muted)' }}>
                 {new Date(selectedLesson.date).toLocaleDateString('ru-RU', {
                   weekday: 'long', day: 'numeric', month: 'long',
                 })}
@@ -188,7 +205,7 @@ export default function JournalPage() {
 
           {/* Homework */}
           <div className="rounded-2xl p-4 mb-4"
-            style={{ background: '#fefce8', border: '1.5px solid #fde68a' }}>
+            style={{ background: isDark ? 'rgba(251,191,36,0.06)' : '#fefce8', border: `1.5px solid ${isDark ? 'rgba(251,191,36,0.2)' : '#fde68a'}` }}>
             <div className="flex items-center gap-2 mb-2">
               <BookMarked size={14} className="text-amber-500 shrink-0" />
               <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide">Домашнее задание для группы</p>
@@ -198,18 +215,21 @@ export default function JournalPage() {
               onChange={e => { setHomework(e.target.value); setSaved(false) }}
               placeholder="Например: повторить слова по теме Animals, с. 24 упр. 3..."
               rows={2}
-              className="w-full rounded-xl px-3 py-2 text-sm text-gray-700 resize-none outline-none transition-all"
-              style={{ border: '1.5px solid #fde68a', background: '#fffbeb' }}
+              className="w-full rounded-xl px-3 py-2 text-sm resize-none outline-none transition-all"
+              style={{
+                border: `1.5px solid ${isDark ? 'rgba(251,191,36,0.2)' : '#fde68a'}`,
+                background: isDark ? 'rgba(251,191,36,0.05)' : '#fffbeb',
+                color: isDark ? '#fde68a' : '#92400e',
+              }}
               onFocus={e => { e.currentTarget.style.borderColor = '#f59e0b' }}
-              onBlur={e  => { e.currentTarget.style.borderColor = '#fde68a' }}
+              onBlur={e  => { e.currentTarget.style.borderColor = isDark ? 'rgba(251,191,36,0.2)' : '#fde68a' }}
             />
 
-            {/* Attached files */}
             {files.length > 0 && (
               <div className="mt-3 space-y-1.5">
                 {files.map(f => (
                   <div key={f.id} className="flex items-center gap-2 px-3 py-2 rounded-xl"
-                    style={{ background: '#fffbeb', border: '1px solid #fde68a' }}>
+                    style={{ background: isDark ? 'rgba(251,191,36,0.05)' : '#fffbeb', border: `1px solid ${isDark ? 'rgba(251,191,36,0.15)' : '#fde68a'}` }}>
                     <FileText size={13} className="text-amber-500 shrink-0" />
                     <a href={f.url} target="_blank" rel="noopener noreferrer"
                       className="flex-1 text-xs font-medium text-amber-800 truncate hover:underline">
@@ -227,7 +247,6 @@ export default function JournalPage() {
               </div>
             )}
 
-            {/* Upload button */}
             <div className="mt-3">
               <input
                 ref={fileInputRef}
@@ -268,19 +287,20 @@ export default function JournalPage() {
             {entries.map(entry => (
               <div key={entry.studentId} className="rounded-2xl p-4 overflow-hidden"
                 style={{
-                  background: '#fff',
-                  border: `1.5px solid ${entry.attended ? '#bbf7d0' : '#f3f4f6'}`,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  background: 'var(--adm-bg-card)',
+                  border: `1.5px solid ${entry.attended
+                    ? (isDark ? 'rgba(52,211,153,0.3)' : '#bbf7d0')
+                    : 'var(--adm-border-card)'}`,
+                  boxShadow: 'var(--adm-shadow-card)',
                 }}>
-                {/* Student name + attendance toggle */}
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-bold text-gray-900 truncate max-w-[180px]">{entry.name}</p>
+                  <p className="text-sm font-bold truncate max-w-[180px]" style={{ color: 'var(--adm-text-primary)' }}>{entry.name}</p>
                   <button
                     onClick={() => toggle(entry.studentId, 'attended', !entry.attended)}
                     className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
                     style={entry.attended
                       ? { background: '#d1fae5', color: '#065f46' }
-                      : { background: '#f3f4f6', color: '#9ca3af' }}>
+                      : { background: isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6', color: isDark ? 'rgba(167,139,250,0.6)' : '#9ca3af' }}>
                     {entry.attended && <Check size={12} />}
                     {entry.attended ? 'Присутствует' : 'Отсутствует'}
                   </button>
@@ -288,9 +308,8 @@ export default function JournalPage() {
 
                 {entry.attended && (
                   <div className="grid grid-cols-1 gap-2">
-                    {/* Grade */}
                     <div>
-                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Оценка</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--adm-text-muted)' }}>Оценка</p>
                       <div className="flex gap-1.5">
                         {[5, 4, 3, 2, 1].map(g => (
                           <button key={g}
@@ -298,31 +317,34 @@ export default function JournalPage() {
                             className="w-9 h-9 rounded-xl text-sm font-black transition-all"
                             style={entry.grade === g
                               ? { background: 'linear-gradient(135deg, #7c3aed, #6d28d9)', color: '#fff', boxShadow: '0 2px 8px rgba(124,58,237,0.3)' }
-                              : { background: '#f5f3ff', color: '#7c3aed' }}>
+                              : { background: isDark ? 'rgba(124,58,237,0.2)' : '#f5f3ff', color: isDark ? '#c4b5fd' : '#7c3aed' }}>
                             {g}
                           </button>
                         ))}
                         {entry.grade !== null && (
                           <button onClick={() => toggle(entry.studentId, 'grade', null)}
-                            className="px-2 text-xs text-gray-400 hover:text-gray-600 transition-all">
+                            className="px-2 text-xs transition-all" style={{ color: 'var(--adm-text-muted)' }}>
                             ✕
                           </button>
                         )}
                       </div>
                     </div>
 
-                    {/* Comment */}
                     <div>
-                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Комментарий</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--adm-text-muted)' }}>Комментарий</p>
                       <textarea
                         value={entry.comment}
                         onChange={e => toggle(entry.studentId, 'comment', e.target.value)}
                         placeholder="Заметка для родителей..."
                         rows={2}
-                        className="w-full rounded-xl px-3 py-2 text-sm text-gray-700 resize-none outline-none transition-all"
-                        style={{ border: '1.5px solid #ede9fe', background: '#fafafa' }}
+                        className="w-full rounded-xl px-3 py-2 text-sm resize-none outline-none transition-all"
+                        style={{
+                          border: `1.5px solid ${isDark ? 'rgba(167,139,250,0.2)' : '#ede9fe'}`,
+                          background: isDark ? 'rgba(255,255,255,0.05)' : '#fafafa',
+                          color: isDark ? '#ffffff' : '#374151',
+                        }}
                         onFocus={e => { e.currentTarget.style.borderColor = '#7c3aed' }}
-                        onBlur={e  => { e.currentTarget.style.borderColor = '#ede9fe' }}
+                        onBlur={e  => { e.currentTarget.style.borderColor = isDark ? 'rgba(167,139,250,0.2)' : '#ede9fe' }}
                       />
                     </div>
                   </div>

@@ -12,20 +12,30 @@ export default async function TeacherPage() {
   ])
 
   return (
-    <div className="p-8 font-sans text-gray-800">
+    <div className="p-8 font-sans" style={{ color: 'var(--adm-text-primary)' }}>
       <div className="max-w-3xl mx-auto">
 
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold">Профиль преподавателя</h1>
-            <p className="text-gray-500 mt-1">Информация отображается на главной странице и на странице преподавателя</p>
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--adm-text-primary)' }}>Профиль преподавателя</h1>
+            <p className="mt-1" style={{ color: 'var(--adm-text-muted)' }}>Информация отображается на главной странице и на странице преподавателя</p>
           </div>
           <div className="flex items-center gap-2 mt-1">
             <Link
               href="/#teacher"
               target="_blank"
-              className="flex items-center gap-2 text-sm text-gray-500 border border-gray-200 px-4 py-2 rounded-xl hover:bg-gray-100 transition-colors"
+              className="flex items-center gap-2 text-sm px-4 py-2 rounded-xl transition-colors"
+              style={{
+                color: 'var(--adm-text-muted)',
+                border: '1px solid var(--adm-border-card)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--adm-bg-hover)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent'
+              }}
             >
               <Eye size={15} />
               Главная
@@ -33,7 +43,17 @@ export default async function TeacherPage() {
             <Link
               href="/teacher"
               target="_blank"
-              className="flex items-center gap-2 text-sm text-gray-500 border border-gray-200 px-4 py-2 rounded-xl hover:bg-gray-100 transition-colors"
+              className="flex items-center gap-2 text-sm px-4 py-2 rounded-xl transition-colors"
+              style={{
+                color: 'var(--adm-text-muted)',
+                border: '1px solid var(--adm-border-card)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--adm-bg-hover)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent'
+              }}
             >
               <Eye size={15} />
               Страница /teacher

@@ -2,6 +2,7 @@
 
 import { updateBookingStatus } from '@/app/actions'
 import DeleteBookingButton from './DeleteBookingButton'
+import { useAdminTheme } from '@/contexts/AdminThemeContext'
 
 function relativeDate(date: Date | string): string {
   const d = new Date(date)
@@ -16,20 +17,26 @@ function relativeDate(date: Date | string): string {
 export default function BookingRow({ b, idx }: { b: any; idx: number }) {
   const isNew = b.status === 'Новая'
   const isZebra = idx % 2 === 1
+  const { theme } = useAdminTheme()
+  const isDark = theme === 'dark'
+
+  const rowBg = isZebra
+    ? (isDark ? 'rgba(139,92,246,0.06)' : 'rgba(139,92,246,0.025)')
+    : (isDark ? 'rgba(255,255,255,0.03)' : '#fff')
 
   return (
     <tr
       style={{
-        background: isZebra ? 'rgba(139,92,246,0.025)' : '#fff',
-        borderBottom: '1px solid rgba(139,92,246,0.06)',
+        background: rowBg,
+        borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(139,92,246,0.06)'}`,
         transition: 'background 0.15s',
       }}
       onMouseEnter={e => {
-        (e.currentTarget as HTMLTableRowElement).style.background = 'rgba(139,92,246,0.06)'
+        (e.currentTarget as HTMLTableRowElement).style.background =
+          isDark ? 'rgba(124,58,237,0.12)' : 'rgba(139,92,246,0.06)'
       }}
       onMouseLeave={e => {
-        (e.currentTarget as HTMLTableRowElement).style.background =
-          isZebra ? 'rgba(139,92,246,0.025)' : '#fff'
+        (e.currentTarget as HTMLTableRowElement).style.background = rowBg
       }}
     >
       {/* Name + avatar */}
@@ -41,12 +48,32 @@ export default function BookingRow({ b, idx }: { b: any; idx: number }) {
           >
             {b.parentName.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()}
           </div>
-          <span className="text-sm font-semibold text-gray-800 whitespace-nowrap">{b.parentName}</span>
+          <span
+            className="text-sm font-semibold whitespace-nowrap"
+            style={{ color: 'var(--adm-text-primary)' }}
+          >
+            {b.parentName}
+          </span>
         </div>
       </td>
-      <td className="px-3 py-3 text-sm text-gray-500 whitespace-nowrap">{b.childAge} л.</td>
-      <td className="px-3 py-3 font-mono text-xs text-gray-600 whitespace-nowrap">{b.phone}</td>
-      <td className="px-3 py-3 text-xs text-gray-400 whitespace-nowrap">{relativeDate(b.createdAt)}</td>
+      <td
+        className="px-3 py-3 text-sm whitespace-nowrap"
+        style={{ color: 'var(--adm-text-muted)' }}
+      >
+        {b.childAge} л.
+      </td>
+      <td
+        className="px-3 py-3 font-mono text-xs whitespace-nowrap"
+        style={{ color: 'var(--adm-text-muted)' }}
+      >
+        {b.phone}
+      </td>
+      <td
+        className="px-3 py-3 text-xs whitespace-nowrap"
+        style={{ color: 'var(--adm-text-muted)' }}
+      >
+        {relativeDate(b.createdAt)}
+      </td>
       <td className="px-3 py-3">
         <form action={updateBookingStatus.bind(null, b.id, isNew ? 'Обработана' : 'Новая')}>
           <button

@@ -2,6 +2,8 @@
 
 import { usePathname } from 'next/navigation'
 import AdminNav from '@/components/AdminNav'
+import AdminMobileTopBar from '@/components/AdminMobileTopBar'
+import AdminMobileBottomNav from '@/components/AdminMobileBottomNav'
 import { AdminThemeProvider, useAdminTheme } from '@/contexts/AdminThemeContext'
 
 function AdminLayoutInner({ children }: { children: React.ReactNode }) {
@@ -24,10 +26,12 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
           : { background: '#faf9ff' }
       }
     >
+      <AdminMobileTopBar />
       <AdminNav />
-      <main className="flex-1">
+      <main className="flex-1 pb-16 md:pb-0">
         {children}
       </main>
+      <AdminMobileBottomNav />
     </div>
   )
 }

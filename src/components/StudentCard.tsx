@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import StudentModal from './StudentModal'
 import type { StudentForModal } from './StudentModal'
+import { useAdminTheme } from '@/contexts/AdminThemeContext'
 
 export default function StudentCard({
   student,
@@ -12,6 +13,8 @@ export default function StudentCard({
   tagColors?: Record<string, string>
 }) {
   const [open, setOpen] = useState(false)
+  const { theme } = useAdminTheme()
+  const isDark = theme === 'dark'
 
   const totalLessons    = student.lessons?.length ?? 0
   const attendedLessons = student.lessons?.filter(l => l.attended).length ?? 0
@@ -21,7 +24,6 @@ export default function StudentCard({
 
   const isIndividual = student.tag !== 'Группа' && student.tag !== 'Групповое'
 
-  /* colour config */
   const tagBg    = isIndividual ? 'rgba(124,58,237,0.1)'  : 'rgba(249,115,22,0.1)'
   const tagColor = isIndividual ? '#7c3aed'               : '#ea580c'
   const barColor = isIndividual
@@ -32,7 +34,7 @@ export default function StudentCard({
     : 'linear-gradient(135deg,#fb923c,#f97316)'
 
   const attendColor =
-    attendancePct === null ? '#9ca3af'
+    attendancePct === null ? 'var(--adm-text-muted)'
     : attendancePct >= 75  ? '#16a34a'
     : attendancePct >= 50  ? '#d97706'
     : '#dc2626'
@@ -43,46 +45,41 @@ export default function StudentCard({
         onClick={() => setOpen(true)}
         className="w-full text-left rounded-2xl overflow-hidden transition-all duration-200"
         style={{
-          background: '#fff',
-          border: '1px solid rgba(139,92,246,0.12)',
-          boxShadow: '0 1px 8px rgba(109,40,217,0.04)',
+          background: 'var(--adm-bg-card)',
+          border: '1px solid var(--adm-border-card)',
+          boxShadow: 'var(--adm-shadow-card)',
         }}
         onMouseEnter={e => {
-          (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(139,92,246,0.3)'
-          ;(e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 20px rgba(109,40,217,0.1)'
-          ;(e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'
+          e.currentTarget.style.borderColor = isDark ? 'rgba(167,139,250,0.25)' : 'rgba(139,92,246,0.3)'
+          e.currentTarget.style.boxShadow = isDark ? '0 4px 20px rgba(139,92,246,0.15)' : '0 4px 20px rgba(109,40,217,0.1)'
+          e.currentTarget.style.transform = 'translateY(-1px)'
         }}
         onMouseLeave={e => {
-          (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(139,92,246,0.12)'
-          ;(e.currentTarget as HTMLButtonElement).style.boxShadow = '0 1px 8px rgba(109,40,217,0.04)'
-          ;(e.currentTarget as HTMLButtonElement).style.transform = ''
+          e.currentTarget.style.borderColor = 'var(--adm-border-card)'
+          e.currentTarget.style.boxShadow = 'var(--adm-shadow-card)'
+          e.currentTarget.style.transform = ''
         }}
       >
         {/* Top section: avatar + name + tag badge */}
         <div className="flex items-center justify-between px-5 pt-4 pb-3">
           <div className="flex items-center gap-3 min-w-0">
-            {/* Avatar */}
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
               style={{ background: avatarBg }}
             >
               {student.name.charAt(0).toUpperCase()}
             </div>
-
-            {/* Name + meta */}
             <div className="min-w-0">
-              <p className="font-semibold text-gray-900 truncate text-sm leading-tight">
+              <p className="font-semibold truncate text-sm leading-tight" style={{ color: 'var(--adm-text-primary)' }}>
                 {student.name}
               </p>
-              <p className="text-xs text-gray-400 mt-0.5 truncate">
+              <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--adm-text-muted)' }}>
                 {[student.age && `${student.age} лет`, student.phone]
                   .filter(Boolean)
                   .join(' · ')}
               </p>
             </div>
           </div>
-
-          {/* Tag badge */}
           <span
             className="shrink-0 ml-3 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
             style={{ background: tagBg, color: tagColor }}
@@ -95,20 +92,19 @@ export default function StudentCard({
         {attendancePct !== null && (
           <div className="px-5 pb-3">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">
+              <span className="text-[10px] font-medium uppercase tracking-wide" style={{ color: 'var(--adm-text-muted)' }}>
                 Посещаемость
               </span>
               <span className="text-[11px] font-bold" style={{ color: attendColor }}>
                 {attendancePct}%
-                <span className="text-gray-400 font-normal ml-1">
+                <span className="font-normal ml-1" style={{ color: 'var(--adm-text-muted)' }}>
                   ({attendedLessons}/{totalLessons})
                 </span>
               </span>
             </div>
-            {/* Track */}
             <div
               className="w-full h-1.5 rounded-full overflow-hidden"
-              style={{ background: 'rgba(139,92,246,0.08)' }}
+              style={{ background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(139,92,246,0.08)' }}
             >
               <div
                 className="h-full rounded-full transition-all"
@@ -121,10 +117,13 @@ export default function StudentCard({
         {/* Notes */}
         {student.notes && (
           <div
-            className="px-5 py-2.5 text-xs text-gray-500 text-left"
-            style={{ borderTop: '1px solid rgba(139,92,246,0.06)' }}
+            className="px-5 py-2.5 text-xs text-left"
+            style={{
+              borderTop: '1px solid var(--adm-border-sep)',
+              color: 'var(--adm-text-muted)',
+            }}
           >
-            <span className="text-gray-400 mr-1">💬</span>
+            <span className="mr-1">💬</span>
             {student.notes}
           </div>
         )}

@@ -33,7 +33,7 @@ export default function AdminNav() {
 
   return (
     <nav
-      className="sticky top-0 z-50 flex items-center gap-1 px-4 h-[60px]"
+      className="sticky top-0 z-50 hidden md:flex items-center gap-1 px-4 h-[60px]"
       style={{
         background: 'var(--adm-nav-bg)',
         backdropFilter: 'blur(20px)',

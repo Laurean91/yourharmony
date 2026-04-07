@@ -5,6 +5,7 @@ import { Users, Plus, Trash2, Link2, Copy, Check, X } from 'lucide-react'
 import { useToast } from '@/components/ui/toast'
 import { ParentRowSkeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/ui/empty-state'
+import { useAdminTheme } from '@/contexts/AdminThemeContext'
 
 type Student = { id: string; name: string; tag: string; age: number | null }
 type ParentRow = {
@@ -19,6 +20,8 @@ type ParentRow = {
 
 export default function ParentsPage() {
   const { toast } = useToast()
+  const { theme } = useAdminTheme()
+  const isDark = theme === 'dark'
   const [parents,   setParents]   = useState<ParentRow[]>([])
   const [students,  setStudents]  = useState<Student[]>([])
   const [loading,   setLoading]   = useState(true)
@@ -29,6 +32,17 @@ export default function ParentsPage() {
   const [copied,    setCopied]    = useState(false)
   const [saving,    setSaving]    = useState(false)
   const [form, setForm] = useState({ username: '', password: '', name: '', phone: '', email: '' })
+
+  const inputStyle = {
+    width: '100%',
+    borderRadius: 12,
+    padding: '8px 12px',
+    fontSize: 14,
+    outline: 'none',
+    background: isDark ? 'rgba(255,255,255,0.06)' : '#fafafa',
+    border: `1.5px solid ${isDark ? 'rgba(167,139,250,0.2)' : '#e9d5ff'}`,
+    color: isDark ? '#ffffff' : '#1e1b4b',
+  }
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -107,8 +121,8 @@ export default function ParentsPage() {
             <Users size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-extrabold text-gray-900">Родители</h1>
-            <p className="text-xs text-gray-400">Управление аккаунтами</p>
+            <h1 className="text-xl font-extrabold" style={{ color: 'var(--adm-text-primary)' }}>Родители</h1>
+            <p className="text-xs" style={{ color: 'var(--adm-text-muted)' }}>Управление аккаунтами</p>
           </div>
         </div>
         <button onClick={() => setShowForm(true)}
@@ -143,7 +157,11 @@ export default function ParentsPage() {
       {/* Create form */}
       {showForm && (
         <form onSubmit={createParent} className="rounded-2xl p-6 mb-6"
-          style={{ background: '#fff', border: '1px solid #e9d5ff', boxShadow: '0 4px 20px rgba(124,58,237,0.08)' }}>
+          style={{
+            background: 'var(--adm-bg-card)',
+            border: '1px solid var(--adm-border-card)',
+            boxShadow: 'var(--adm-shadow-card)',
+          }}>
           <p className="text-sm font-extrabold mb-4"
             style={{ background: 'linear-gradient(90deg, #7c3aed, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             Новый аккаунт родителя
@@ -163,17 +181,17 @@ export default function ParentsPage() {
                   required={required}
                   value={form[key as keyof typeof form]}
                   onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                  className="w-full rounded-xl px-3 py-2 text-sm font-medium outline-none transition-all"
-                  style={{ border: '1.5px solid #e9d5ff', background: '#fafafa', color: '#1e1b4b' }}
-                  onFocus={e => { e.currentTarget.style.borderColor = '#7c3aed'; e.currentTarget.style.background = '#fff' }}
-                  onBlur={e  => { e.currentTarget.style.borderColor = '#e9d5ff'; e.currentTarget.style.background = '#fafafa' }}
+                  style={inputStyle}
+                  onFocus={e => { e.currentTarget.style.borderColor = '#7c3aed' }}
+                  onBlur={e  => { e.currentTarget.style.borderColor = isDark ? 'rgba(167,139,250,0.2)' : '#e9d5ff' }}
                 />
               </div>
             ))}
           </div>
           <div className="flex gap-2 justify-end">
             <button type="button" onClick={() => setShowForm(false)}
-              className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-100 transition-all">
+              className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+              style={{ color: 'var(--adm-text-muted)', background: 'var(--adm-bg-hover)' }}>
               Отмена
             </button>
             <button type="submit" disabled={saving}
@@ -189,26 +207,39 @@ export default function ParentsPage() {
       {linkId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: 'rgba(0,0,0,0.4)' }}>
-          <div className="w-full max-w-md rounded-2xl p-6 bg-white shadow-2xl">
-            <p className="text-sm font-extrabold text-gray-800 mb-4">Привязать учеников</p>
+          <div
+            className="w-full max-w-md rounded-2xl p-6 shadow-2xl"
+            style={{
+              background: isDark ? 'rgba(28,16,69,0.98)' : '#ffffff',
+              border: '1px solid var(--adm-border-card)',
+            }}
+          >
+            <p className="text-sm font-extrabold mb-4" style={{ color: 'var(--adm-text-primary)' }}>Привязать учеников</p>
             <div className="space-y-2 max-h-64 overflow-y-auto mb-4">
               {students.map(s => {
                 const checked = linkIds.includes(s.id)
                 return (
-                  <label key={s.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all hover:bg-gray-50">
+                  <label
+                    key={s.id}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
+                    style={{ background: checked ? 'var(--adm-bg-hover)' : 'transparent' }}
+                    onMouseEnter={e => { if (!checked) e.currentTarget.style.background = 'var(--adm-bg-hover)' }}
+                    onMouseLeave={e => { if (!checked) e.currentTarget.style.background = 'transparent' }}
+                  >
                     <input type="checkbox" checked={checked}
                       onChange={() => setLinkIds(ids => checked ? ids.filter(i => i !== s.id) : [...ids, s.id])}
                       className="w-4 h-4 rounded accent-violet-600" />
-                    <span className="flex-1 text-sm font-medium text-gray-800">{s.name}</span>
+                    <span className="flex-1 text-sm font-medium" style={{ color: 'var(--adm-text-primary)' }}>{s.name}</span>
                     <span className="text-xs px-2 py-0.5 rounded-full"
-                      style={{ background: '#ede9fe', color: '#5b21b6' }}>{s.tag}</span>
+                      style={{ background: isDark ? 'rgba(124,58,237,0.2)' : '#ede9fe', color: isDark ? '#c4b5fd' : '#5b21b6' }}>{s.tag}</span>
                   </label>
                 )
               })}
             </div>
             <div className="flex gap-2 justify-end">
               <button onClick={() => setLinkId(null)}
-                className="px-4 py-2 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-100 transition-all">
+                className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+                style={{ color: 'var(--adm-text-muted)', background: 'var(--adm-bg-hover)' }}>
                 Отмена
               </button>
               <button onClick={() => saveLinks(linkId)}
@@ -235,7 +266,11 @@ export default function ParentsPage() {
         <div className="space-y-3">
           {parents.map(p => (
             <div key={p.id} className="rounded-2xl p-4"
-              style={{ background: '#fff', border: '1px solid #f3f4f6', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+              style={{
+                background: 'var(--adm-bg-card)',
+                border: '1px solid var(--adm-border-card)',
+                boxShadow: 'var(--adm-shadow-card)',
+              }}>
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"
                   style={{ background: 'linear-gradient(135deg, #a78bfa, #7c3aed)' }}>
@@ -243,14 +278,18 @@ export default function ParentsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-bold text-gray-900">{p.name}</p>
-                    <code className="text-xs px-2 py-0.5 rounded-lg font-mono"
-                      style={{ background: '#f3f4f6', color: '#4b5563' }}>
+                    <p className="text-sm font-bold" style={{ color: 'var(--adm-text-primary)' }}>{p.name}</p>
+                    <code
+                      className="text-xs px-2 py-0.5 rounded-lg font-mono"
+                      style={{
+                        background: isDark ? 'rgba(255,255,255,0.08)' : '#f3f4f6',
+                        color: isDark ? 'rgba(167,139,250,0.8)' : '#4b5563',
+                      }}>
                       @{p.username}
                     </code>
                   </div>
                   {(p.phone || p.email) && (
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--adm-text-muted)' }}>
                       {[p.phone, p.email].filter(Boolean).join(' · ')}
                     </p>
                   )}
@@ -267,12 +306,18 @@ export default function ParentsPage() {
                 </div>
                 <div className="flex gap-1 shrink-0">
                   <button onClick={() => openLink(p)}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-violet-600 hover:bg-violet-50 transition-all"
+                    className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
+                    style={{ color: 'var(--adm-text-muted)' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#7c3aed'; e.currentTarget.style.background = 'rgba(124,58,237,0.1)' }}
+                    onMouseLeave={e => { e.currentTarget.style.color = 'var(--adm-text-muted)'; e.currentTarget.style.background = 'transparent' }}
                     title="Привязать учеников">
                     <Link2 size={15} />
                   </button>
                   <button onClick={() => deleteParent(p.id)}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                    className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
+                    style={{ color: 'var(--adm-text-muted)' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = 'rgba(239,68,68,0.1)' }}
+                    onMouseLeave={e => { e.currentTarget.style.color = 'var(--adm-text-muted)'; e.currentTarget.style.background = 'transparent' }}
                     title="Удалить">
                     <Trash2 size={15} />
                   </button>

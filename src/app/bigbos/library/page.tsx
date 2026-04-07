@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition } from 'react'
 import { BookOpen, Upload, Trash2, FileText, Tag, Users, X, Plus, ExternalLink } from 'lucide-react'
+import { useAdminTheme } from '@/contexts/AdminThemeContext'
 
 type LibraryFile = {
   id: string
@@ -39,12 +40,13 @@ function formatSize(bytes: number) {
 }
 
 export default function LibraryPage() {
+  const { theme } = useAdminTheme()
+  const isDark = theme === 'dark'
   const [files, setFiles] = useState<LibraryFile[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [isPending, startTransition] = useTransition()
 
-  // form state
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('')
@@ -105,6 +107,17 @@ export default function LibraryPage() {
     return acc
   }, { 'Без категории': files.filter(f => !f.category || !CATEGORIES.includes(f.category)) })
 
+  const inputStyle = {
+    width: '100%',
+    borderRadius: 12,
+    padding: '10px 12px',
+    fontSize: 14,
+    outline: 'none',
+    background: isDark ? 'rgba(255,255,255,0.06)' : '#ffffff',
+    border: `1px solid ${isDark ? 'rgba(167,139,250,0.2)' : '#e5e7eb'}`,
+    color: isDark ? '#ffffff' : '#111827',
+  }
+
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto">
 
@@ -116,8 +129,8 @@ export default function LibraryPage() {
             <BookOpen size={20} className="text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-extrabold text-gray-900">Полезная литература</h1>
-            <p className="text-xs text-gray-400 mt-0.5">Книги и материалы для учеников</p>
+            <h1 className="text-xl font-extrabold" style={{ color: 'var(--adm-text-primary)' }}>Полезная литература</h1>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--adm-text-muted)' }}>Книги и материалы для учеников</p>
           </div>
         </div>
         <button
@@ -134,17 +147,22 @@ export default function LibraryPage() {
       {showForm && (
         <form onSubmit={handleSubmit}
           className="mb-8 rounded-2xl border p-6"
-          style={{ background: '#faf9ff', borderColor: 'rgba(124,58,237,0.15)' }}>
-          <h2 className="text-sm font-bold text-gray-700 mb-4">Новый файл</h2>
+          style={{
+            background: isDark ? 'rgba(124,58,237,0.06)' : '#faf9ff',
+            borderColor: 'rgba(124,58,237,0.15)',
+          }}>
+          <h2 className="text-sm font-bold mb-4" style={{ color: 'var(--adm-text-primary)' }}>Новый файл</h2>
 
-          {/* File picker */}
           <div className="mb-4">
             <input ref={fileRef} type="file" id="lib-file" className="hidden"
               accept=".pdf,.doc,.docx,.epub,.mp3,.wav,.ogg,.jpg,.jpeg,.png,.webp"
               onChange={handleFileChange} />
             <label htmlFor="lib-file"
               className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border-2 border-dashed cursor-pointer transition-colors text-sm"
-              style={{ borderColor: selectedFile ? '#7c3aed' : '#d1d5db', color: selectedFile ? '#7c3aed' : '#9ca3af' }}>
+              style={{
+                borderColor: selectedFile ? '#7c3aed' : (isDark ? 'rgba(167,139,250,0.2)' : '#d1d5db'),
+                color: selectedFile ? '#7c3aed' : 'var(--adm-text-muted)',
+              }}>
               <Upload size={16} />
               {selectedFile ? selectedFile.name : 'Выберите файл (PDF, EPUB, Word, MP3, изображение)'}
             </label>
@@ -152,17 +170,17 @@ export default function LibraryPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
             <div>
-              <label className="text-xs font-semibold text-gray-500 mb-1 block">Название *</label>
+              <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--adm-text-muted)' }}>Название *</label>
               <input value={title} onChange={e => setTitle(e.target.value)}
                 placeholder="Например: «Wizard of Oz» для начинающих"
-                className="w-full px-3 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
-                style={{ borderColor: '#e5e7eb', background: '#fff', color: '#111827' }} />
+                style={inputStyle}
+                onFocus={e => { e.currentTarget.style.borderColor = '#7c3aed' }}
+                onBlur={e  => { e.currentTarget.style.borderColor = isDark ? 'rgba(167,139,250,0.2)' : '#e5e7eb' }}
+              />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 mb-1 block">Категория</label>
-              <select value={category} onChange={e => setCategory(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 bg-white"
-                style={{ borderColor: '#e5e7eb' }}>
+              <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--adm-text-muted)' }}>Категория</label>
+              <select value={category} onChange={e => setCategory(e.target.value)} style={{ ...inputStyle, appearance: 'none' as const }}>
                 <option value="">— без категории —</option>
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -171,17 +189,17 @@ export default function LibraryPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
             <div>
-              <label className="text-xs font-semibold text-gray-500 mb-1 block">Описание</label>
+              <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--adm-text-muted)' }}>Описание</label>
               <input value={description} onChange={e => setDescription(e.target.value)}
                 placeholder="Краткое описание материала"
-                className="w-full px-3 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
-                style={{ borderColor: '#e5e7eb', background: '#fff', color: '#111827' }} />
+                style={inputStyle}
+                onFocus={e => { e.currentTarget.style.borderColor = '#7c3aed' }}
+                onBlur={e  => { e.currentTarget.style.borderColor = isDark ? 'rgba(167,139,250,0.2)' : '#e5e7eb' }}
+              />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 mb-1 block">Для группы</label>
-              <select value={targetTag} onChange={e => setTargetTag(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 bg-white"
-                style={{ borderColor: '#e5e7eb' }}>
+              <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--adm-text-muted)' }}>Для группы</label>
+              <select value={targetTag} onChange={e => setTargetTag(e.target.value)} style={{ ...inputStyle, appearance: 'none' as const }}>
                 {TARGET_TAGS.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
@@ -205,9 +223,13 @@ export default function LibraryPage() {
           { label: 'Для всех', value: files.filter(f => f.targetTag === 'Все').length, color: '#1e40af' },
           { label: 'Для групп', value: files.filter(f => f.targetTag !== 'Все').length, color: '#065f46' },
         ].map(s => (
-          <div key={s.label} className="rounded-2xl p-4 text-center" style={{ background: '#fff', border: '1px solid #f3f4f6' }}>
+          <div key={s.label} className="rounded-2xl p-4 text-center"
+            style={{
+              background: 'var(--adm-bg-card)',
+              border: '1px solid var(--adm-border-card)',
+            }}>
             <p className="text-2xl font-black" style={{ color: s.color }}>{s.value}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{s.label}</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--adm-text-muted)' }}>{s.label}</p>
           </div>
         ))}
       </div>
@@ -216,14 +238,14 @@ export default function LibraryPage() {
       {loading ? (
         <div className="space-y-3">
           {[1,2,3].map(i => (
-            <div key={i} className="h-20 rounded-2xl animate-pulse" style={{ background: '#f3f4f6' }} />
+            <div key={i} className="h-20 rounded-2xl animate-pulse" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : '#f3f4f6' }} />
           ))}
         </div>
       ) : files.length === 0 ? (
         <div className="text-center py-16">
-          <BookOpen size={40} className="mx-auto mb-3 text-gray-300" />
-          <p className="text-gray-400 font-medium">Библиотека пуста</p>
-          <p className="text-xs text-gray-300 mt-1">Добавьте первый файл, нажав кнопку выше</p>
+          <BookOpen size={40} className="mx-auto mb-3" style={{ color: 'var(--adm-text-muted)' }} />
+          <p className="font-medium" style={{ color: 'var(--adm-text-muted)' }}>Библиотека пуста</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--adm-text-muted)' }}>Добавьте первый файл, нажав кнопку выше</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -232,7 +254,7 @@ export default function LibraryPage() {
             return (
               <div key={cat}>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-400">{cat}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--adm-text-muted)' }}>{cat}</span>
                   <span className="text-xs font-semibold rounded-full px-2 py-0.5"
                     style={{ background: CAT_COLORS[cat] ?? '#e5e7eb', color: '#374151' }}>
                     {catFiles.length}
@@ -242,17 +264,20 @@ export default function LibraryPage() {
                   {catFiles.map(f => (
                     <div key={f.id}
                       className="flex items-start gap-4 rounded-2xl px-4 py-3.5 group transition-all"
-                      style={{ background: '#fff', border: '1px solid #f3f4f6' }}>
+                      style={{
+                        background: 'var(--adm-bg-card)',
+                        border: '1px solid var(--adm-border-card)',
+                      }}>
 
                       <div className="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center"
-                        style={{ background: CAT_COLORS[f.category ?? ''] ?? '#f3f4f6' }}>
-                        <FileText size={18} style={{ color: '#4b5563' }} />
+                        style={{ background: isDark ? 'rgba(255,255,255,0.06)' : (CAT_COLORS[f.category ?? ''] ?? '#f3f4f6') }}>
+                        <FileText size={18} style={{ color: isDark ? 'rgba(167,139,250,0.7)' : '#4b5563' }} />
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-gray-900 truncate">{f.title}</p>
+                        <p className="text-sm font-bold truncate" style={{ color: 'var(--adm-text-primary)' }}>{f.title}</p>
                         {f.description && (
-                          <p className="text-xs text-gray-400 mt-0.5 truncate">{f.description}</p>
+                          <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--adm-text-muted)' }}>{f.description}</p>
                         )}
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                           <span className="text-[10px] font-semibold rounded-full px-2 py-0.5"
@@ -260,21 +285,27 @@ export default function LibraryPage() {
                             <Users size={8} className="inline mr-1" />
                             {f.targetTag}
                           </span>
-                          <span className="text-[10px] text-gray-300">{formatSize(f.size)}</span>
-                          <span className="text-[10px] text-gray-300 truncate max-w-[120px]">{f.name}</span>
+                          <span className="text-[10px]" style={{ color: 'var(--adm-text-muted)' }}>{formatSize(f.size)}</span>
+                          <span className="text-[10px] truncate max-w-[120px]" style={{ color: 'var(--adm-text-muted)' }}>{f.name}</span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
                         <a href={f.url} target="_blank" rel="noopener noreferrer"
-                          className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-gray-100"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+                          style={{ color: 'var(--adm-text-muted)' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'var(--adm-bg-hover)' }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
                           title="Открыть файл">
-                          <ExternalLink size={14} className="text-gray-400" />
+                          <ExternalLink size={14} />
                         </a>
                         <button onClick={() => handleDelete(f.id)} disabled={isPending}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-red-50"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+                          style={{ color: 'var(--adm-text-muted)' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.color = '#ef4444' }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--adm-text-muted)' }}
                           title="Удалить">
-                          <Trash2 size={14} className="text-gray-300 group-hover:text-red-400 transition-colors" />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>
@@ -287,8 +318,12 @@ export default function LibraryPage() {
       )}
 
       {/* Tag legend */}
-      <div className="mt-8 rounded-2xl p-4" style={{ background: '#f8f7ff', border: '1px solid rgba(124,58,237,0.1)' }}>
-        <p className="text-xs font-bold text-gray-500 mb-2 flex items-center gap-1.5"><Tag size={11} /> Группы</p>
+      <div className="mt-8 rounded-2xl p-4"
+        style={{
+          background: isDark ? 'rgba(124,58,237,0.06)' : '#f8f7ff',
+          border: `1px solid ${isDark ? 'rgba(124,58,237,0.15)' : 'rgba(124,58,237,0.1)'}`,
+        }}>
+        <p className="text-xs font-bold mb-2 flex items-center gap-1.5" style={{ color: 'var(--adm-text-muted)' }}><Tag size={11} /> Группы</p>
         <div className="flex flex-wrap gap-2 text-xs">
           <span className="px-2.5 py-1 rounded-full font-medium" style={{ background: '#dbeafe', color: '#1e40af' }}>Все — виден всем родителям</span>
           <span className="px-2.5 py-1 rounded-full font-medium" style={{ background: '#f3e8ff', color: '#6d28d9' }}>Индивидуальное — только индивидуальные занятия</span>

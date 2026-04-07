@@ -19,10 +19,10 @@ export default async function LandingSettingsPage() {
   ])
 
   return (
-    <div className="p-8 font-sans text-gray-800">
+    <div className="p-8 font-sans" style={{ color: 'var(--adm-text-primary)' }}>
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Управление сайтом</h1>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--adm-text-primary)' }}>Управление сайтом</h1>
         </div>
 
         <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-3 mb-8 text-sm text-amber-800">

@@ -5,11 +5,12 @@ import {
   getAllPostsAdmin, getFinanceStats,
 } from '../actions'
 import DashboardStats from '@/components/DashboardStats'
+import DashboardChart from '@/components/DashboardChart'
 import DashboardStudentGrid from '@/components/DashboardStudentGrid'
 import UpcomingLessons from '@/components/UpcomingLessons'
 import BookingRow from '@/components/BookingRow'
 import Link from 'next/link'
-import { TrendingUp, ArrowUpRight, Bell } from 'lucide-react'
+import { ArrowUpRight, Bell } from 'lucide-react'
 
 /* ─── tiny helpers ─────────────────────────────────────── */
 function card() {
@@ -22,7 +23,7 @@ function card() {
 
 /* ─── page ─────────────────────────────────────────────── */
 export default async function AdminDashboard() {
-  const [bookings, lessons, students, posts, financeStats] = await Promise.all([
+  const [bookings, lessons, students, , financeStats] = await Promise.all([
     getBookings(),
     getLessons(),
     getStudents(),
@@ -32,7 +33,6 @@ export default async function AdminDashboard() {
 
   const newBookings = bookings.filter((b: any) => b.status === 'Новая')
 
-  // Previous month revenue from monthlyRevenue array
   const mr = financeStats.monthlyRevenue
   const prevRevenue = mr.length >= 2
     ? (mr[mr.length - 2].individual + mr[mr.length - 2].group)
@@ -44,7 +44,7 @@ export default async function AdminDashboard() {
   const todayFormatted = today.charAt(0).toUpperCase() + today.slice(1)
 
   return (
-    <div className="p-6 md:p-8 font-sans text-gray-800">
+    <div className="p-6 md:p-8 font-sans" style={{ color: 'var(--adm-text-primary)' }}>
 
       {/* ── Header ── */}
       <div className="flex items-start justify-between mb-6">
@@ -67,7 +67,7 @@ export default async function AdminDashboard() {
         )}
       </div>
 
-      {/* ── KPI + Area chart ── */}
+      {/* ── Row 1: KPI cards ── */}
       <DashboardStats
         bookings={bookings as any}
         lessons={lessons as any}
@@ -76,60 +76,18 @@ export default async function AdminDashboard() {
         prevRevenue={prevRevenue}
       />
 
-      {/* ── Finance + Students grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-
-        {/* Finance quick block */}
-        <div className="rounded-2xl p-6" style={card()}>
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-2.5">
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(124,58,237,.1)' }}
-              >
-                <TrendingUp size={17} style={{ color: '#7c3aed' }} />
-              </div>
-              <h2 className="text-base font-semibold" style={{ color: 'var(--adm-text-primary)' }}>Финансы</h2>
-            </div>
-            <Link
-              href="/bigbos/finance"
-              className="flex items-center gap-1 text-xs font-semibold hover:opacity-70 transition-opacity"
-              style={{ color: '#7c3aed' }}
-            >
-              Аналитика <ArrowUpRight size={13} />
-            </Link>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <div>
-              <p className="text-xs mb-1 uppercase tracking-wide font-medium" style={{ color: 'var(--adm-text-muted)' }}>Доход в этом месяце</p>
-              <p className="text-4xl font-extrabold" style={{ color: '#7c3aed' }}>
-                {financeStats.totalThisMonth.toLocaleString('ru-RU')}{' '}
-                <span className="text-2xl">₽</span>
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <div
-                className="flex-1 px-4 py-2.5 rounded-xl"
-                style={{ background: 'rgba(124,58,237,.06)', border: '1px solid rgba(124,58,237,.1)' }}
-              >
-                <p className="text-[10px] mb-0.5 uppercase tracking-wide" style={{ color: 'var(--adm-text-muted)' }}>Индивидуальные</p>
-                <p className="text-lg font-bold" style={{ color: 'var(--adm-text-primary)' }}>
-                  {financeStats.totalIndividual.toLocaleString('ru-RU')} ₽
-                </p>
-              </div>
-              <div
-                className="flex-1 px-4 py-2.5 rounded-xl"
-                style={{ background: 'rgba(249,115,22,.06)', border: '1px solid rgba(249,115,22,.12)' }}
-              >
-                <p className="text-[10px] mb-0.5 uppercase tracking-wide" style={{ color: 'var(--adm-text-muted)' }}>Групповые</p>
-                <p className="text-lg font-bold" style={{ color: 'var(--adm-text-primary)' }}>
-                  {financeStats.totalGroup.toLocaleString('ru-RU')} ₽
-                </p>
-              </div>
-            </div>
-          </div>
+      {/* ── Row 2: Chart (3/5) + Upcoming Lessons (2/5) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-5">
+        <div className="lg:col-span-3">
+          <DashboardChart bookings={bookings as any} lessons={lessons as any} />
         </div>
+        <div className="lg:col-span-2">
+          <UpcomingLessons lessons={lessons as any} />
+        </div>
+      </div>
+
+      {/* ── Row 3: Students (1/2) + Bookings (1/2) ── */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-5">
 
         {/* Students */}
         <div className="rounded-2xl p-6" style={card()}>
@@ -144,7 +102,7 @@ export default async function AdminDashboard() {
             </Link>
           </div>
           {students.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-8">
+            <p className="text-sm text-center py-8" style={{ color: 'var(--adm-text-muted)' }}>
               Учеников пока нет.{' '}
               <Link href="/bigbos/students" className="font-semibold hover:underline" style={{ color: '#7c3aed' }}>
                 Добавить →
@@ -154,13 +112,6 @@ export default async function AdminDashboard() {
             <DashboardStudentGrid students={students as any} />
           )}
         </div>
-      </div>
-
-      {/* ── Upcoming lessons + Bookings ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-5">
-
-        {/* Upcoming lessons */}
-        <UpcomingLessons lessons={lessons as any} />
 
         {/* Bookings table */}
         <div className="rounded-2xl overflow-hidden" style={card()}>
@@ -180,7 +131,7 @@ export default async function AdminDashboard() {
           </div>
 
           {bookings.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-10 px-5">Заявок пока нет</p>
+            <p className="text-sm text-center py-10 px-5" style={{ color: 'var(--adm-text-muted)' }}>Заявок пока нет</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -215,5 +166,3 @@ export default async function AdminDashboard() {
     </div>
   )
 }
-
-/* BookingRow → src/components/BookingRow.tsx ('use client') */

@@ -8,17 +8,29 @@ import type {
   Testimonial, FaqItem,
 } from '../lib/landingTypes'
 import TeacherForm from './TeacherForm'
+import { useAdminTheme } from '@/contexts/AdminThemeContext'
 
-/* ───────── Shared UI ───────── */
-const inputCls = 'w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white'
-const textareaCls = `${inputCls} resize-y min-h-[80px]`
-const labelCls = 'block text-sm font-medium text-gray-700 mb-1'
-const sectionCls = 'bg-white rounded-2xl border border-gray-100 shadow-sm p-6'
+/* ───────── Shared styles ───────── */
+const inputBaseCls = 'w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400'
+const inputStyle: React.CSSProperties = {
+  background: 'var(--adm-bg-input)',
+  border: '1px solid var(--adm-border-input)',
+  color: 'var(--adm-text-primary)',
+}
+const textareaBaseCls = `${inputBaseCls} resize-y min-h-[80px]`
+const labelStyle: React.CSSProperties = { color: 'var(--adm-text-primary)' }
+const sectionStyle: React.CSSProperties = {
+  background: 'var(--adm-bg-card)',
+  border: '1px solid var(--adm-border-card)',
+  borderRadius: 16,
+  padding: 24,
+  boxShadow: 'var(--adm-shadow-card)',
+}
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className={labelCls}>{label}</label>
+      <label className="block text-sm font-medium mb-1" style={labelStyle}>{label}</label>
       {children}
     </div>
   )
@@ -27,12 +39,12 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (v: boolean) => void }) {
   return (
     <label className="flex items-center gap-3 cursor-pointer select-none">
-      <span className={`text-sm font-medium ${enabled ? 'text-gray-800' : 'text-gray-400'}`}>
+      <span className="text-sm font-medium" style={{ color: enabled ? 'var(--adm-text-primary)' : 'var(--adm-text-muted)' }}>
         {enabled ? 'Блок включён' : 'Блок выключен'}
       </span>
       <div
         onClick={() => onChange(!enabled)}
-        className={`relative w-11 h-6 rounded-full transition-colors ${enabled ? 'bg-purple-600' : 'bg-gray-300'}`}
+        className={`relative w-11 h-6 rounded-full transition-colors ${enabled ? 'bg-purple-600' : 'bg-gray-400'}`}
       >
         <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-6' : 'translate-x-1'}`} />
       </div>
@@ -51,7 +63,7 @@ function EnabledBanner({ enabled }: { enabled: boolean }) {
 
 function SaveBar({ saving, saved, onSave }: { saving: boolean; saved: boolean; onSave: () => void }) {
   return (
-    <div className="flex items-center gap-3 pt-4 border-t border-gray-100 mt-6">
+    <div className="flex items-center gap-3 pt-4 mt-6" style={{ borderTop: '1px solid var(--adm-border-card)' }}>
       <button
         onClick={onSave}
         disabled={saving}
@@ -59,7 +71,19 @@ function SaveBar({ saving, saved, onSave }: { saving: boolean; saved: boolean; o
       >
         {saving ? 'Сохранение...' : 'Сохранить'}
       </button>
-      {saved && <span className="text-green-600 text-sm font-medium">✓ Сохранено</span>}
+      {saved && <span className="text-green-500 text-sm font-medium">✓ Сохранено</span>}
+    </div>
+  )
+}
+
+function SectionHeader({ title, subtitle, enabled, onToggle }: { title: string; subtitle: string; enabled: boolean; onToggle: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between pb-4" style={{ borderBottom: '1px solid var(--adm-border-card)' }}>
+      <div>
+        <p className="font-semibold" style={{ color: 'var(--adm-text-primary)' }}>{title}</p>
+        <p className="text-sm" style={{ color: 'var(--adm-text-muted)' }}>{subtitle}</p>
+      </div>
+      <Toggle enabled={enabled} onChange={onToggle} />
     </div>
   )
 }
@@ -88,20 +112,20 @@ function HeroForm({ initial }: { initial: HeroSettings }) {
   return (
     <div className="space-y-4">
       <Field label="Заголовок">
-        <input className={inputCls} value={d.title} onChange={e => setD({ ...d, title: e.target.value })} />
+        <input className={inputBaseCls} style={inputStyle} value={d.title} onChange={e => setD({ ...d, title: e.target.value })} />
       </Field>
       <Field label="Подзаголовок">
-        <textarea className={textareaCls} value={d.subtitle} onChange={e => setD({ ...d, subtitle: e.target.value })} />
+        <textarea className={textareaBaseCls} style={inputStyle} value={d.subtitle} onChange={e => setD({ ...d, subtitle: e.target.value })} />
       </Field>
       <div className="grid grid-cols-3 gap-4">
         <Field label="Учеников (число)">
-          <input type="number" className={inputCls} value={d.studentsCount} onChange={e => setD({ ...d, studentsCount: Number(e.target.value) })} />
+          <input type="number" className={inputBaseCls} style={inputStyle} value={d.studentsCount} onChange={e => setD({ ...d, studentsCount: Number(e.target.value) })} />
         </Field>
         <Field label="Лет работаем">
-          <input type="number" className={inputCls} value={d.yearsCount} onChange={e => setD({ ...d, yearsCount: Number(e.target.value) })} />
+          <input type="number" className={inputBaseCls} style={inputStyle} value={d.yearsCount} onChange={e => setD({ ...d, yearsCount: Number(e.target.value) })} />
         </Field>
         <Field label="Оценка (напр. 5.0)">
-          <input type="number" step="0.1" min="0" max="5" className={inputCls} value={d.rating} onChange={e => setD({ ...d, rating: Number(e.target.value) })} />
+          <input type="number" step="0.1" min="0" max="5" className={inputBaseCls} style={inputStyle} value={d.rating} onChange={e => setD({ ...d, rating: Number(e.target.value) })} />
         </Field>
       </div>
       <SaveBar saving={saving} saved={saved} onSave={() => save(() => updateSectionSettings('hero', d))} />
@@ -117,25 +141,20 @@ function ContactsForm({ initial, onEnabledChange }: { initial: ContactsSettings;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-        <div>
-          <p className="font-semibold text-gray-900">Контакты</p>
-          <p className="text-sm text-gray-500">Адрес, телефон, Telegram</p>
-        </div>
-        <Toggle enabled={enabled} onChange={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
-      </div>
+      <SectionHeader title="Контакты" subtitle="Адрес, телефон, Telegram" enabled={enabled}
+        onToggle={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
       <EnabledBanner enabled={enabled} />
       <Field label="Описание">
-        <textarea className={textareaCls} value={d.description} onChange={e => setD({ ...d, description: e.target.value })} />
+        <textarea className={textareaBaseCls} style={inputStyle} value={d.description} onChange={e => setD({ ...d, description: e.target.value })} />
       </Field>
       <Field label="Адрес">
-        <input className={inputCls} value={d.address} onChange={e => setD({ ...d, address: e.target.value })} />
+        <input className={inputBaseCls} style={inputStyle} value={d.address} onChange={e => setD({ ...d, address: e.target.value })} />
       </Field>
       <Field label="Телефон">
-        <input className={inputCls} value={d.phone} onChange={e => setD({ ...d, phone: e.target.value })} />
+        <input className={inputBaseCls} style={inputStyle} value={d.phone} onChange={e => setD({ ...d, phone: e.target.value })} />
       </Field>
       <Field label="Ссылка на Telegram">
-        <input className={inputCls} value={d.telegramUrl} onChange={e => setD({ ...d, telegramUrl: e.target.value })} />
+        <input className={inputBaseCls} style={inputStyle} value={d.telegramUrl} onChange={e => setD({ ...d, telegramUrl: e.target.value })} />
       </Field>
       <SaveBar saving={saving} saved={saved} onSave={() => save(() => updateSectionSettings('contacts', d))} />
     </div>
@@ -150,25 +169,20 @@ function CtaForm({ initial, onEnabledChange }: { initial: CtaSettings; onEnabled
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-        <div>
-          <p className="font-semibold text-gray-900">CTA — призыв к действию</p>
-          <p className="text-sm text-gray-500">Баннер с кнопкой записи</p>
-        </div>
-        <Toggle enabled={enabled} onChange={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
-      </div>
+      <SectionHeader title="CTA — призыв к действию" subtitle="Баннер с кнопкой записи" enabled={enabled}
+        onToggle={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
       <EnabledBanner enabled={enabled} />
       <Field label="Заголовок">
-        <input className={inputCls} value={d.headline} onChange={e => setD({ ...d, headline: e.target.value })} />
+        <input className={inputBaseCls} style={inputStyle} value={d.headline} onChange={e => setD({ ...d, headline: e.target.value })} />
       </Field>
       <Field label="Подтекст">
-        <textarea className={textareaCls} value={d.subtext} onChange={e => setD({ ...d, subtext: e.target.value })} />
+        <textarea className={textareaBaseCls} style={inputStyle} value={d.subtext} onChange={e => setD({ ...d, subtext: e.target.value })} />
       </Field>
       <Field label="Ссылка на Telegram">
-        <input className={inputCls} value={d.telegramUrl} onChange={e => setD({ ...d, telegramUrl: e.target.value })} />
+        <input className={inputBaseCls} style={inputStyle} value={d.telegramUrl} onChange={e => setD({ ...d, telegramUrl: e.target.value })} />
       </Field>
       <Field label="Мелкий текст внизу">
-        <input className={inputCls} value={d.footer} onChange={e => setD({ ...d, footer: e.target.value })} />
+        <input className={inputBaseCls} style={inputStyle} value={d.footer} onChange={e => setD({ ...d, footer: e.target.value })} />
       </Field>
       <SaveBar saving={saving} saved={saved} onSave={() => save(() => updateSectionSettings('cta', d))} />
     </div>
@@ -188,25 +202,20 @@ function FeaturesForm({ initial, onEnabledChange }: { initial: FeaturesSettings;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-        <div>
-          <p className="font-semibold text-gray-900">Преимущества</p>
-          <p className="text-sm text-gray-500">«Почему выбирают нас» — карточки</p>
-        </div>
-        <Toggle enabled={enabled} onChange={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
-      </div>
+      <SectionHeader title="Преимущества" subtitle="«Почему выбирают нас» — карточки" enabled={enabled}
+        onToggle={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
       <EnabledBanner enabled={enabled} />
       <Field label="Описание клуба (абзац над карточками)">
-        <textarea className={textareaCls} value={d.description} onChange={e => setD({ ...d, description: e.target.value })} />
+        <textarea className={textareaBaseCls} style={inputStyle} value={d.description} onChange={e => setD({ ...d, description: e.target.value })} />
       </Field>
       {d.items.map((item, i) => (
-        <div key={i} className={`${sectionCls} space-y-3`}>
+        <div key={i} className="space-y-3" style={sectionStyle}>
           <p className="text-xs font-bold uppercase tracking-wider text-purple-500">Карточка {i + 1}</p>
           <Field label="Заголовок карточки">
-            <input className={inputCls} value={item.title} onChange={e => updateItem(i, 'title', e.target.value)} />
+            <input className={inputBaseCls} style={inputStyle} value={item.title} onChange={e => updateItem(i, 'title', e.target.value)} />
           </Field>
           <Field label="Текст карточки">
-            <textarea className={textareaCls} value={item.text} onChange={e => updateItem(i, 'text', e.target.value)} />
+            <textarea className={textareaBaseCls} style={inputStyle} value={item.text} onChange={e => updateItem(i, 'text', e.target.value)} />
           </Field>
         </div>
       ))}
@@ -243,54 +252,49 @@ function FormatsForm({ initial, onEnabledChange }: { initial: FormatsSettings; o
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-        <div>
-          <p className="font-semibold text-gray-900">Форматы занятий</p>
-          <p className="text-sm text-gray-500">Групповые и индивидуальные</p>
-        </div>
-        <Toggle enabled={enabled} onChange={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
-      </div>
+      <SectionHeader title="Форматы занятий" subtitle="Групповые и индивидуальные" enabled={enabled}
+        onToggle={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
       <EnabledBanner enabled={enabled} />
       <Field label="Подзаголовок раздела">
-        <textarea className={textareaCls} value={d.subtitle} onChange={e => setD({ ...d, subtitle: e.target.value })} />
+        <textarea className={textareaBaseCls} style={inputStyle} value={d.subtitle} onChange={e => setD({ ...d, subtitle: e.target.value })} />
       </Field>
 
       {/* Групповые */}
-      <div className={`${sectionCls} space-y-3`}>
+      <div className="space-y-3" style={sectionStyle}>
         <p className="text-xs font-bold uppercase tracking-wider text-purple-500">Групповые занятия (офлайн)</p>
         <Field label="Заголовок">
-          <input className={inputCls} value={d.groupTitle} onChange={e => setD({ ...d, groupTitle: e.target.value })} />
+          <input className={inputBaseCls} style={inputStyle} value={d.groupTitle} onChange={e => setD({ ...d, groupTitle: e.target.value })} />
         </Field>
         <Field label="Описание">
-          <textarea className={textareaCls} value={d.groupDescription} onChange={e => setD({ ...d, groupDescription: e.target.value })} />
+          <textarea className={textareaBaseCls} style={inputStyle} value={d.groupDescription} onChange={e => setD({ ...d, groupDescription: e.target.value })} />
         </Field>
-        <p className={labelCls}>Пункты списка</p>
+        <p className="block text-sm font-medium mb-1" style={labelStyle}>Пункты списка</p>
         {d.groupBullets.map((b, i) => (
           <div key={i} className="flex gap-2">
-            <input className={inputCls} value={b} onChange={e => updateBullet('group', i, e.target.value)} />
+            <input className={inputBaseCls} style={inputStyle} value={b} onChange={e => updateBullet('group', i, e.target.value)} />
             <button onClick={() => removeBullet('group', i)} className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-xl text-sm">✕</button>
           </div>
         ))}
-        <button onClick={() => addBullet('group')} className="text-sm text-purple-600 hover:text-purple-800 font-medium">+ Добавить пункт</button>
+        <button onClick={() => addBullet('group')} className="text-sm text-purple-500 hover:text-purple-700 font-medium">+ Добавить пункт</button>
       </div>
 
       {/* Индивидуальные */}
-      <div className={`${sectionCls} space-y-3`}>
+      <div className="space-y-3" style={sectionStyle}>
         <p className="text-xs font-bold uppercase tracking-wider text-orange-500">Индивидуальные занятия (онлайн)</p>
         <Field label="Заголовок">
-          <input className={inputCls} value={d.individualTitle} onChange={e => setD({ ...d, individualTitle: e.target.value })} />
+          <input className={inputBaseCls} style={inputStyle} value={d.individualTitle} onChange={e => setD({ ...d, individualTitle: e.target.value })} />
         </Field>
         <Field label="Описание">
-          <textarea className={textareaCls} value={d.individualDescription} onChange={e => setD({ ...d, individualDescription: e.target.value })} />
+          <textarea className={textareaBaseCls} style={inputStyle} value={d.individualDescription} onChange={e => setD({ ...d, individualDescription: e.target.value })} />
         </Field>
-        <p className={labelCls}>Пункты списка</p>
+        <p className="block text-sm font-medium mb-1" style={labelStyle}>Пункты списка</p>
         {d.individualBullets.map((b, i) => (
           <div key={i} className="flex gap-2">
-            <input className={inputCls} value={b} onChange={e => updateBullet('individual', i, e.target.value)} />
+            <input className={inputBaseCls} style={inputStyle} value={b} onChange={e => updateBullet('individual', i, e.target.value)} />
             <button onClick={() => removeBullet('individual', i)} className="px-3 py-2 text-red-500 hover:bg-red-50 rounded-xl text-sm">✕</button>
           </div>
         ))}
-        <button onClick={() => addBullet('individual')} className="text-sm text-orange-600 hover:text-orange-800 font-medium">+ Добавить пункт</button>
+        <button onClick={() => addBullet('individual')} className="text-sm text-orange-500 hover:text-orange-700 font-medium">+ Добавить пункт</button>
       </div>
 
       <SaveBar saving={saving} saved={saved} onSave={() => save(() => updateSectionSettings('formats', d))} />
@@ -311,22 +315,17 @@ function HowItWorksForm({ initial, onEnabledChange }: { initial: HowItWorksSetti
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-        <div>
-          <p className="font-semibold text-gray-900">Как начать</p>
-          <p className="text-sm text-gray-500">Шаги от заявки до занятий</p>
-        </div>
-        <Toggle enabled={enabled} onChange={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
-      </div>
+      <SectionHeader title="Как начать" subtitle="Шаги от заявки до занятий" enabled={enabled}
+        onToggle={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
       <EnabledBanner enabled={enabled} />
       {d.items.map((item, i) => (
-        <div key={i} className={`${sectionCls} space-y-3`}>
+        <div key={i} className="space-y-3" style={sectionStyle}>
           <p className="text-xs font-bold uppercase tracking-wider text-purple-500">Шаг {i + 1}</p>
           <Field label="Заголовок шага">
-            <input className={inputCls} value={item.title} onChange={e => updateItem(i, 'title', e.target.value)} />
+            <input className={inputBaseCls} style={inputStyle} value={item.title} onChange={e => updateItem(i, 'title', e.target.value)} />
           </Field>
           <Field label="Описание шага">
-            <textarea className={textareaCls} value={item.text} onChange={e => updateItem(i, 'text', e.target.value)} />
+            <textarea className={textareaBaseCls} style={inputStyle} value={item.text} onChange={e => updateItem(i, 'text', e.target.value)} />
           </Field>
         </div>
       ))}
@@ -351,37 +350,36 @@ function TestimonialsForm({ initial, onEnabledChange }: { initial: TestimonialsS
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-        <div>
-          <p className="font-semibold text-gray-900">Отзывы</p>
-          <p className="text-sm text-gray-500">Карусель отзывов родителей</p>
-        </div>
-        <Toggle enabled={enabled} onChange={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
-      </div>
+      <SectionHeader title="Отзывы" subtitle="Карусель отзывов родителей" enabled={enabled}
+        onToggle={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
       <EnabledBanner enabled={enabled} />
       {d.items.map((item, i) => (
-        <div key={i} className={`${sectionCls} space-y-3`}>
+        <div key={i} className="space-y-3" style={sectionStyle}>
           <div className="flex items-center justify-between">
             <p className="text-xs font-bold uppercase tracking-wider text-orange-500">Отзыв {i + 1}</p>
             <button onClick={() => remove(i)} className="text-xs text-red-500 hover:text-red-700 font-medium">Удалить</button>
           </div>
           <div className="grid grid-cols-3 gap-3">
             <Field label="Имя">
-              <input className={inputCls} value={item.name} onChange={e => update(i, 'name', e.target.value)} />
+              <input className={inputBaseCls} style={inputStyle} value={item.name} onChange={e => update(i, 'name', e.target.value)} />
             </Field>
             <Field label="Ребёнок (напр. «Саша, 8 лет»)">
-              <input className={inputCls} value={item.child} onChange={e => update(i, 'child', e.target.value)} />
+              <input className={inputBaseCls} style={inputStyle} value={item.child} onChange={e => update(i, 'child', e.target.value)} />
             </Field>
             <Field label="Длительность (напр. «6 месяцев»)">
-              <input className={inputCls} value={item.duration} onChange={e => update(i, 'duration', e.target.value)} />
+              <input className={inputBaseCls} style={inputStyle} value={item.duration} onChange={e => update(i, 'duration', e.target.value)} />
             </Field>
           </div>
           <Field label="Текст отзыва">
-            <textarea className={textareaCls} value={item.text} onChange={e => update(i, 'text', e.target.value)} rows={3} />
+            <textarea className={textareaBaseCls} style={inputStyle} value={item.text} onChange={e => update(i, 'text', e.target.value)} rows={3} />
           </Field>
         </div>
       ))}
-      <button onClick={add} className="w-full py-3 border-2 border-dashed border-orange-300 text-orange-600 rounded-2xl text-sm font-medium hover:border-orange-400 hover:bg-orange-50 transition-colors">
+      <button onClick={add} className="w-full py-3 rounded-2xl text-sm font-medium transition-colors"
+        style={{ border: '2px dashed rgba(249,115,22,0.5)', color: '#f97316' }}
+        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(249,115,22,0.05)')}
+        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+      >
         + Добавить отзыв
       </button>
       <SaveBar saving={saving} saved={saved} onSave={() => save(() => updateSectionSettings('testimonials', d))} />
@@ -405,29 +403,28 @@ function FaqForm({ initial, onEnabledChange }: { initial: FaqSettings; onEnabled
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-        <div>
-          <p className="font-semibold text-gray-900">FAQ</p>
-          <p className="text-sm text-gray-500">Часто задаваемые вопросы</p>
-        </div>
-        <Toggle enabled={enabled} onChange={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
-      </div>
+      <SectionHeader title="FAQ" subtitle="Часто задаваемые вопросы" enabled={enabled}
+        onToggle={v => { setD({ ...d, enabled: v }); onEnabledChange(v) }} />
       <EnabledBanner enabled={enabled} />
       {d.items.map((item, i) => (
-        <div key={i} className={`${sectionCls} space-y-3`}>
+        <div key={i} className="space-y-3" style={sectionStyle}>
           <div className="flex items-center justify-between">
             <p className="text-xs font-bold uppercase tracking-wider text-purple-500">Вопрос {i + 1}</p>
             <button onClick={() => remove(i)} className="text-xs text-red-500 hover:text-red-700 font-medium">Удалить</button>
           </div>
           <Field label="Вопрос">
-            <input className={inputCls} value={item.q} onChange={e => update(i, 'q', e.target.value)} />
+            <input className={inputBaseCls} style={inputStyle} value={item.q} onChange={e => update(i, 'q', e.target.value)} />
           </Field>
           <Field label="Ответ">
-            <textarea className={textareaCls} value={item.a} onChange={e => update(i, 'a', e.target.value)} rows={3} />
+            <textarea className={textareaBaseCls} style={inputStyle} value={item.a} onChange={e => update(i, 'a', e.target.value)} rows={3} />
           </Field>
         </div>
       ))}
-      <button onClick={add} className="w-full py-3 border-2 border-dashed border-purple-300 text-purple-600 rounded-2xl text-sm font-medium hover:border-purple-400 hover:bg-purple-50 transition-colors">
+      <button onClick={add} className="w-full py-3 rounded-2xl text-sm font-medium transition-colors"
+        style={{ border: '2px dashed rgba(124,58,237,0.4)', color: '#7c3aed' }}
+        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(124,58,237,0.05)')}
+        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+      >
         + Добавить вопрос
       </button>
       <SaveBar saving={saving} saved={saved} onSave={() => save(() => updateSectionSettings('faq', d))} />
@@ -442,17 +439,20 @@ function GalleryForm({ photos }: { photos: Photo[] }) {
   return (
     <div className="space-y-6">
       <form action={uploadPhoto} className="flex flex-col sm:flex-row gap-2">
-        <input type="file" name="file" accept="image/*" required className="border border-gray-200 p-2 rounded-xl flex-1 text-sm bg-gray-50" />
+        <input type="file" name="file" accept="image/*" required
+          className="rounded-xl flex-1 text-sm p-2"
+          style={{ border: '1px solid var(--adm-border-input)', background: 'var(--adm-bg-input)', color: 'var(--adm-text-primary)' }} />
         <button type="submit" className="bg-purple-600 text-white px-5 py-2 rounded-xl font-medium hover:bg-purple-700 whitespace-nowrap text-sm">
           Загрузить
         </button>
       </form>
       {photos.length === 0 && (
-        <p className="text-sm text-gray-400 text-center py-6">Фотографий пока нет</p>
+        <p className="text-sm text-center py-6" style={{ color: 'var(--adm-text-muted)' }}>Фотографий пока нет</p>
       )}
       <div className="grid grid-cols-3 gap-3">
         {photos.map((p) => (
-          <div key={p.id} className="relative group rounded-xl overflow-hidden aspect-square border border-gray-100">
+          <div key={p.id} className="relative group rounded-xl overflow-hidden aspect-square"
+            style={{ border: '1px solid var(--adm-border-card)' }}>
             <img src={p.url} className="w-full h-full object-cover" alt="" />
             <form action={deletePhoto.bind(null, p.id, p.url)} className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
               <button type="submit" className="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-bold">
@@ -500,6 +500,9 @@ type Props = {
 
 export default function LandingEditor(props: Props) {
   const [tab, setTab] = useState(0)
+  const { theme } = useAdminTheme()
+  const isDark = theme === 'dark'
+
   const [enabledMap, setEnabledMap] = useState<Record<EnabledTabKey, boolean>>({
     contacts: props.contacts.enabled !== false,
     cta: props.cta.enabled !== false,
@@ -519,19 +522,22 @@ export default function LandingEditor(props: Props) {
       <div className="flex flex-wrap gap-2 mb-6">
         {TABS.map((t, i) => {
           const isEnabled = t.key in enabledMap ? enabledMap[t.key as EnabledTabKey] : true
+          const active = tab === i
           return (
             <button
               key={t.key}
               onClick={() => setTab(i)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                tab === i
-                  ? 'bg-purple-600 text-white shadow-sm'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-purple-300 hover:text-purple-600'
-              }`}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+              style={{
+                background: active ? '#7c3aed' : 'var(--adm-bg-card)',
+                color: active ? '#ffffff' : 'var(--adm-text-muted)',
+                border: active ? 'none' : '1px solid var(--adm-border-card)',
+                boxShadow: active ? '0 2px 8px rgba(124,58,237,0.3)' : 'none',
+              }}
             >
               {t.label}
               {!isEnabled && (
-                <span className={`w-1.5 h-1.5 rounded-full ${tab === i ? 'bg-white/60' : 'bg-amber-400'}`} />
+                <span className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-white/60' : 'bg-amber-400'}`} />
               )}
             </button>
           )

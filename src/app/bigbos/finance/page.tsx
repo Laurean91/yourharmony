@@ -36,17 +36,17 @@ export default async function FinancePage() {
   return (
     <div className="p-6 md:p-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-gray-900 leading-tight">Финансы</h1>
-        <p className="text-sm text-gray-400 mt-0.5">Доходы на основе отмеченных занятий</p>
+        <h1 className="text-2xl font-extrabold leading-tight" style={{ color: 'var(--adm-text-primary)' }}>Финансы</h1>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--adm-text-muted)' }}>Доходы на основе отмеченных занятий</p>
       </div>
 
       {/* ── Price settings ── */}
       <div
         className="rounded-2xl p-6"
         style={{
-          background: '#fff',
-          border: '1px solid rgba(139,92,246,0.12)',
-          boxShadow: '0 1px 10px rgba(109,40,217,0.04)',
+          background: 'var(--adm-bg-card)',
+          border: '1px solid var(--adm-border-card)',
+          boxShadow: 'var(--adm-shadow-card)',
         }}
       >
         <PriceSettingsForm individual={prices.individual} group={prices.group} />
@@ -82,9 +82,9 @@ export default async function FinancePage() {
         <div
           className="rounded-2xl p-5"
           style={{
-            background: '#fff',
-            border: '1px solid rgba(139,92,246,0.15)',
-            boxShadow: '0 2px 12px rgba(109,40,217,0.06)',
+            background: 'var(--adm-bg-card)',
+            border: '1px solid var(--adm-border-card)',
+            boxShadow: 'var(--adm-shadow-card)',
           }}
         >
           <div className="flex items-center mb-3">
@@ -92,15 +92,15 @@ export default async function FinancePage() {
               className="w-2 h-2 rounded-full mr-2 shrink-0"
               style={{ background: '#7c3aed' }}
             />
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Индивидуальные</p>
+            <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--adm-text-muted)' }}>Индивидуальные</p>
             <DeltaBadge current={stats.totalIndividual} prev={prevIndividual} />
           </div>
-          <p className="text-2xl font-extrabold text-gray-900">
+          <p className="text-2xl font-extrabold" style={{ color: 'var(--adm-text-primary)' }}>
             {stats.totalIndividual.toLocaleString('ru-RU')}
-            <span className="text-base text-gray-400 ml-1 font-medium">₽</span>
+            <span className="text-base ml-1 font-medium" style={{ color: 'var(--adm-text-muted)' }}>₽</span>
           </p>
           {prevIndividual > 0 && (
-            <p className="text-xs text-gray-400 mt-2">
+            <p className="text-xs mt-2" style={{ color: 'var(--adm-text-muted)' }}>
               прошлый: {prevIndividual.toLocaleString('ru-RU')} ₽
             </p>
           )}
@@ -110,9 +110,9 @@ export default async function FinancePage() {
         <div
           className="rounded-2xl p-5"
           style={{
-            background: '#fff',
-            border: '1px solid rgba(249,115,22,0.15)',
-            boxShadow: '0 2px 12px rgba(249,115,22,0.06)',
+            background: 'var(--adm-bg-card)',
+            border: '1px solid var(--adm-border-card)',
+            boxShadow: 'var(--adm-shadow-card)',
           }}
         >
           <div className="flex items-center mb-3">
@@ -120,15 +120,15 @@ export default async function FinancePage() {
               className="w-2 h-2 rounded-full mr-2 shrink-0"
               style={{ background: '#f97316' }}
             />
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Групповые</p>
+            <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--adm-text-muted)' }}>Групповые</p>
             <DeltaBadge current={stats.totalGroup} prev={prevGroup} />
           </div>
-          <p className="text-2xl font-extrabold text-gray-900">
+          <p className="text-2xl font-extrabold" style={{ color: 'var(--adm-text-primary)' }}>
             {stats.totalGroup.toLocaleString('ru-RU')}
-            <span className="text-base text-gray-400 ml-1 font-medium">₽</span>
+            <span className="text-base ml-1 font-medium" style={{ color: 'var(--adm-text-muted)' }}>₽</span>
           </p>
           {prevGroup > 0 && (
-            <p className="text-xs text-gray-400 mt-2">
+            <p className="text-xs mt-2" style={{ color: 'var(--adm-text-muted)' }}>
               прошлый: {prevGroup.toLocaleString('ru-RU')} ₽
             </p>
           )}
@@ -139,9 +139,9 @@ export default async function FinancePage() {
       <div
         className="rounded-2xl p-5 md:p-6"
         style={{
-          background: '#fff',
-          border: '1px solid rgba(139,92,246,0.12)',
-          boxShadow: '0 1px 10px rgba(109,40,217,0.04)',
+          background: 'var(--adm-bg-card)',
+          border: '1px solid var(--adm-border-card)',
+          boxShadow: 'var(--adm-shadow-card)',
         }}
       >
         <FinanceChart data={stats.monthlyRevenue} />
@@ -151,22 +151,22 @@ export default async function FinancePage() {
       <div
         className="rounded-2xl overflow-hidden"
         style={{
-          background: '#fff',
-          border: '1px solid rgba(139,92,246,0.12)',
-          boxShadow: '0 1px 10px rgba(109,40,217,0.04)',
+          background: 'var(--adm-bg-card)',
+          border: '1px solid var(--adm-border-card)',
+          boxShadow: 'var(--adm-shadow-card)',
         }}
       >
         {/* Table header */}
         <div
           className="px-6 py-4"
-          style={{ borderBottom: '1px solid rgba(139,92,246,0.08)' }}
+          style={{ borderBottom: 'var(--adm-border-sep)' }}
         >
-          <h2 className="text-base font-semibold text-gray-800">Доход по ученикам</h2>
-          <p className="text-sm text-gray-400 mt-0.5">На основе посещённых занятий за всё время</p>
+          <h2 className="text-base font-semibold" style={{ color: 'var(--adm-text-primary)' }}>Доход по ученикам</h2>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--adm-text-muted)' }}>На основе посещённых занятий за всё время</p>
         </div>
 
         {stats.studentRevenue.length === 0 ? (
-          <p className="p-6 text-sm text-gray-400 text-center py-10">
+          <p className="p-6 text-sm text-center py-10" style={{ color: 'var(--adm-text-muted)' }}>
             Нет данных — отметьте посещаемость в расписании
           </p>
         ) : (
@@ -176,9 +176,9 @@ export default async function FinancePage() {
                 <tr
                   className="text-[10px] uppercase tracking-wider"
                   style={{
-                    color: '#9ca3af',
-                    background: 'rgba(139,92,246,0.03)',
-                    borderBottom: '1px solid rgba(139,92,246,0.08)',
+                    color: 'var(--adm-text-muted)',
+                    background: 'var(--adm-bg-thead)',
+                    borderBottom: '1px solid var(--adm-border-sep)',
                   }}
                 >
                   <th className="px-6 py-3 text-left font-semibold">Ученик</th>
@@ -194,8 +194,11 @@ export default async function FinancePage() {
                   return (
                     <tr
                       key={s.studentId}
-                      className={`transition-colors hover:bg-purple-50/60 ${idx % 2 === 1 ? 'bg-purple-50/30' : 'bg-white'}`}
-                      style={{ borderBottom: '1px solid rgba(139,92,246,0.06)' }}
+                      className="transition-colors hover:opacity-80"
+                      style={{
+                        background: idx % 2 === 1 ? 'var(--adm-bg-zebra)' : 'transparent',
+                        borderBottom: '1px solid var(--adm-border-sep)',
+                      }}
                     >
                       {/* Name + avatar */}
                       <td className="px-6 py-3.5">
@@ -210,7 +213,7 @@ export default async function FinancePage() {
                           >
                             {s.name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()}
                           </div>
-                          <span className="font-semibold text-gray-800">{s.name}</span>
+                          <span className="font-semibold" style={{ color: 'var(--adm-text-primary)' }}>{s.name}</span>
                         </div>
                       </td>
 
@@ -229,7 +232,7 @@ export default async function FinancePage() {
                       </td>
 
                       {/* Attended count */}
-                      <td className="px-4 py-3.5 text-right text-gray-500 font-medium">{s.attended}</td>
+                      <td className="px-4 py-3.5 text-right font-medium" style={{ color: 'var(--adm-text-muted)' }}>{s.attended}</td>
 
                       {/* Revenue + bar */}
                       <td className="px-4 py-3.5 pr-6 text-right">

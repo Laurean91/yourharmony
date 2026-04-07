@@ -23,13 +23,13 @@ export default async function StudentsPage({
     : allStudents
 
   return (
-    <div className="p-8 font-sans text-gray-800">
+    <div className="p-8 font-sans" style={{ color: 'var(--adm-text-primary)' }}>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Мои ученики</h1>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--adm-text-primary)' }}>Мои ученики</h1>
           <div className="ml-auto flex items-center gap-3">
-            <span className="text-sm text-gray-400">{allStudents.length} {allStudents.length === 1 ? 'ученик' : 'учеников'}</span>
+            <span className="text-sm" style={{ color: 'var(--adm-text-muted)' }}>{allStudents.length} {allStudents.length === 1 ? 'ученик' : 'учеников'}</span>
             <AddStudentModal />
           </div>
         </div>
@@ -43,8 +43,17 @@ export default async function StudentsPage({
               className={`px-4 py-1.5 rounded-xl text-sm font-medium transition-colors ${
                 (t === 'Все' && !filterTag) || filterTag === t
                   ? 'bg-purple-600 text-white'
-                  : 'bg-white border border-gray-200 text-gray-600 hover:border-purple-300'
+                  : ''
               }`}
+              style={
+                (t === 'Все' && !filterTag) || filterTag === t
+                  ? {}
+                  : {
+                      background: 'var(--adm-bg-card)',
+                      border: '1px solid var(--adm-border-card)',
+                      color: 'var(--adm-text-secondary)',
+                    }
+              }
             >
               {t}
             </Link>
@@ -53,7 +62,14 @@ export default async function StudentsPage({
 
         {/* Students list */}
         {students.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center text-gray-400 text-sm">
+          <div
+            className="rounded-2xl p-12 text-center text-sm"
+            style={{
+              background: 'var(--adm-bg-card)',
+              border: '1px solid var(--adm-border-card)',
+              color: 'var(--adm-text-muted)',
+            }}
+          >
             Учеников пока нет
           </div>
         ) : (

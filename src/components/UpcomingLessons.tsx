@@ -167,7 +167,7 @@ export default function UpcomingLessons({ lessons }: { lessons: Lesson[] }) {
                           {ind ? 'Инд.' : 'Группа'}
                         </span>
                         {lesson.title && (
-                          <span className="text-xs text-gray-500 truncate">{lesson.title}</span>
+                          <span className="text-xs truncate" style={{ color: 'var(--adm-text-muted)' }}>{lesson.title}</span>
                         )}
                       </div>
 
@@ -188,11 +188,11 @@ export default function UpcomingLessons({ lessons }: { lessons: Lesson[] }) {
                             </div>
                           ))}
                           {lesson.students.length > 3 && (
-                            <span className="text-[10px] text-gray-400">
+                            <span className="text-[10px]" style={{ color: 'var(--adm-text-muted)' }}>
                               +{lesson.students.length - 3}
                             </span>
                           )}
-                          <span className="text-[10px] text-gray-400 ml-1">
+                          <span className="text-[10px] ml-1" style={{ color: 'var(--adm-text-muted)' }}>
                             {lesson.students.map(s => s.student.name).join(', ')}
                           </span>
                         </div>
@@ -201,8 +201,8 @@ export default function UpcomingLessons({ lessons }: { lessons: Lesson[] }) {
 
                     {/* Attendance status */}
                     <div className="shrink-0 flex items-center gap-1">
-                      <Clock size={11} style={{ color: '#9ca3af' }} />
-                      <span className="text-[10px] font-medium text-gray-400">
+                      <Clock size={11} style={{ color: isDark ? 'rgba(167,139,250,0.45)' : '#9ca3af' }} />
+                      <span className="text-[10px] font-medium" style={{ color: 'var(--adm-text-muted)' }}>
                         {attended}/{lesson.students.length}
                       </span>
                     </div>

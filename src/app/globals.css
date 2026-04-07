@@ -111,6 +111,7 @@ input::placeholder, textarea::placeholder {
   --adm-shadow-card:  0 2px 12px rgba(124,58,237,0.06);
   --adm-text-primary: #111827;
   --adm-text-muted:   #9ca3af;
+  --adm-text-secondary: #6b7280;
   --adm-nav-bg:       rgba(255,255,255,0.95);
   --adm-nav-border:   rgba(124,58,237,0.10);
   --adm-nav-item:     #6b7280;
@@ -118,6 +119,12 @@ input::placeholder, textarea::placeholder {
   --adm-nav-item-hover:    #7c3aed;
   --adm-nav-active-bg:     rgba(124,58,237,0.10);
   --adm-nav-active:        #7c3aed;
+  --adm-bg-input:     #fafafa;
+  --adm-border-input: rgba(124,58,237,0.2);
+  --adm-bg-hover:     rgba(139,92,246,0.04);
+  --adm-bg-zebra:     rgba(139,92,246,0.025);
+  --adm-bg-thead:     rgba(139,92,246,0.03);
+  --adm-border-sep:   rgba(139,92,246,0.08);
 }
 
 [data-admin-theme="dark"] {
@@ -128,6 +135,7 @@ input::placeholder, textarea::placeholder {
   --adm-shadow-card:  none;
   --adm-text-primary: #ffffff;
   --adm-text-muted:   rgba(167,139,250,0.5);
+  --adm-text-secondary: rgba(167,139,250,0.7);
   --adm-nav-bg:       rgba(28,16,69,0.85);
   --adm-nav-border:   rgba(167,139,250,0.12);
   --adm-nav-item:     rgba(167,139,250,0.82);
@@ -135,4 +143,19 @@ input::placeholder, textarea::placeholder {
   --adm-nav-item-hover:    rgba(167,139,250,0.9);
   --adm-nav-active-bg:     rgba(124,58,237,0.25);
   --adm-nav-active:        #c4b5fd;
+  --adm-bg-input:     rgba(255,255,255,0.06);
+  --adm-border-input: rgba(167,139,250,0.2);
+  --adm-bg-hover:     rgba(255,255,255,0.06);
+  --adm-bg-zebra:     rgba(139,92,246,0.06);
+  --adm-bg-thead:     rgba(255,255,255,0.03);
+  --adm-border-sep:   rgba(255,255,255,0.06);
+}
+
+/* Dark mode inputs inside admin panel */
+[data-admin-theme="dark"] input,
+[data-admin-theme="dark"] select,
+[data-admin-theme="dark"] textarea {
+  color: #ffffff;
+  background: var(--adm-bg-input);
+  border-color: var(--adm-border-input);
 }
