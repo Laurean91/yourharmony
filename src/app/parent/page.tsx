@@ -1,10 +1,12 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
-import { Calendar, Star, CheckSquare, Library, Sparkles } from 'lucide-react'
+import { Calendar, Star, CheckSquare, Library, Sparkles, TrendingUp, Award, Flame } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 import StudentPhotoUpload from '../../components/StudentPhotoUpload'
+import ParentDashboardClient, { type StudentData, type ParentData } from '../../components/ParentDashboardClient'
+
+// ── helpers ────────────────────────────────────────────────────────────────
 
 function calcStars(lessons: Array<{ attended: boolean; grade: number | null }>): number {
   return lessons.reduce((sum, l) => {
@@ -17,8 +19,6 @@ function calcStars(lessons: Array<{ attended: boolean; grade: number | null }>):
     return sum + pts
   }, 0)
 }
-
-// ── helpers ────────────────────────────────────────────────────────────────
 
 type LessonEntry = { lesson: { date: Date }; attended: boolean; grade: number | null }
 
@@ -47,65 +47,34 @@ type Badge = { label: string; icon: string; color: string; bg: string }
 
 function getBadges(attended: number, streak: number, grades: number[]): Badge[] {
   const badges: Badge[] = []
-
   if (attended >= 1)  badges.push({ label: 'Первый урок',   icon: '🎯', color: '#059669', bg: '#ECFDF5' })
   if (attended >= 10) badges.push({ label: '10 уроков',      icon: '🔟', color: '#2563EB', bg: '#EFF6FF' })
   if (attended >= 25) badges.push({ label: '25 уроков',      icon: '🎖', color: '#7C3AED', bg: '#F5F3FF' })
   if (attended >= 50) badges.push({ label: '50 уроков',      icon: '🏆', color: '#D97706', bg: '#FFFBEB' })
-
-  if (streak >= 3)  badges.push({ label: `Серия ${streak}`, icon: '🔥', color: '#EA580C', bg: '#FFF7ED' })
-
+  if (streak >= 3)    badges.push({ label: `Серия ${streak}`, icon: '🔥', color: '#EA580C', bg: '#FFF7ED' })
   const hasGrades = grades.length >= 3
   if (hasGrades) {
     const avg = grades.reduce((a, b) => a + b, 0) / grades.length
-    if (avg >= 4.7) badges.push({ label: 'Отличник',          icon: '⭐', color: '#CA8A04', bg: '#FEFCE8' })
+    if (avg >= 4.7) badges.push({ label: 'Отличник', icon: '⭐', color: '#CA8A04', bg: '#FEFCE8' })
   }
-
-  // 3 пятёрки подряд
-  let consecutiveFives = 0
+  let fives = 0
   for (const g of grades) {
-    if (g === 5) consecutiveFives++
-    else consecutiveFives = 0
-    if (consecutiveFives >= 3) {
-      badges.push({ label: '3 пятёрки подряд', icon: '💫', color: '#DB2777', bg: '#FDF2F8' })
-      break
-    }
+    if (g === 5) fives++
+    else fives = 0
+    if (fives >= 3) { badges.push({ label: '3 пятёрки подряд', icon: '💫', color: '#DB2777', bg: '#FDF2F8' }); break }
   }
-
   return badges
 }
 
-// ── SVG progress ring ──────────────────────────────────────────────────────
-
-// RADIUS=42, strokeWidth=4:
-//   ring inner edge = 42-2 = 40px from center (10px from SVG edge)
-//   ring outer edge = 42+2 = 44px from center (6px from SVG edge)
-//   avatar with inset-[12px] → outer edge at 50-12=38px from center < 40 ✓
-const RADIUS = 42
-const STROKE = 4
-const CIRC = 2 * Math.PI * RADIUS // ≈ 263.9
+const RADIUS = 42, STROKE = 4, CIRC = 2 * Math.PI * RADIUS
 
 function ProgressRingPath({ percent, color }: { percent: number; color: string }) {
   const offset = CIRC * (1 - Math.min(percent, 100) / 100)
   return (
-    <svg
-      width="100" height="100"
-      viewBox="0 0 100 100"
-      className="absolute inset-0"
-      style={{ transform: 'rotate(-90deg)' }}
-    >
-      {/* track */}
-      <circle cx="50" cy="50" r={RADIUS} fill="none" stroke="#e5e7eb" strokeWidth={STROKE} />
-      {/* progress arc */}
-      <circle
-        cx="50" cy="50" r={RADIUS}
-        fill="none"
-        stroke={color}
-        strokeWidth={STROKE}
-        strokeDasharray={`${CIRC}`}
-        strokeDashoffset={`${offset}`}
-        strokeLinecap="round"
-      />
+    <svg width="100" height="100" viewBox="0 0 100 100" className="absolute inset-0" style={{ transform: 'rotate(-90deg)' }}>
+      <circle cx="50" cy="50" r={RADIUS} fill="none" stroke="rgba(79,70,229,0.1)" strokeWidth={STROKE} />
+      <circle cx="50" cy="50" r={RADIUS} fill="none" stroke={color} strokeWidth={STROKE}
+        strokeDasharray={`${CIRC}`} strokeDashoffset={`${offset}`} strokeLinecap="round" />
     </svg>
   )
 }
@@ -126,7 +95,6 @@ export default async function ParentDashboard() {
               lessons: {
                 include: { lesson: true },
                 orderBy: { lesson: { date: 'desc' } },
-                // fetch enough for streak + badge computation
                 take: 200,
               },
             },
@@ -153,317 +121,320 @@ export default async function ParentDashboard() {
 
   const now = new Date()
 
-  return (
-    <div className="p-4 md:p-8 max-w-3xl mx-auto">
+  const studentsData: StudentData[] = parent.students.map(({ student }) => {
+    const allPast    = student.lessons.filter(l => l.lesson.date <= now)
+    const nextLesson = [...student.lessons].reverse().find(l => l.lesson.date > now)
+    const attended   = allPast.filter(l => l.attended).length
+    const total      = allPast.length
+    const rate       = total > 0 ? Math.round((attended / total) * 100) : 0
+    const lastGrade  = allPast.find(l => l.grade != null)
+    const gradesAsc  = [...allPast]
+      .sort((a, b) => a.lesson.date.getTime() - b.lesson.date.getTime())
+      .map(l => l.grade).filter((g): g is number => g != null)
+    const streak = getStreak(student.lessons as LessonEntry[], now)
+    const level  = getLevel(attended)
+    const badges = getBadges(attended, streak, gradesAsc)
+    const stars  = calcStars(student.lessons)
+    const levelPct = attended >= level.nextAt ? 100 : Math.round((attended / level.nextAt) * 100)
 
-      {/* Welcome header */}
-      <div
-        className="rounded-2xl px-6 py-5 mb-8 animate-fade-slide-up"
-        style={{
-          background: 'linear-gradient(135deg, #ecfdf5 0%, #eff6ff 100%)',
-          border: '1px solid #d1fae5',
-          boxShadow: '0 4px 20px rgba(5,150,105,0.08)',
-        }}
-      >
-        <div className="flex items-center gap-4">
-          <Image src="/logo.svg" width={44} height={44} alt="Гармония" />
-          <div>
-            <h1 className="text-2xl font-extrabold text-gray-900">
-              Привет, <span style={{ color: '#059669' }}>{parent.name}</span> 👋
-            </h1>
-            <p className="text-sm text-gray-400 mt-0.5">Личный кабинет клуба «Гармония»</p>
+    return {
+      id: student.id, name: student.name, tag: student.tag, age: student.age,
+      photoUrl: student.photoUrl ?? null, attended, total, rate, streak,
+      lastGrade: lastGrade?.grade ?? null,
+      levelName: level.name, levelColor: level.color, levelBg: level.bg,
+      levelNextAt: level.nextAt, levelPct, badges, stars,
+      nextLesson: nextLesson ? {
+        date: new Date(nextLesson.lesson.date).toLocaleDateString('ru-RU', {
+          weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+        }),
+        title: nextLesson.lesson.title ?? null,
+      } : null,
+      gradesAsc,
+    }
+  })
+
+  const parentData: ParentData = {
+    name: parent.name, students: studentsData, libraryCount, libraryRecent,
+  }
+
+  const studentCards = studentsData.length > 0
+    ? studentsData.map(s => <StudentDashboard key={s.id} student={s} />)
+    : [
+        <div key="empty" className="text-center py-20" style={{ color: 'var(--par-text-muted)' }}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" className="mx-auto mb-3" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+          <p className="text-sm">Пока нет привязанных детей.<br/>Обратитесь к преподавателю.</p>
+        </div>,
+      ]
+
+  const footer = (studentsData.length > 0 || libraryCount > 0) ? (
+    <div className={`grid gap-3 mt-4 ${studentsData.length > 0 && libraryCount > 0 ? 'grid-cols-2' : 'grid-cols-1'} lg:grid-cols-4`}>
+      {studentsData.length > 0 && (
+        <Link href="/parent/stars" className="block group">
+          <div className="parent-glass rounded-2xl p-4 flex items-center gap-3 active:scale-[0.98]">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'linear-gradient(135deg, rgba(251,191,36,0.2), rgba(245,158,11,0.15))' }}>
+              <Sparkles size={18} style={{ color: '#d97706' }} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold leading-tight" style={{ color: 'var(--par-text-primary)' }}>Звёздная карта</p>
+              <p className="text-[10px] mt-0.5" style={{ color: 'var(--par-text-muted)' }}>
+                {studentsData.map(s => `${s.stars}⭐`).join(' · ')}
+              </p>
+            </div>
           </div>
-        </div>
-      </div>
+        </Link>
+      )}
+      {libraryCount > 0 && (
+        <Link href="/parent/library" className="block group">
+          <div className="parent-glass rounded-2xl p-4 flex items-center gap-3 active:scale-[0.98]">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'linear-gradient(135deg, rgba(79,70,229,0.15), rgba(129,140,248,0.1))' }}>
+              <Library size={18} style={{ color: 'var(--par-accent)' }} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold leading-tight" style={{ color: 'var(--par-text-primary)' }}>Литература</p>
+              <p className="text-[10px] mt-0.5" style={{ color: 'var(--par-text-muted)' }}>
+                {libraryCount} {libraryCount < 5 ? 'файла' : 'файлов'}
+              </p>
+            </div>
+          </div>
+        </Link>
+      )}
+    </div>
+  ) : null
 
-      <div className="space-y-5">
-        {parent.students.map(({ student }, idx) => {
-          const allPast    = student.lessons.filter(l => l.lesson.date <= now)
-          const nextLesson = [...student.lessons].reverse().find(l => l.lesson.date > now)
+  return (
+    <ParentDashboardClient data={parentData} studentCards={studentCards} footer={footer} />
+  )
+}
 
-          const attended = allPast.filter(l => l.attended).length
-          const total    = allPast.length
-          const rate     = total > 0 ? Math.round((attended / total) * 100) : 0
-          const lastGrade = allPast.find(l => l.grade != null)
+// ── Student Dashboard (wide layout) ───────────────────────────────────────
 
-          // for badges: grades chronological order (asc)
-          const gradesAsc = [...allPast]
-            .sort((a, b) => a.lesson.date.getTime() - b.lesson.date.getTime())
-            .map(l => l.grade)
-            .filter((g): g is number => g != null)
+function StudentDashboard({ student: s }: { student: StudentData }) {
+  const initials = s.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
-          const streak = getStreak(student.lessons as LessonEntry[], now)
-          const level  = getLevel(attended)
-          const badges = getBadges(attended, streak, gradesAsc)
+  const kpi = [
+    {
+      label: 'Посещаемость',
+      value: s.rate > 0 ? `${s.rate}%` : '—',
+      sub: `${s.attended} из ${s.total} уроков`,
+      icon: TrendingUp,
+      iconBg: 'rgba(79,70,229,0.1)',
+      iconColor: 'var(--par-accent)',
+      valueColor: 'var(--par-accent)',
+    },
+    {
+      label: 'Последняя оценка',
+      value: s.lastGrade ?? '—',
+      sub: s.lastGrade
+        ? s.lastGrade >= 5 ? 'Отлично!' : s.lastGrade >= 4 ? 'Хорошо' : 'Удовл.'
+        : 'Нет оценки',
+      icon: Star,
+      iconBg: 'rgba(217,119,6,0.1)',
+      iconColor: '#d97706',
+      valueColor: s.lastGrade
+        ? s.lastGrade >= 4 ? '#d97706' : s.lastGrade >= 3 ? '#ca8a04' : '#dc2626'
+        : 'var(--par-text-muted)',
+    },
+    {
+      label: 'Серия уроков',
+      value: s.streak > 0 ? s.streak : '—',
+      sub: s.streak >= 2 ? `${s.streak} подряд 🔥` : 'Нет серии',
+      icon: Flame,
+      iconBg: 'rgba(249,115,22,0.1)',
+      iconColor: 'var(--par-cta)',
+      valueColor: s.streak >= 2 ? 'var(--par-cta)' : 'var(--par-text-muted)',
+    },
+    {
+      label: 'Звёзды',
+      value: s.stars,
+      sub: `Уровень: ${s.levelName}`,
+      icon: Award,
+      iconBg: 'rgba(139,92,246,0.1)',
+      iconColor: '#8b5cf6',
+      valueColor: '#8b5cf6',
+    },
+  ]
 
-          const initials = student.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
-          const levelPct = attended >= level.nextAt
-            ? 100
-            : Math.round((attended / level.nextAt) * 100)
+  return (
+    <div className="space-y-4">
 
-          return (
-            <div
-              key={student.id}
-              className="student-card rounded-3xl overflow-hidden animate-fade-slide-up"
-              style={{
-                background: '#fff',
-                boxShadow: '0 4px 28px rgba(5,150,105,0.09), 0 1px 4px rgba(0,0,0,0.04)',
-                border: '1.5px solid #d1fae5',
-                animationDelay: `${idx * 120}ms`,
-              }}
-            >
+      {/* ── Row 1: Profile + KPI ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-              {/* ── VARIANT A: Profile header with progress ring ── */}
-              <div
-                className="px-6 py-5"
-                style={{ background: 'linear-gradient(120deg, #ecfdf5 0%, #eff6ff 100%)' }}
-              >
-                <div className="flex items-center gap-5">
+        {/* Profile card — col-span-1 */}
+        <div className="parent-glass rounded-2xl p-5 flex flex-col gap-4">
 
-                  {/* Avatar + ring + upload */}
-                  <div className="relative flex-shrink-0" style={{ width: 100, height: 100 }}>
-                    <ProgressRingPath percent={rate} color="#059669" />
-                    <StudentPhotoUpload
-                      studentId={student.id}
-                      photoUrl={student.photoUrl ?? null}
-                      initials={initials}
-                    />
-                    {/* streak fire badge */}
-                    {streak >= 2 && (
-                      <div
-                        className="absolute -bottom-1 -right-1 flex items-center justify-center rounded-full text-white text-[10px] font-extrabold border-2 border-white z-10"
-                        style={{
-                          width: 26, height: 26,
-                          background: 'linear-gradient(135deg, #F97316, #EF4444)',
-                        }}
-                        title={`Серия ${streak} уроков подряд`}
-                      >
-                        {streak}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Name + info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xl font-extrabold text-gray-900 truncate">{student.name}</p>
-                    <div className="flex flex-wrap items-center gap-2 mt-1">
-                      {student.tag && (
-                        <span
-                          className="px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                          style={{ background: '#d1fae5', color: '#065f46' }}
-                        >
-                          {student.tag}
-                        </span>
-                      )}
-                      {student.age && (
-                        <span className="text-xs text-gray-400 font-medium">{student.age} лет</span>
-                      )}
-                    </div>
-
-                    {/* Streak info */}
-                    {streak >= 2 && (
-                      <p className="text-xs text-orange-500 font-semibold mt-1.5 flex items-center gap-1">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="#F97316"><path d="M17.66 11.2c-.23-.3-.51-.56-.77-.82-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32C8.86 6.23 8 9.55 8.9 12.39c.07.26.07.54-.1.75-.22.3-.6.4-.92.31-.34-.1-.56-.4-.62-.73C6.83 11.6 7 9.82 7.89 8c-1.34.93-2.23 2.47-2.71 3.93C4.46 13.5 4.5 15.07 4.97 16.5c.56 1.56 1.67 2.88 3.07 3.72c1.46.89 3.26 1.15 4.92.87C14.93 20.7 17 18.6 17.66 16.55c.64-1.95.5-4.22-.69-5.96z"/></svg>
-                        Серия {streak} {streak === 1 ? 'урок' : streak < 5 ? 'урока' : 'уроков'} подряд!
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* ── VARIANT B: Level + progress bar ── */}
-              <div
-                className="px-6 py-4 border-t border-gray-100"
-                style={{ background: level.bg }}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <span
-                      className="px-3 py-0.5 rounded-full text-xs font-extrabold shrink-0"
-                      style={{ background: level.color, color: '#fff' }}
-                    >
-                      {level.name}
-                    </span>
-                    <span className="text-xs text-gray-500 truncate">
-                      {attended >= level.nextAt
-                        ? 'Макс. уровень!'
-                        : `ещё ${level.nextAt - attended} ур.`}
-                    </span>
-                  </div>
-                  <span className="text-xs font-bold ml-2 shrink-0" style={{ color: level.color }}>
-                    {attended}/{level.nextAt}
-                  </span>
-                </div>
-                {/* progress bar */}
-                <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-700"
-                    style={{
-                      width: `${levelPct}%`,
-                      background: `linear-gradient(90deg, ${level.color}99, ${level.color})`,
-                    }}
-                  />
-                </div>
-
-                {/* Achievement badges */}
-                {badges.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-3">
-                    {badges.map(badge => (
-                      <span
-                        key={badge.label}
-                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border"
-                        style={{
-                          background: badge.bg,
-                          color: badge.color,
-                          borderColor: badge.color + '33',
-                        }}
-                        title={badge.label}
-                      >
-                        {badge.icon} {badge.label}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Stats row */}
-              <div className="grid grid-cols-3 divide-x divide-gray-100 border-t border-gray-100">
-                {[
-                  { label: 'Посещ.',  value: rate > 0 ? `${rate}%` : '—', color: '#059669', bar: 'linear-gradient(90deg,#34d399,#059669)' },
-                  { label: 'Уроков', value: total,                        color: '#374151', bar: 'linear-gradient(90deg,#93c5fd,#3b82f6)' },
-                  { label: 'Оценка', value: lastGrade?.grade ?? '—',      color: lastGrade ? '#3b82f6' : '#9ca3af', bar: 'linear-gradient(90deg,#fcd34d,#f59e0b)' },
-                ].map(({ label, value, color, bar }) => (
-                  <div key={label} className="relative px-2 py-3 text-center overflow-hidden">
-                    <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: bar }} />
-                    <p className="text-[10px] text-gray-400 mb-0.5 leading-tight">{label}</p>
-                    <p className="text-base font-black" style={{ color }}>{value}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Next lesson */}
-              {nextLesson && (
-                <div className="px-6 py-3 flex items-center gap-3 border-t border-gray-100">
-                  <Calendar size={15} style={{ color: '#059669' }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-gray-400">Ближайший урок</p>
-                    <p className="text-sm font-semibold text-gray-800 truncate">
-                      {new Date(nextLesson.lesson.date).toLocaleDateString('ru-RU', {
-                        weekday: 'short', day: 'numeric', month: 'short',
-                        hour: '2-digit', minute: '2-digit',
-                      })}
-                      {nextLesson.lesson.title && ` — ${nextLesson.lesson.title}`}
-                    </p>
-                  </div>
+          {/* Avatar row */}
+          <div className="flex items-start gap-4">
+            {/* StudentPhotoUpload owns its 100×100 container — don't wrap with sized div */}
+            <div className="relative shrink-0">
+              <ProgressRingPath percent={s.rate} color="var(--par-accent)" />
+              <StudentPhotoUpload studentId={s.id} photoUrl={s.photoUrl} initials={initials} />
+              {s.streak >= 2 && (
+                <div
+                  className="absolute bottom-0 right-0 flex items-center justify-center rounded-full text-white text-[9px] font-extrabold border-2 border-white z-20"
+                  style={{ width: 22, height: 22, background: 'linear-gradient(135deg, var(--par-cta), #EF4444)' }}
+                  title={`Серия ${s.streak} уроков подряд`}
+                >
+                  {s.streak}
                 </div>
               )}
+            </div>
 
-              {/* Quick links */}
-              <div className="grid grid-cols-3 divide-x divide-gray-100 border-t border-gray-100">
-                {[
-                  { href: `/parent/schedule?studentId=${student.id}`,   label: 'Расписание', icon: Calendar },
-                  { href: `/parent/grades?studentId=${student.id}`,     label: 'Оценки',     icon: Star },
-                  { href: `/parent/attendance?studentId=${student.id}`, label: 'Посещения',  icon: CheckSquare },
-                ].map(({ href, label, icon: Icon }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    className="quick-link flex flex-col items-center gap-1.5 py-4 text-xs font-medium text-gray-500 min-h-[44px] cursor-pointer"
-                  >
-                    <Icon size={18} />
-                    {label}
-                  </Link>
-                ))}
+            {/* Name + tags */}
+            <div className="flex-1 min-w-0 pt-1">
+              <p className="text-base font-extrabold leading-snug" style={{ color: 'var(--par-text-primary)' }}>
+                {s.name}
+              </p>
+              <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                {s.tag && (
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                    style={{ background: 'rgba(79,70,229,0.1)', color: 'var(--par-accent)' }}>
+                    {s.tag}
+                  </span>
+                )}
+                {s.age && (
+                  <span className="text-[11px]" style={{ color: 'var(--par-text-muted)' }}>
+                    {s.age} лет
+                  </span>
+                )}
               </div>
             </div>
-          )
-        })}
+          </div>
+
+          {/* Level bar */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold"
+                style={{ background: s.levelColor, color: '#fff' }}>
+                {s.levelName}
+              </span>
+              <span className="text-[11px] font-semibold" style={{ color: 'var(--par-text-muted)' }}>
+                {s.attended}
+                <span style={{ color: 'var(--par-text-muted)' }}>/{s.levelNextAt} ур.</span>
+              </span>
+            </div>
+            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(79,70,229,0.08)' }}>
+              <div className="h-full rounded-full" style={{
+                width: `${s.levelPct}%`,
+                background: `linear-gradient(90deg, ${s.levelColor}80, ${s.levelColor})`,
+                transition: 'width 0.7s ease',
+              }} />
+            </div>
+          </div>
+
+          {/* Quick nav links */}
+          <div className="grid grid-cols-3 gap-1 border-t pt-3" style={{ borderColor: 'var(--par-glass-border)' }}>
+            {[
+              { href: `/parent/schedule?studentId=${s.id}`,   label: 'Расписание', icon: Calendar },
+              { href: `/parent/grades?studentId=${s.id}`,     label: 'Оценки',     icon: Star },
+              { href: `/parent/attendance?studentId=${s.id}`, label: 'Посещения',  icon: CheckSquare },
+            ].map(({ href, label, icon: Icon }) => (
+              <Link key={href} href={href}
+                className="parent-quick-link flex flex-col items-center gap-1 py-2 rounded-xl text-[10px] font-medium"
+                style={{ color: 'var(--par-text-secondary)' }}>
+                <Icon size={15} />
+                {label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* KPI grid — col-span-2, 2×2 */}
+        <div className="md:col-span-2 grid grid-cols-2 gap-3">
+          {kpi.map(({ label, value, sub, icon: Icon, iconBg, iconColor, valueColor }) => (
+            <div key={label} className="parent-glass rounded-2xl p-4 flex flex-col justify-between gap-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: iconBg }}>
+                <Icon size={16} style={{ color: iconColor }} />
+              </div>
+              <div>
+                <p className="text-2xl font-black leading-none mb-0.5" style={{ color: valueColor }}>
+                  {value}
+                </p>
+                <p className="text-xs font-semibold leading-tight" style={{ color: 'var(--par-text-primary)' }}>
+                  {label}
+                </p>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--par-text-muted)' }}>
+                  {sub}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* ── Quick-access teasers: Stars + Library ── */}
-      {(parent.students.length > 0 || libraryCount > 0) && (
-        <div className={`grid gap-3 mt-5 animate-fade-slide-up ${parent.students.length > 0 && libraryCount > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+      {/* ── Row 2: Next lesson + badges ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-          {/* Stars card */}
-          {parent.students.length > 0 && (
-            <Link href="/parent/stars" className="block group">
-              <div className="rounded-2xl p-4 h-full flex flex-col gap-3 transition-all hover:shadow-md active:scale-[0.98]"
-                style={{ background: '#fff', border: '1.5px solid #d1fae5', boxShadow: '0 4px 20px rgba(5,150,105,0.07)' }}>
-
-                <div className="flex items-center justify-between">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: 'linear-gradient(135deg, #fef3c7, #fde68a)' }}>
-                    <Sparkles size={17} style={{ color: '#d97706' }} />
-                  </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="M9 18l6-6-6-6" stroke="#d1fae5" className="group-hover:stroke-emerald-400 transition-colors"/>
-                  </svg>
-                </div>
-
-                <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-                  {parent.students.map(({ student }) => {
-                    const stars = calcStars(student.lessons)
-                    return (
-                      <div key={student.id} className="flex items-baseline gap-1">
-                        <span className="text-2xl font-black leading-none" style={{ color: '#d97706' }}>{stars}</span>
-                        <span className="text-[10px] text-gray-400">⭐</span>
-                      </div>
-                    )
-                  })}
-                </div>
-
-                <div>
-                  <p className="text-xs font-bold text-gray-700 leading-tight">Звёздная карта</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">Рейтинг среди учеников</p>
-                </div>
+        {/* Next lesson */}
+        {s.nextLesson ? (
+          <Link href={`/parent/schedule?studentId=${s.id}`} className="block">
+            <div className="parent-glass rounded-2xl p-4 flex items-center gap-4 h-full">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: 'rgba(79,70,229,0.1)' }}>
+                <Calendar size={18} style={{ color: 'var(--par-accent)' }} />
               </div>
-            </Link>
-          )}
-
-          {/* Library card */}
-          {libraryCount > 0 && (
-            <Link href="/parent/library" className="block group">
-              <div className="rounded-2xl p-4 h-full flex flex-col gap-3 transition-all hover:shadow-md active:scale-[0.98]"
-                style={{ background: '#fff', border: '1.5px solid #d1fae5', boxShadow: '0 4px 20px rgba(5,150,105,0.07)' }}>
-
-                <div className="flex items-center justify-between">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: 'linear-gradient(135deg, #d1fae5, #a7f3d0)' }}>
-                    <Library size={17} style={{ color: '#059669' }} />
-                  </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="M9 18l6-6-6-6" stroke="#d1fae5" className="group-hover:stroke-emerald-400 transition-colors"/>
-                  </svg>
-                </div>
-
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-black leading-none" style={{ color: '#059669' }}>{libraryCount}</span>
-                  <span className="text-[10px] text-gray-400">{libraryCount < 5 ? 'файла' : 'файлов'}</span>
-                </div>
-
-                <div>
-                  <p className="text-xs font-bold text-gray-700 leading-tight">Литература</p>
-                  {libraryRecent[0] && (
-                    <p className="text-[10px] text-gray-400 mt-0.5 truncate leading-tight">{libraryRecent[0].title}</p>
-                  )}
-                </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wider mb-0.5"
+                  style={{ color: 'var(--par-text-muted)' }}>
+                  Ближайший урок
+                </p>
+                <p className="text-sm font-bold leading-snug" style={{ color: 'var(--par-text-primary)' }}>
+                  {s.nextLesson.date}
+                </p>
+                {s.nextLesson.title && (
+                  <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--par-text-secondary)' }}>
+                    {s.nextLesson.title}
+                  </p>
+                )}
               </div>
-            </Link>
-          )}
-
-        </div>
-      )}
-
-      {parent.students.length === 0 && (
-        <div className="text-center py-16 text-gray-400 animate-fade-slide-up">
-          <div className="text-4xl mb-3">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" className="mx-auto text-gray-300" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-            </svg>
+            </div>
+          </Link>
+        ) : (
+          <div className="parent-glass rounded-2xl p-4 flex items-center gap-4 opacity-50">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'rgba(79,70,229,0.06)' }}>
+              <Calendar size={18} style={{ color: 'var(--par-text-muted)' }} />
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider mb-0.5"
+                style={{ color: 'var(--par-text-muted)' }}>
+                Ближайший урок
+              </p>
+              <p className="text-sm" style={{ color: 'var(--par-text-muted)' }}>
+                Нет запланированных уроков
+              </p>
+            </div>
           </div>
-          <p className="text-sm">Пока нет привязанных детей.<br/>Обратитесь к преподавателю.</p>
+        )}
+
+        {/* Badges */}
+        <div className="parent-glass rounded-2xl p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-wider mb-2.5"
+            style={{ color: 'var(--par-text-muted)' }}>
+            Достижения
+          </p>
+          {s.badges.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {s.badges.map(badge => (
+                <span key={badge.label}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border"
+                  style={{ background: badge.bg, color: badge.color, borderColor: badge.color + '33' }}>
+                  {badge.icon} {badge.label}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm" style={{ color: 'var(--par-text-muted)' }}>
+              Достижения появятся по мере посещений 🚀
+            </p>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }

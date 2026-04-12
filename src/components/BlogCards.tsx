@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { motion, useMotionValue } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { formatDate } from '../lib/utils'
 
 type Post = {
@@ -25,7 +25,6 @@ export default function BlogCards({ posts }: { posts: Post[] }) {
   const [current, setCurrent] = useState(0)
   const [dragging, setDragging] = useState(false)
   const total = posts.length
-  const x = useMotionValue(0)
 
   useEffect(() => {
     const calc = () => {
@@ -46,7 +45,6 @@ export default function BlogCards({ posts }: { posts: Post[] }) {
   const goTo = (idx: number) => {
     const clamped = Math.max(0, Math.min(idx, maxIdx))
     setCurrent(clamped)
-    x.set(-(clamped * stepPx))
   }
 
   const prev = () => goTo(current - 1)
@@ -56,21 +54,17 @@ export default function BlogCards({ posts }: { posts: Post[] }) {
   useEffect(() => {
     if (!stepPx || total <= visibleCount) return
     const id = setInterval(() => {
-      setCurrent(c => {
-        const n = c >= maxIdx ? 0 : c + 1
-        x.set(-(n * stepPx))
-        return n
-      })
+      setCurrent(c => (c >= maxIdx ? 0 : c + 1))
     }, 4500)
     return () => clearInterval(id)
-  }, [stepPx, total, visibleCount, maxIdx, x])
+  }, [stepPx, total, visibleCount, maxIdx])
 
   const handleDragEnd = (_: unknown, info: { offset: { x: number } }) => {
     setDragging(false)
     const threshold = stepPx * 0.25
     if (info.offset.x < -threshold) goTo(current + 1)
     else if (info.offset.x > threshold) goTo(current - 1)
-    else x.set(-(current * stepPx))
+    else goTo(current)
   }
 
   if (total === 0) return null
@@ -81,12 +75,12 @@ export default function BlogCards({ posts }: { posts: Post[] }) {
       <div ref={trackRef} className="overflow-hidden">
         <motion.div
           className="flex"
-          style={{ x, gap: GAP, cursor: dragging ? 'grabbing' : 'grab' }}
+          style={{ gap: GAP, cursor: dragging ? 'grabbing' : 'grab' }}
           drag="x"
           dragConstraints={{ left: -(maxIdx * stepPx), right: 0 }}
           dragElastic={0.08}
           animate={{ x: -(current * stepPx) }}
-          transition={{ type: 'spring', stiffness: 300, damping: 35 }}
+          transition={{ type: 'tween', ease: [0.25, 0.46, 0.45, 0.94], duration: 0.45 }}
           onDragStart={() => setDragging(true)}
           onDragEnd={handleDragEnd}
         >

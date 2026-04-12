@@ -22,6 +22,14 @@ export const metadata: Metadata = {
   },
   description: 'Английский для детей от 4 лет в Москве у метро Люблино. Групповые занятия по субботам в 12:00. Онлайн по согласованию. Группы до 8 детей, педагог с CELTA и IELTS 8.0.',
   alternates: { canonical: SITE_URL },
+  icons: {
+    icon: [
+      { url: '/logo.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: [
+      { url: '/logo.png', sizes: '512x512', type: 'image/png' },
+    ],
+  },
   openGraph: {
     title: 'Английский для детей в Москве | Клуб «Гармония»',
     description: 'Английский для детей от 4 лет в Москве у метро Люблино. Групповые занятия по субботам в 12:00. Онлайн по согласованию. Группы до 8 детей, педагог с CELTA и IELTS 8.0.',
@@ -47,7 +55,15 @@ const localBusinessSchema = {
   alternateName: 'Клуб Гармония',
   description: 'Детский языковой клуб «Гармония» — английский для детей от 4 лет в Москве. Групповые занятия по субботам у метро Люблино, онлайн-занятия по согласованию.',
   url: SITE_URL,
-  logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png`, width: 1536, height: 1024 },
+  logo: {
+    '@type': 'ImageObject',
+    '@id': `${SITE_URL}/#logo`,
+    url: `${SITE_URL}/logo.png`,
+    contentUrl: `${SITE_URL}/logo.png`,
+    width: 512,
+    height: 512,
+    caption: 'Языковой клуб «Гармония»',
+  },
   image: `${SITE_URL}/og-image.png`,
   telephone: '+7 (985) 150-83-00',
   address: {

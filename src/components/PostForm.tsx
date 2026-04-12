@@ -59,8 +59,8 @@ export default function PostForm({ categories, post, action, submitLabel }: Post
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Title + Slug */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-gray-800 mb-5">Основное</h2>
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+        <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-5">Основное</h2>
         <SlugInput
           initialTitle={post?.title}
           initialSlug={post?.slug}
@@ -69,8 +69,8 @@ export default function PostForm({ categories, post, action, submitLabel }: Post
       </div>
 
       {/* Excerpt */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
           Краткое описание (excerpt)
         </label>
         <textarea
@@ -79,13 +79,13 @@ export default function PostForm({ categories, post, action, submitLabel }: Post
           rows={3}
           maxLength={300}
           placeholder="Одно-два предложения о чём статья. Отображается в карточке и в метатегах."
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+          className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 placeholder:text-gray-400 dark:placeholder:text-gray-500 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
         />
       </div>
 
       {/* Cover image */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">Обложка статьи</label>
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Обложка статьи</label>
         {coverPreview && (
           <div className="relative aspect-[16/9] max-h-52 overflow-hidden rounded-xl mb-4 border border-gray-200">
             <Image src={coverPreview} alt="Обложка" fill className="object-cover" />
@@ -99,13 +99,13 @@ export default function PostForm({ categories, post, action, submitLabel }: Post
             const file = e.target.files?.[0]
             if (file) setCoverPreview(URL.createObjectURL(file))
           }}
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+          className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-semibold file:bg-purple-50 dark:file:bg-purple-900/30 file:text-purple-700 dark:file:text-purple-400 hover:file:bg-purple-100 dark:hover:file:bg-purple-900/50"
         />
       </div>
 
       {/* Content editor */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-        <label className="block text-sm font-semibold text-gray-700 mb-3">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
           Содержимое статьи <span className="text-red-500">*</span>
         </label>
         <RichTextEditor
@@ -116,15 +116,15 @@ export default function PostForm({ categories, post, action, submitLabel }: Post
       </div>
 
       {/* Category + Status */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-        <h2 className="text-lg font-bold text-gray-800 mb-5">Параметры публикации</h2>
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+        <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-5">Параметры публикации</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Категория</label>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Категория</label>
             <select
               name="categoryId"
               defaultValue={post?.categoryId ?? ''}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
             >
               <option value="">— Без категории —</option>
               {categories.map((c) => (
@@ -153,10 +153,10 @@ export default function PostForm({ categories, post, action, submitLabel }: Post
                 />
               </button>
               <div>
-                <p className="font-semibold text-gray-800 text-sm">
+                <p className="font-semibold text-gray-800 dark:text-gray-200 text-sm">
                   {isPublished ? 'Опубликовано' : 'Черновик'}
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-400 dark:text-gray-500">
                   {isPublished ? 'Статья видна читателям' : 'Статья скрыта'}
                 </p>
               </div>
@@ -170,7 +170,7 @@ export default function PostForm({ categories, post, action, submitLabel }: Post
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-5 py-2.5 text-gray-600 font-medium hover:bg-gray-100 rounded-xl transition-colors"
+          className="px-5 py-2.5 text-gray-600 dark:text-gray-400 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
         >
           Отмена
         </button>

@@ -1,41 +1,41 @@
 import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export default auth((req) => {
+export const proxy = auth((req: NextRequest & { auth: { user?: { role?: string } } | null }) => {
   const { pathname } = req.nextUrl
-  const role = req.auth?.user?.role
-  const isAuthenticated = !!role
+  const session = req.auth
+  const role = session?.user?.role
 
-  const isTeacherPath = pathname.startsWith('/bigbos')
-  const isParentPath  = pathname.startsWith('/parent')
-  const isLoginPage   = pathname === '/bigbos/login' || pathname === '/parent/login'
-
-  // Public login pages — always allow
-  if (isLoginPage) return NextResponse.next()
-
-  // /bigbos/* — TEACHER only
-  if (isTeacherPath) {
-    if (!isAuthenticated) {
-      return NextResponse.redirect(new URL('/bigbos/login', req.url))
-    }
-    if (role !== 'TEACHER') {
-      return NextResponse.redirect(new URL('/parent', req.url))
+  // Защита /bigbos/* — только TEACHER
+  if (pathname.startsWith('/bigbos') && pathname !== '/bigbos/login') {
+    if (!session || role !== 'TEACHER') {
+      const loginUrl = new URL('/bigbos/login', req.url)
+      loginUrl.searchParams.set('callbackUrl', pathname)
+      return NextResponse.redirect(loginUrl)
     }
   }
 
-  // /parent/* — PARENT only
-  if (isParentPath) {
-    if (!isAuthenticated) {
-      return NextResponse.redirect(new URL('/parent/login', req.url))
+  // Защита /parent/* — только PARENT (кроме login и preview)
+  if (pathname.startsWith('/parent') && pathname !== '/parent/login' && !pathname.startsWith('/parent/preview')) {
+    if (!session || role !== 'PARENT') {
+      const loginUrl = new URL('/parent/login', req.url)
+      loginUrl.searchParams.set('callbackUrl', pathname)
+      return NextResponse.redirect(loginUrl)
     }
-    if (role !== 'PARENT') {
-      return NextResponse.redirect(new URL('/bigbos', req.url))
-    }
+  }
+
+  // Редирект авторизованных пользователей со страниц логина
+  if (pathname === '/bigbos/login' && session && role === 'TEACHER') {
+    return NextResponse.redirect(new URL('/bigbos', req.url))
+  }
+  if (pathname === '/parent/login' && session && role === 'PARENT') {
+    return NextResponse.redirect(new URL('/parent', req.url))
   }
 
   return NextResponse.next()
 })
 
-export const config = {
+export const proxyConfig = {
   matcher: ['/bigbos/:path*', '/parent/:path*'],
 }

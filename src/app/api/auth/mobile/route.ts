@@ -2,10 +2,30 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { SignJWT } from 'jose'
 import { prisma } from '@/lib/prisma'
+import { createRefreshToken, rotateRefreshToken } from '@/lib/refresh-tokens'
+import { logAuthEvent } from '@/lib/auth-log'
 
-// POST /api/auth/mobile — returns a JWT for mobile apps (no cookie session needed)
-// Body: { username, password }
+const ACCESS_TOKEN_TTL = '2h'
+
+async function signAccessToken(userId: string, role: string): Promise<string> {
+  const secret = new TextEncoder().encode(process.env.AUTH_SECRET!)
+  return new SignJWT({ role })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setSubject(userId)
+    .setIssuedAt()
+    .setExpirationTime(ACCESS_TOKEN_TTL)
+    .sign(secret)
+}
+
+// POST /api/auth/mobile/login — вход (username + password)
 export async function POST(req: NextRequest) {
+  const { pathname } = req.nextUrl
+
+  // /api/auth/mobile/refresh — ротация refresh-токена
+  if (pathname.endsWith('/refresh')) {
+    return handleRefresh(req)
+  }
+
   let body: { username?: string; password?: string }
   try { body = await req.json() } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
@@ -16,41 +36,65 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'username and password required' }, { status: 400 })
   }
 
-  let userId = ''
-  let name   = ''
-  let role: 'TEACHER' | 'PARENT' = 'PARENT'
+  const user = await prisma.user.findUnique({
+    where: { username },
+    include: { parent: true },
+  })
 
-  // Check teacher credentials
-  const adminUser     = process.env.ADMIN_USER
-  const adminPassword = process.env.ADMIN_PASSWORD
-  if (adminUser && adminPassword && username === adminUser && password === adminPassword) {
-    userId = '0'
-    name   = 'Admin'
-    role   = 'TEACHER'
-  } else {
-    // Check parent in DB
-    const user = await prisma.user.findUnique({
-      where: { username },
-      include: { parent: true },
-    })
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
-    }
-    const match = await bcrypt.compare(password, user.passwordHash)
-    if (!match) {
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
-    }
-    userId = user.id
-    name   = user.parent?.name ?? username
-    role   = user.role as 'TEACHER' | 'PARENT'
+  if (!user) {
+    await logAuthEvent('LOGIN_FAIL')
+    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
   }
 
-  const secret = new TextEncoder().encode(process.env.AUTH_SECRET)
-  const token  = await new SignJWT({ sub: userId, name, role })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('30d')
-    .sign(secret)
+  const match = await bcrypt.compare(password, user.passwordHash)
+  if (!match) {
+    await logAuthEvent('LOGIN_FAIL', user.id)
+    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+  }
 
-  return NextResponse.json({ token, userId, name, role })
+  await logAuthEvent('LOGIN_SUCCESS', user.id)
+
+  const accessToken = await signAccessToken(user.id, user.role)
+  const refreshToken = await createRefreshToken(user.id)
+  const name = user.parent?.name ?? username
+
+  return NextResponse.json({
+    accessToken,
+    refreshToken,
+    userId: user.id,
+    name,
+    role: user.role,
+    expiresIn: 7200,
+  })
+}
+
+async function handleRefresh(req: NextRequest) {
+  let body: { refreshToken?: string }
+  try { body = await req.json() } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+
+  if (!body.refreshToken) {
+    return NextResponse.json({ error: 'refreshToken required' }, { status: 400 })
+  }
+
+  const result = await rotateRefreshToken(body.refreshToken)
+  if (!result) {
+    return NextResponse.json({ error: 'Invalid or expired refresh token' }, { status: 401 })
+  }
+
+  const { newToken, userId } = result
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 401 })
+  }
+
+  const accessToken = await signAccessToken(userId, user.role)
+  await logAuthEvent('TOKEN_REFRESH', userId)
+
+  return NextResponse.json({
+    accessToken,
+    refreshToken: newToken,
+    expiresIn: 7200,
+  })
 }

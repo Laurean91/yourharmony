@@ -117,7 +117,7 @@ function HeroForm({ initial }: { initial: HeroSettings }) {
       <Field label="Подзаголовок">
         <textarea className={textareaBaseCls} style={inputStyle} value={d.subtitle} onChange={e => setD({ ...d, subtitle: e.target.value })} />
       </Field>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Field label="Учеников (число)">
           <input type="number" className={inputBaseCls} style={inputStyle} value={d.studentsCount} onChange={e => setD({ ...d, studentsCount: Number(e.target.value) })} />
         </Field>
@@ -359,7 +359,7 @@ function TestimonialsForm({ initial, onEnabledChange }: { initial: TestimonialsS
             <p className="text-xs font-bold uppercase tracking-wider text-orange-500">Отзыв {i + 1}</p>
             <button onClick={() => remove(i)} className="text-xs text-red-500 hover:text-red-700 font-medium">Удалить</button>
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Field label="Имя">
               <input className={inputBaseCls} style={inputStyle} value={item.name} onChange={e => update(i, 'name', e.target.value)} />
             </Field>

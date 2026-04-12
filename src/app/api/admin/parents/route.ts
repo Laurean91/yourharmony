@@ -48,7 +48,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { username, password, name, phone, email } = body
+  const { password, name, phone, email } = body
+  const username = typeof body.username === 'string' ? body.username.toLowerCase().trim() : undefined
   if (!username || !password || !name) {
     return NextResponse.json({ error: 'username, password, name are required' }, { status: 400 })
   }

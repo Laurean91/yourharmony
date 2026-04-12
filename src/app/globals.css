@@ -159,3 +159,108 @@ input::placeholder, textarea::placeholder {
   background: var(--adm-bg-input);
   border-color: var(--adm-border-input);
 }
+
+/* ── Parent cabinet theme variables ── */
+[data-parent-theme="light"] {
+  --par-bg-base:        #EEF2FF;
+  --par-bg-card:        rgba(255,255,255,0.85);
+  --par-bg-card-solid:  #ffffff;
+  --par-border-card:    rgba(79,70,229,0.10);
+  --par-shadow-card:    0 2px 16px rgba(79,70,229,0.08);
+  --par-text-primary:   #1E1B4B;
+  --par-text-muted:     #9ca3af;
+  --par-text-secondary: #6b7280;
+  --par-accent:         #4F46E5;
+  --par-accent-light:   #818CF8;
+  --par-cta:            #F97316;
+  --par-cta-light:      #FB923C;
+  --par-nav-bg:         rgba(255,255,255,0.72);
+  --par-nav-border:     rgba(79,70,229,0.10);
+  --par-nav-active-bg:  rgba(79,70,229,0.10);
+  --par-nav-active:     #4F46E5;
+  --par-nav-item:       #6b7280;
+  /* Glass-specific */
+  --par-glass-bg:       rgba(255,255,255,0.72);
+  --par-glass-blur:     16px;
+  --par-glass-border:   rgba(255,255,255,0.5);
+  --par-glass-shadow:   0 8px 32px rgba(79,70,229,0.08);
+  --par-glass-hover-bg: rgba(255,255,255,0.85);
+  --par-ring-glow:      0 0 0 3px rgba(79,70,229,0.35), 0 0 16px rgba(79,70,229,0.2);
+  --par-ring-glow-alt:  0 0 0 3px rgba(16,185,129,0.35), 0 0 16px rgba(16,185,129,0.2);
+}
+
+@keyframes parentCardIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.parent-card-in { animation: parentCardIn 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.parent-delay-1 { animation-delay: 80ms; }
+.parent-delay-2 { animation-delay: 160ms; }
+.parent-delay-3 { animation-delay: 240ms; }
+.parent-delay-4 { animation-delay: 320ms; }
+.parent-delay-5 { animation-delay: 400ms; }
+
+@keyframes parentGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(79,70,229,0.15); }
+  50%      { box-shadow: 0 0 24px rgba(79,70,229,0.3); }
+}
+.parent-glow { animation: parentGlow 3s ease-in-out infinite; }
+
+.parent-card-hover {
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease;
+}
+.parent-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(79,70,229,0.14);
+}
+
+.parent-quick-link {
+  transition: background 0.15s, color 0.15s;
+}
+.parent-quick-link:hover {
+  background: rgba(79,70,229,0.06);
+  color: #4F46E5;
+}
+
+/* Glass card base */
+.parent-glass {
+  background: var(--par-glass-bg);
+  backdrop-filter: blur(var(--par-glass-blur));
+  -webkit-backdrop-filter: blur(var(--par-glass-blur));
+  border: 1px solid var(--par-glass-border);
+  box-shadow: var(--par-glass-shadow);
+  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, background 0.3s ease;
+}
+.parent-glass:hover {
+  transform: translateY(-4px);
+  background: var(--par-glass-hover-bg);
+  box-shadow: 0 12px 40px rgba(79,70,229,0.12);
+}
+
+/* Notification badge pulse */
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+  50%      { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+}
+.parent-badge-pulse {
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+/* Blob decorative animations for parent */
+@keyframes parentBlob1 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.15; }
+  50%      { transform: translate(40px, -30px) scale(1.12); opacity: 0.22; }
+}
+@keyframes parentBlob2 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.12; }
+  50%      { transform: translate(-30px, 20px) scale(1.08); opacity: 0.18; }
+}
+.parent-blob-1 { animation: parentBlob1 8s ease-in-out infinite; }
+.parent-blob-2 { animation: parentBlob2 10s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .parent-blob-1, .parent-blob-2 { animation: none; }
+  .parent-badge-pulse { animation: none; }
+  .parent-glass { transition: none; }
+  .parent-glass:hover { transform: none; }
+}

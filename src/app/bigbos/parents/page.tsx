@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Users, Plus, Trash2, Link2, Copy, Check, X } from 'lucide-react'
+import { Users, Plus, Trash2, Link2, Copy, Check, X, KeyRound } from 'lucide-react'
 import { useToast } from '@/components/ui/toast'
 import { ParentRowSkeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -28,9 +28,12 @@ export default function ParentsPage() {
   const [showForm,  setShowForm]  = useState(false)
   const [linkId,    setLinkId]    = useState<string | null>(null)
   const [linkIds,   setLinkIds]   = useState<string[]>([])
-  const [newPass,   setNewPass]   = useState<string | null>(null)
-  const [copied,    setCopied]    = useState(false)
-  const [saving,    setSaving]    = useState(false)
+  const [newPass,      setNewPass]      = useState<string | null>(null)
+  const [copied,       setCopied]       = useState(false)
+  const [saving,       setSaving]       = useState(false)
+  const [resetId,      setResetId]      = useState<string | null>(null)
+  const [resetPass,    setResetPass]    = useState('')
+  const [resetSaving,  setResetSaving]  = useState(false)
   const [form, setForm] = useState({ username: '', password: '', name: '', phone: '', email: '' })
 
   const inputStyle = {
@@ -110,6 +113,26 @@ export default function ParentsPage() {
     navigator.clipboard.writeText(pass)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function saveResetPassword() {
+    if (!resetId || !resetPass) return
+    setResetSaving(true)
+    try {
+      const res = await fetch(`/api/admin/parents/${resetId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: resetPass }),
+      })
+      if (!res.ok) throw new Error()
+      toast.success('Пароль изменён')
+      setResetId(null)
+      setResetPass('')
+    } catch {
+      toast.error('Ошибка смены пароля')
+    } finally {
+      setResetSaving(false)
+    }
   }
 
   return (
@@ -252,6 +275,44 @@ export default function ParentsPage() {
         </div>
       )}
 
+      {/* Reset password modal */}
+      {resetId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.4)' }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 shadow-2xl"
+            style={{ background: isDark ? 'rgba(28,16,69,0.98)' : '#ffffff', border: '1px solid var(--adm-border-card)' }}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{ background: 'rgba(8,145,178,0.12)' }}>
+                <KeyRound size={17} style={{ color: '#0891b2' }} />
+              </div>
+              <p className="text-sm font-extrabold" style={{ color: 'var(--adm-text-primary)' }}>Сменить пароль</p>
+            </div>
+            <input
+              type="text"
+              placeholder="Новый пароль"
+              value={resetPass}
+              onChange={e => setResetPass(e.target.value)}
+              style={{ ...inputStyle, marginBottom: 16 }}
+              onFocus={e => { e.currentTarget.style.borderColor = '#0891b2' }}
+              onBlur={e  => { e.currentTarget.style.borderColor = isDark ? 'rgba(167,139,250,0.2)' : '#e9d5ff' }}
+            />
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => { setResetId(null); setResetPass('') }}
+                className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
+                style={{ color: 'var(--adm-text-muted)', background: 'var(--adm-bg-hover)' }}>
+                Отмена
+              </button>
+              <button onClick={saveResetPassword} disabled={resetSaving || !resetPass}
+                className="px-4 py-2 rounded-xl text-sm font-bold text-white transition-all"
+                style={{ background: '#0891b2', opacity: resetSaving || !resetPass ? 0.6 : 1, cursor: resetSaving || !resetPass ? 'not-allowed' : 'pointer' }}>
+                {resetSaving ? 'Сохранение...' : 'Сохранить'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Parents table */}
       {loading ? (
         <ParentRowSkeleton count={4} />
@@ -312,6 +373,14 @@ export default function ParentsPage() {
                     onMouseLeave={e => { e.currentTarget.style.color = 'var(--adm-text-muted)'; e.currentTarget.style.background = 'transparent' }}
                     title="Привязать учеников">
                     <Link2 size={15} />
+                  </button>
+                  <button onClick={() => { setResetId(p.id); setResetPass('') }}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
+                    style={{ color: 'var(--adm-text-muted)' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#0891b2'; e.currentTarget.style.background = 'rgba(8,145,178,0.1)' }}
+                    onMouseLeave={e => { e.currentTarget.style.color = 'var(--adm-text-muted)'; e.currentTarget.style.background = 'transparent' }}
+                    title="Сменить пароль">
+                    <KeyRound size={15} />
                   </button>
                   <button onClick={() => deleteParent(p.id)}
                     className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"

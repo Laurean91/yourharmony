@@ -29,6 +29,15 @@
 ### Кнопка «Записаться» на лендинге (2026-04-04)
 - Убрана белая обводка `ring-2 ring-white/30` с кнопки Hero в `src/components/LandingClient.tsx`
 
+### BlogCards — плавное перелистование (2026-04-13)
+
+**Проблема:** перелистование статей на главной происходило рывками при нажатии стрелок.  
+**Причина:** `goTo()` вызывал `x.set(-(idx * stepPx))` — мгновенная установка позиции через `useMotionValue`, которая конфликтовала с `animate` prop на `<motion.div>`.  
+**Решение** (`src/components/BlogCards.tsx`):
+- Убраны все вызовы `x.set()` из `goTo`, автопрокрутки и `handleDragEnd` — позиция управляется только через `animate={{ x: -(current * stepPx) }}`
+- `transition` заменён с `spring` (упругий, давал отскок) на `tween` с ease-кривой `[0.25, 0.46, 0.45, 0.94]` и `duration: 0.45` — плавное easeOut без рывков
+- Удалены `useMotionValue` и связанный `x` — больше не нужны
+
 ### Navbar — мобильное меню redesign (2026-04-12)
 - **Кнопка бургера**: SVG-кнопка 36×36px, три линии (фиолетовая/лиловая/оранжевая) морфируются в X через `motion.line` координаты; стеклянный фон с `backdrop-filter: blur(8px)`, без браузерного outline (`WebkitTapHighlightColor: transparent`)
 - **Popup-меню**: всплывающее окно 256px под кнопкой справа (не полноэкранный overlay); glassmorphism-фон с gradient indigo→white→orange, `border-radius: 16px`, shadow; staggered анимация ссылок снизу вверх (spring); gradient divider; CTA-кнопка; декоративная звёздочка; закрытие по клику снаружи и Escape

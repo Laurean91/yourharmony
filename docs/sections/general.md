@@ -13,7 +13,7 @@
 - **Next.js 16** (App Router, Server Components, Server Actions)
 - **Prisma** + **PostgreSQL 16**
 - **Tailwind CSS**
-- **NextAuth.js v5** — аутентификация по логину/паролю
+- **NextAuth.js v5** — аутентификация: Credentials (логин/пароль) + TOTP 2FA для учителя, логин/пароль для родителей
 - **Vercel Blob** — хранение файлов и изображений
 - **Resend** — email-уведомления о новых заявках
 - **Telegram Bot API** — уведомления о новых заявках в Telegram
@@ -132,8 +132,13 @@ yourharmony/
 | `LandingSection` | Секции лендинга (key, data JSON, enabled) |
 | `Parent` | Аккаунты родителей |
 | `ParentStudent` | Связь родителей и учеников |
+| `User` | Учётные записи (TEACHER/PARENT): id, username, passwordHash, role, email, createdAt |
+| `RefreshToken` | Refresh-токены с RTR: tokenHash (SHA-256), family, expiresAt, revokedAt |
+| `AuthEvent` | Аудит-лог: action, userId, ip, userAgent, createdAt |
+| `MagicToken` | (зарезервировано) Одноразовые токены входа |
+| `TotpSecret` | TOTP-секрет для 2FA учителя: secret (base32), verified |
 
-**Индексы:** `Booking(createdAt, status)`, `Post(isPublished, categoryId, createdAt)`, `Lesson(date)`, `LessonStudent(lessonId, studentId)`, `LibraryFile(targetTag)`
+**Индексы:** `Booking(createdAt, status)`, `Post(isPublished, categoryId, createdAt)`, `Lesson(date)`, `LessonStudent(lessonId, studentId)`, `LibraryFile(targetTag)`, `User(username, email)`, `RefreshToken(userId, family)`, `AuthEvent(userId, createdAt)`
 
 ---
 
@@ -145,8 +150,8 @@ yourharmony/
 | `POSTGRES_URL` | Альтернативная строка подключения |
 | `POSTGRES_PASSWORD` | Пароль PostgreSQL (Docker Compose) |
 | `AUTH_SECRET` | Секрет NextAuth.js (`openssl rand -hex 32`) |
-| `ADMIN_USER` | Логин для `/bigbos` |
-| `ADMIN_PASSWORD` | Пароль для `/bigbos` |
+| `ADMIN_USER` | Логин учителя (при первом деплое — seed создаёт запись в БД) |
+| `ADMIN_PASSWORD` | Пароль учителя (при первом деплое — хэшируется bcrypt и сохраняется в БД) |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob токен |
 | `RESEND_API_KEY` | API-ключ Resend |
 | `NOTIFICATION_EMAIL` | Email для уведомлений о заявках |
@@ -183,6 +188,11 @@ yourharmony/
 
 | Метод | Путь | Описание |
 |-------|------|----------|
+| POST | `/api/auth/totp/setup` (GET) | Сгенерировать QR-код для Google Authenticator |
+| POST | `/api/auth/totp/verify` | Верифицировать TOTP-код (активация 2FA или вход) |
+| GET | `/api/auth/totp/status` | Статус TOTP текущего пользователя `{ enabled }` |
+| POST | `/api/auth/refresh` | Обновить web-сессию через RTR |
+| POST | `/api/auth/mobile` | Mobile JWT: access (2ч) + refresh (7д) с RTR |
 | PATCH | `/api/lessons/{id}` | Редактировать занятие |
 | PATCH | `/api/lessons/{id}/move` | Перенести занятие |
 | POST/GET | `/api/lessons/{id}/journal` | Журнал (оценки, ДЗ, файлы) |
@@ -213,8 +223,8 @@ Internet → Nginx :80/:443 → Next.js :3000
 
 ### CI/CD (GitHub Actions)
 1. TypeScript check (`tsc --noEmit`)
-2. SSH на VPS → `git pull` → `docker compose up -d --build`
-3. Prisma-миграции через сервис `migrator` (`db push --skip-generate`)
+2. SSH на VPS → запись `.env` из секретов → `git pull` → `docker compose up -d --build`
+3. `migrator` запускается автоматически через `depends_on` перед `nextjs`: `prisma migrate deploy` → `prisma db seed` (создаёт admin если не существует)
 4. Health check Next.js (:3000) и FastAPI (:8000/api/v1/health)
 
 ### Docker сервисы
@@ -282,6 +292,37 @@ cd api && pytest tests/ -v --cov=api
 ---
 
 ## История изменений — инфраструктура и безопасность
+
+### Система аутентификации — полная переработка (2026-04-08)
+
+#### Архитектура
+- **Учитель** (`TEACHER`): логин/пароль (bcrypt) + опциональный TOTP 2FA (Google Authenticator)
+- **Родитель** (`PARENT`): логин/пароль (bcrypt), создаётся и управляется учителем из `/bigbos/parents`
+- Пароль учителя хранится в таблице `User` (bcrypt hash), не в `.env`
+- `src/proxy.ts` (Next.js 16) — защита маршрутов `/bigbos/*` и `/parent/*`
+
+#### Новые таблицы БД
+`User`, `RefreshToken`, `AuthEvent`, `MagicToken` (зарезервировано), `TotpSecret`
+
+#### Новые API endpoints
+- `GET /api/auth/totp/setup` — генерация QR-кода
+- `POST /api/auth/totp/verify` — верификация кода
+- `GET /api/auth/totp/status` — статус 2FA
+- `POST /api/auth/refresh` — RTR для web
+- `POST /api/auth/mobile` — JWT для мобильных (access 2ч + refresh 7д + RTR)
+
+#### Безопасность
+- Refresh Token Rotation (RTR) с family-based detection кражи токена
+- Аудит-лог всех auth-событий в `AuthEvent`
+- nginx rate limiting: 5 req/min на `/api/auth/*`
+- bcrypt rounds=12
+- Логин регистронезависим: `username` приводится к нижнему регистру и обрезается от пробелов при авторизации (`src/auth.ts`) и при создании пользователя (`/api/admin/parents`)
+
+#### Docker/CI
+- `migrator`: `prisma migrate deploy` + `prisma db seed`
+- Seed создаёт admin из `ADMIN_USER`/`ADMIN_PASSWORD` если не существует
+- `prisma/migrations/20260408000000_init_auth_system/` — первая миграция
+- `tsx` добавлен в devDependencies (нужен для seed)
 
 ### Docker фиксы (2026-04-03)
 - `db push --skip-generate` вместо `migrate deploy`

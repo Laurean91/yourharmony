@@ -84,7 +84,7 @@ function LibraryPageInner() {
   const filtered = activeCategory ? files.filter(f => (f.category ?? 'Другое') === activeCategory) : files
 
   return (
-    <div className="p-4 md:p-8 max-w-3xl mx-auto">
+    <div className="px-4 md:px-8 py-6 max-w-4xl mx-auto">
 
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">

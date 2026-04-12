@@ -40,7 +40,7 @@ export default function SlugInput({ initialTitle = '', initialSlug = '', onSlugC
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
           Заголовок <span className="text-red-500">*</span>
         </label>
         <input
@@ -50,16 +50,16 @@ export default function SlugInput({ initialTitle = '', initialSlug = '', onSlugC
           onChange={(e) => setTitle(e.target.value)}
           required
           placeholder="Название статьи"
-          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
           Slug (ЧПУ-ссылка) <span className="text-red-500">*</span>
         </label>
-        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent">
-          <span className="px-3 py-2.5 bg-gray-50 text-gray-500 text-sm border-r border-gray-300 shrink-0">
+        <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-transparent">
+          <span className="px-3 py-2.5 bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-sm border-r border-gray-300 dark:border-gray-600 shrink-0">
             /blog/
           </span>
           <input
@@ -69,11 +69,11 @@ export default function SlugInput({ initialTitle = '', initialSlug = '', onSlugC
             onChange={(e) => handleSlugChange(e.target.value)}
             required
             placeholder="moy-post-o-chem-to"
-            className="flex-1 px-3 py-2.5 text-gray-900 outline-none text-sm"
+            className="flex-1 px-3 py-2.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none text-sm"
           />
         </div>
         {!slugManuallyEdited && (
-          <p className="text-xs text-gray-400 mt-1">Генерируется автоматически из заголовка</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Генерируется автоматически из заголовка</p>
         )}
       </div>
     </div>

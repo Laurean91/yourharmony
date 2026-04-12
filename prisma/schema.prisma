@@ -141,14 +141,18 @@ enum Role {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  username     String   @unique
-  passwordHash String
-  role         Role     @default(PARENT)
-  parent       Parent?
-  createdAt    DateTime @default(now())
+  id            String         @id @default(uuid())
+  username      String         @unique
+  passwordHash  String
+  role          Role           @default(PARENT)
+  email         String?        @unique
+  parent        Parent?
+  refreshTokens RefreshToken[]
+  totpSecret    TotpSecret?
+  createdAt     DateTime       @default(now())
 
   @@index([username])
+  @@index([email])
 }
 
 model Parent {
@@ -169,4 +173,50 @@ model ParentStudent {
   student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@id([parentId, studentId])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  family    String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([family])
+}
+
+model AuthEvent {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model MagicToken {
+  id        String    @id @default(uuid())
+  email     String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+}
+
+model TotpSecret {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  secret    String
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

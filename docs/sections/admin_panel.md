@@ -20,6 +20,27 @@
 
 ---
 
+## История изменений — Тёмная тема в форме статей (2026-04-13)
+
+### `PostForm.tsx` + `SlugInput.tsx` — поддержка тёмной темы
+
+**Проблема:** форма создания/редактирования статей (`/bigbos/blog/new`, `/bigbos/blog/[id]/edit`) отображалась в светлых тонах в тёмной теме — белые карточки, серый текст, светлые инпуты.
+
+**Решение** — добавлены Tailwind `dark:` утилиты ко всем элементам формы:
+
+| Элемент | Светлая | Тёмная |
+|---|---|---|
+| Карточки-секции | `bg-white border-gray-200` | `dark:bg-gray-900 dark:border-gray-700` |
+| Инпуты / textarea / select | `bg-white border-gray-300 text-gray-900` | `dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100` |
+| Placeholder | `text-gray-400` | `dark:placeholder:text-gray-500` |
+| Prefix `/blog/` | `bg-gray-50 text-gray-500 border-gray-300` | `dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600` |
+| Лейблы | `text-gray-700` | `dark:text-gray-300` |
+| Заголовки секций | `text-gray-800` | `dark:text-gray-100` |
+| Кнопка «Отмена» | `text-gray-600 hover:bg-gray-100` | `dark:text-gray-400 dark:hover:bg-gray-800` |
+| File input | `file:bg-purple-50 file:text-purple-700` | `dark:file:bg-purple-900/30 dark:file:text-purple-400` |
+
+---
+
 ## История изменений — Фикс мобильного нижнего меню (2026-04-08)
 
 ### `AdminMobileBottomNav` — `fixed` позиционирование
