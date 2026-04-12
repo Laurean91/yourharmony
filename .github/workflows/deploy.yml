@@ -77,7 +77,11 @@ jobs:
 
             echo "==> Rebuilding and starting containers (migrator runs automatically)..."
             # migrator запускается автоматически через depends_on перед nextjs
-            docker compose up -d --build
+            if ! docker compose up -d --build; then
+              echo "==> MIGRATOR LOGS:"
+              docker compose logs migrator
+              exit 1
+            fi
 
             echo "==> Health check..."
             sleep 10
