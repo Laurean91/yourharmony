@@ -26,7 +26,7 @@ COPY prisma ./prisma
 COPY prisma.config.ts ./
 COPY package.json ./
 # Запускаем миграции, затем seed (создаёт admin-пользователя если не существует)
-CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node_modules/.bin/prisma db seed"]
+CMD ["sh", "-c", "node_modules/.bin/prisma migrate resolve --rolled-back 20260408000000_init_auth_system 2>/dev/null || true && node_modules/.bin/prisma migrate deploy && node_modules/.bin/prisma db seed"]
 
 # ── Production ────────────────────────────────────────────────────────────────
 FROM base AS runner
