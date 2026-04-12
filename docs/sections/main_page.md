@@ -29,6 +29,11 @@
 ### Кнопка «Записаться» на лендинге (2026-04-04)
 - Убрана белая обводка `ring-2 ring-white/30` с кнопки Hero в `src/components/LandingClient.tsx`
 
+### Navbar — мобильное меню redesign (2026-04-12)
+- **Кнопка бургера**: SVG-кнопка 36×36px, три линии (фиолетовая/лиловая/оранжевая) морфируются в X через `motion.line` координаты; стеклянный фон с `backdrop-filter: blur(8px)`, без браузерного outline (`WebkitTapHighlightColor: transparent`)
+- **Popup-меню**: всплывающее окно 256px под кнопкой справа (не полноэкранный overlay); glassmorphism-фон с gradient indigo→white→orange, `border-radius: 16px`, shadow; staggered анимация ссылок снизу вверх (spring); gradient divider; CTA-кнопка; декоративная звёздочка; закрытие по клику снаружи и Escape
+- **Анимации**: `popupMenu` variant — `scale 0.92→1 + y -8→0`; `menuItem` — `y 8→0 + blur(3px)→blur(0)`; stagger 55ms; exit 180ms
+
 ### Navbar (2026-04-03)
 - Кнопка-иконка `UserCircle` (градиент фиолетовый→оранжевый) ведёт на `/parent`
 - **Логотип** (`public/logo.svg`): правильный SVG (два прямоугольника: фиолетовый + оранжевый, белые звёзды)
