@@ -4,8 +4,11 @@ import { logAuthEvent } from '@/lib/auth-log'
 import { Resend } from 'resend'
 import { randomBytes } from 'crypto'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const MAGIC_LINK_TTL_MINUTES = 10
+
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 export async function POST(req: NextRequest) {
   let body: { email?: string }
@@ -43,7 +46,7 @@ export async function POST(req: NextRequest) {
   const baseUrl = process.env.NEXTAUTH_URL ?? 'https://yourharmony-english.ru'
   const magicUrl = `${baseUrl}/api/auth/magic-link/verify?token=${token}`
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: 'Гармония <noreply@yourharmony-english.ru>',
     to: email,
     subject: 'Вход в кабинет родителя — Гармония',
