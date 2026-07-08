@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
-import { Home, Calendar, Star, CheckSquare, LogOut, Sparkles, Library } from 'lucide-react'
+import { Home, Calendar, Star, CheckSquare, LogOut, Sparkles, Library, Gamepad2 } from 'lucide-react'
 import ParentMobileTopBar from '@/components/ParentMobileTopBar'
 
 const NAV = [
@@ -13,8 +13,10 @@ const NAV = [
   { href: '/parent/grades',     label: 'Успеваемость', mobile: 'Оценки',     icon: Star },
   { href: '/parent/attendance', label: 'Посещаемость', mobile: 'Посещения',  icon: CheckSquare },
   { href: '/parent/stars',      label: 'Звёзды',       mobile: 'Звёзды',    icon: Sparkles },
+  { href: '/parent/games',      label: 'Игры English', mobile: 'Игры',      icon: Gamepad2 },
   { href: '/parent/library',    label: 'Литература',   mobile: 'Книги',     icon: Library },
 ]
+
 
 export default function ParentLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()

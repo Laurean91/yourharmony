@@ -264,3 +264,53 @@ input::placeholder, textarea::placeholder {
   .parent-glass { transition: none; }
   .parent-glass:hover { transform: none; }
 }
+
+/* ── Kids "English Games" module ── */
+
+/* Joyful bounce/pop when the child taps the CORRECT answer */
+@keyframes gamePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.14) rotate(-2deg); }
+  70%  { transform: scale(0.96) rotate(1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.game-pop { animation: gamePop 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+/* Gentle, encouraging wiggle when the child taps a WRONG answer */
+@keyframes gameWiggle {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-7px) rotate(-2deg); }
+  40%      { transform: translateX(6px) rotate(2deg); }
+  60%      { transform: translateX(-4px) rotate(-1deg); }
+  80%      { transform: translateX(3px) rotate(1deg); }
+}
+.game-wiggle { animation: gameWiggle 0.5s ease both; }
+
+/* Soft floating idle animation for the big question glyph */
+@keyframes gameFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+.game-float { animation: gameFloat 3s ease-in-out infinite; }
+
+/* Celebration burst for the correct-answer overlay */
+@keyframes gameBurstIn {
+  0%   { opacity: 0; transform: scale(0.4) rotate(-12deg); }
+  60%  { opacity: 1; transform: scale(1.15) rotate(4deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+.game-burst-in { animation: gameBurstIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+/* Confetti-like falling emoji on topic completion */
+@keyframes gameConfettiFall {
+  0%   { opacity: 0; transform: translateY(-30px) rotate(0deg); }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(120px) rotate(220deg); }
+}
+.game-confetti { animation: gameConfettiFall 2.2s ease-in forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .game-pop, .game-wiggle, .game-float,
+  .game-burst-in, .game-confetti { animation: none; }
+}
+
