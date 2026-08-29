@@ -49,11 +49,26 @@ function GradesPageInner() {
 
   useEffect(() => {
     if (!selected) return
-    setLoading(true)
-    fetch(`/api/parent/grades?studentId=${selected}`)
-      .then(r => r.json())
-      .then(data => { setEntries(Array.isArray(data) ? data : []); setLoading(false) })
-      .catch(() => { setLoading(false); toast.error('Не удалось загрузить оценки') })
+    // cancelled защищает от гонки: при быстром переключении ученика ответ
+    // предыдущего запроса может прийти позже и перезаписать актуальные данные.
+    let cancelled = false
+
+    const load = async () => {
+      setLoading(true)
+      try {
+        const data = await fetch(`/api/parent/grades?studentId=${selected}`).then(r => r.json())
+        if (cancelled) return
+        setEntries(Array.isArray(data) ? data : [])
+      } catch {
+        if (cancelled) return
+        toast.error('Не удалось загрузить оценки')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    load()
+    return () => { cancelled = true }
   }, [selected])
 
   const avg = entries.length > 0

@@ -4,6 +4,8 @@ import {
   getBookings, getLessons, getStudents,
   getAllPostsAdmin, getFinanceStats,
 } from '../actions'
+
+type Booking = Awaited<ReturnType<typeof getBookings>>[number]
 import DashboardStats from '@/components/DashboardStats'
 import DashboardChart from '@/components/DashboardChart'
 import DashboardStudentGrid from '@/components/DashboardStudentGrid'
@@ -31,7 +33,7 @@ export default async function AdminDashboard() {
     getFinanceStats(),
   ])
 
-  const newBookings = bookings.filter((b: any) => b.status === 'Новая')
+  const newBookings = bookings.filter((b: Booking) => b.status === 'Новая')
 
   const mr = financeStats.monthlyRevenue
   const prevRevenue = mr.length >= 2
@@ -69,9 +71,9 @@ export default async function AdminDashboard() {
 
       {/* ── Row 1: KPI cards ── */}
       <DashboardStats
-        bookings={bookings as any}
-        lessons={lessons as any}
-        students={students as any}
+        bookings={bookings}
+        lessons={lessons}
+        students={students}
         monthRevenue={financeStats.totalThisMonth}
         prevRevenue={prevRevenue}
       />
@@ -79,10 +81,10 @@ export default async function AdminDashboard() {
       {/* ── Row 2: Chart (3/5) + Upcoming Lessons (2/5) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-5">
         <div className="lg:col-span-3">
-          <DashboardChart bookings={bookings as any} lessons={lessons as any} />
+          <DashboardChart bookings={bookings} lessons={lessons} />
         </div>
         <div className="lg:col-span-2">
-          <UpcomingLessons lessons={lessons as any} />
+          <UpcomingLessons lessons={lessons} />
         </div>
       </div>
 
@@ -109,7 +111,7 @@ export default async function AdminDashboard() {
               </Link>
             </p>
           ) : (
-            <DashboardStudentGrid students={students as any} />
+            <DashboardStudentGrid students={students} />
           )}
         </div>
 
@@ -153,7 +155,7 @@ export default async function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {bookings.map((b: any, idx: number) => (
+                  {bookings.map((b: Booking, idx: number) => (
                     <BookingRow key={b.id} b={b} idx={idx} />
                   ))}
                 </tbody>

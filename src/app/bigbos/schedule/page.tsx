@@ -6,5 +6,5 @@ import WeekSchedule from '../../../components/WeekSchedule'
 export default async function SchedulePage() {
   const [lessons, students] = await Promise.all([getLessons(), getStudents()])
 
-  return <WeekSchedule lessons={lessons as any} students={students} />
+  return <WeekSchedule lessons={lessons} students={students} />
 }

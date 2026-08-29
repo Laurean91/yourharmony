@@ -36,7 +36,7 @@ jest.mock('@prisma/client', () => {
   return { PrismaClient: jest.fn(() => mockPrisma) }
 })
 
-const db = () => new PrismaClient() as any
+const db = () => new PrismaClient() as unknown as Record<string, Record<string, jest.Mock>>
 
 jest.mock('next/cache', () => ({ revalidatePath: jest.fn() }))
 jest.mock('next/navigation', () => ({ redirect: jest.fn() }))
@@ -211,6 +211,15 @@ describe('updateBookingStatus', () => {
   })
 })
 
+// sharp декодирует загруженный файл, поэтому фикстура должна быть настоящим
+// изображением, а не текстовой заглушкой. Минимальный валидный 1x1 PNG:
+const PNG_1X1 = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+  'base64',
+)
+const imageFile = (name: string) =>
+  new File([new Uint8Array(PNG_1X1)], name, { type: 'image/png' })
+
 // ─── uploadPhoto ──────────────────────────────────────────────────────────────
 
 describe('uploadPhoto', () => {
@@ -221,10 +230,14 @@ describe('uploadPhoto', () => {
 
   it('uploads file to blob and saves url to db', async () => {
     const fd = new FormData()
-    const file = new File(['img'], 'photo.jpg', { type: 'image/jpeg' })
+    const file = imageFile('photo.png')
     fd.append('file', file)
     await uploadPhoto(fd)
-    expect(put).toHaveBeenCalledWith('photo.jpg', file, { access: 'public' })
+    // uploadPhoto сжимает картинку в webp и кладёт в блоб буфер, а не сам File
+    expect(put).toHaveBeenCalledWith('photo.webp', expect.any(Buffer), {
+      access: 'public',
+      contentType: 'image/webp',
+    })
     expect(db().photo.create).toHaveBeenCalledWith({
       data: { url: 'https://blob.example.com/test.jpg' },
     })
@@ -344,7 +357,7 @@ describe('createPost', () => {
     fd.append('slug', 'with-cover')
     fd.append('content', '<p>text</p>')
     fd.append('isPublished', 'true')
-    const coverFile = new File(['img'], 'cover.jpg', { type: 'image/jpeg' })
+    const coverFile = imageFile('cover.png')
     fd.append('coverFile', coverFile)
     await createPost(fd)
     expect(put).toHaveBeenCalled()

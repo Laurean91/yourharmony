@@ -8,7 +8,7 @@ on:
 jobs:
   # ── Проверка кода перед деплоем ──────────────────────────────────────────────
   lint:
-    name: Type check
+    name: Checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,15 +27,11 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
-      # Пока не блокируют деплой: в коде 102 ошибки eslint и 28 падающих тестов.
-      # После того как их починим — убрать continue-on-error, чтобы гейт блокировал.
-      - name: ESLint (non-blocking)
+      - name: ESLint
         run: npm run lint
-        continue-on-error: true
 
-      - name: Jest (non-blocking)
+      - name: Jest
         run: npm test
-        continue-on-error: true
 
   # ── Деплой на VPS ─────────────────────────────────────────────────────────────
   deploy:

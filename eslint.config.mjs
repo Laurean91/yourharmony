@@ -12,7 +12,16 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Рабочие копии репозитория, созданные агентами: не часть сборки.
+    ".claude/**",
   ]),
 ]);
+
+// jest.mock() поднимается выше импортов, поэтому внутри фабрик и в конфиге
+// Jest требуется CommonJS require() — ESM-импорт там работать не будет.
+eslintConfig.push({
+  files: ["jest.config.js", "**/*.test.ts", "**/*.test.tsx"],
+  rules: { "@typescript-eslint/no-require-imports": "off" },
+});
 
 export default eslintConfig;

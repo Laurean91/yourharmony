@@ -39,7 +39,9 @@ describe('TeacherSection', () => {
   it('renders photo when photoUrl is provided', () => {
     render(<TeacherSection {...defaultProps} photoUrl="https://example.com/photo.jpg" />)
     const img = screen.getByRole('img', { name: 'Анна Сергеевна' })
-    expect(img).toHaveAttribute('src', 'https://example.com/photo.jpg')
+    // next/image переписывает src в /_next/image?url=<encoded>, поэтому
+    // проверяем, что исходный адрес попал в итоговый src.
+    expect(img.getAttribute('src')).toContain(encodeURIComponent('https://example.com/photo.jpg'))
   })
 
   it('renders all qualification badges', () => {

@@ -1,9 +1,9 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 const ADMIN_USER = process.env.ADMIN_USER ?? 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? '123n';
 
-async function login(page: any) {
+async function login(page: Page) {
   await page.goto('/bigbos/login');
   await page.getByLabel('Логин').fill(ADMIN_USER);
   await page.getByLabel('Пароль').fill(ADMIN_PASSWORD);

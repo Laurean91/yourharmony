@@ -30,12 +30,27 @@ function SchedulePageInner() {
 
   useEffect(() => {
     if (!selected) return
-    setLoading(true)
-    fetch(`/api/parent/schedule?studentId=${selected}`)
-      .then(r => r.json())
-      .then(data => { setLessons(Array.isArray(data) ? data : []); setLoading(false) })
-      .catch(() => { setLoading(false); toast.error('Не удалось загрузить расписание') })
-  }, [selected]) // eslint-disable-line react-hooks/exhaustive-deps
+    // cancelled защищает от гонки: при быстром переключении ученика ответ
+    // предыдущего запроса может прийти позже и перезаписать актуальные данные.
+    let cancelled = false
+
+    const load = async () => {
+      setLoading(true)
+      try {
+        const data = await fetch(`/api/parent/schedule?studentId=${selected}`).then(r => r.json())
+        if (cancelled) return
+        setLessons(Array.isArray(data) ? data : [])
+      } catch {
+        if (cancelled) return
+        toast.error('Не удалось загрузить расписание')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    load()
+    return () => { cancelled = true }
+  }, [selected])
 
   const grouped = lessons.reduce<Record<string, Lesson[]>>((acc, l) => {
     const key = new Date(l.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })

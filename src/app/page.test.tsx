@@ -23,10 +23,10 @@ jest.mock('./actions', () => ({
 }))
 
 // Mock complex client components — tested separately
-jest.mock('../components/Navbar', () => () => <nav data-testid="navbar" />)
-jest.mock('../components/Footer', () => () => <footer data-testid="footer" />)
-jest.mock('../components/BlogPreview', () => () => <section data-testid="blog-preview" />)
-jest.mock('../components/TeacherSection', () => () => <section data-testid="teacher-section" />)
+jest.mock('../components/Navbar', () => function MockNavbar() { return <nav data-testid="navbar" /> })
+jest.mock('../components/Footer', () => function MockFooter() { return <footer data-testid="footer" /> })
+jest.mock('../components/BlogPreview', () => function MockBlogPreview() { return <section data-testid="blog-preview" /> })
+jest.mock('../components/TeacherSection', () => function MockTeacherSection() { return <section data-testid="teacher-section" /> })
 jest.mock('../components/LandingClient', () => ({
   LandingHero: () => (
     <section data-testid="landing-hero">
@@ -70,7 +70,7 @@ describe('Landing Page', () => {
     expect(screen.getByTestId('blog-preview')).toBeInTheDocument()
     expect(screen.getByTestId('teacher-section')).toBeInTheDocument()
     expect(screen.getByTestId('landing-top')).toBeInTheDocument()
-    expect(screen.getByTestId('landing-contacts')).toBeInTheDocument()
+    expect(await screen.findByTestId('landing-contacts')).toBeInTheDocument()
     expect(screen.getByTestId('footer')).toBeInTheDocument()
   })
 
@@ -168,7 +168,7 @@ describe('Landing Page', () => {
       screen.getByTestId('blog-preview'),
       screen.getByTestId('landing-top'),
       screen.getByTestId('teacher-section'),
-      screen.getByTestId('landing-contacts'),
+      await screen.findByTestId('landing-contacts'),
     ]
     for (let i = 0; i < sections.length - 1; i++) {
       expect(sections[i].compareDocumentPosition(sections[i + 1])).toBe(

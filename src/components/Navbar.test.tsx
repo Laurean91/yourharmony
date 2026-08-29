@@ -6,12 +6,28 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/',
 }))
 
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => <div {...props}>{children}</div>,
-  },
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}))
+// Navbar рендерит motion.div/svg/line и читает useReducedMotion.
+// Отдаём любой запрошенный тег как обычный DOM-элемент, чтобы мок не отставал
+// от разметки компонента.
+jest.mock('framer-motion', () => {
+  const React = require('react')
+  const strip = ({ children, variants, initial, animate, exit, transition, whileHover, whileTap, ...props }: Record<string, unknown> & { children?: React.ReactNode }) => ({ children, props })
+  const motion = new Proxy({}, {
+    get: (_target, tag: string) => {
+      const Component = (allProps: Record<string, unknown>) => {
+        const { children, props } = strip(allProps)
+        return React.createElement(tag, props, children)
+      }
+      Component.displayName = `motion.${tag}`
+      return Component
+    },
+  })
+  return {
+    motion,
+    AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
+    useReducedMotion: () => false,
+  }
+})
 
 jest.mock('../lib/utils', () => ({
   scrollToSection: jest.fn(),

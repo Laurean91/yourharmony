@@ -9,6 +9,12 @@ jest.mock('../actions', () => ({
   getPhotos: jest.fn().mockResolvedValue([
     { id: '1', url: 'https://blob.example.com/photo1.jpg', createdAt: new Date() },
   ]),
+  getLessons: jest.fn().mockResolvedValue([]),
+  getStudents: jest.fn().mockResolvedValue([]),
+  getFinanceStats: jest.fn().mockResolvedValue({
+    totalThisMonth: 0,
+    monthlyRevenue: [{ individual: 0, group: 0 }, { individual: 0, group: 0 }],
+  }),
   getAllPostsAdmin: jest.fn().mockResolvedValue([
     { id: '1', title: 'Статья 1', isPublished: true },
     { id: '2', title: 'Черновик', isPublished: false },
@@ -22,12 +28,14 @@ jest.mock('../actions', () => ({
 }))
 
 // SignOutButton is a client component with next-auth — mock it
-jest.mock('@/components/SignOutButton', () => () => <button>Выйти</button>)
-jest.mock('@/components/DeleteBookingButton', () => ({ id }: { id: string }) => (
-  <button title="Удалить заявку" data-id={id}>🗑</button>
-))
+jest.mock('@/components/SignOutButton', () => function MockSignOutButton() { return <button>Выйти</button> })
+jest.mock('@/components/DeleteBookingButton', () => function MockDeleteBookingButton({ id }: { id: string }) {
+  return <button title="Удалить заявку" data-id={id}>🗑</button>
+})
 
-const renderAsync = async (Component: any, props: any = {}) => {
+type AsyncComponent = (props: Record<string, unknown>) => Promise<React.ReactElement>
+
+const renderAsync = async (Component: AsyncComponent, props: Record<string, unknown> = {}) => {
   const jsx = await Component(props)
   return render(jsx)
 }
@@ -35,9 +43,9 @@ const renderAsync = async (Component: any, props: any = {}) => {
 describe('AdminDashboard', () => {
   it('renders main sections', async () => {
     await renderAsync(AdminDashboard)
-    expect(screen.getByText('Панель управления клуба')).toBeInTheDocument()
-    expect(screen.getByText('Новые заявки')).toBeInTheDocument()
-    expect(screen.getByText('Управление галереей')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Дашборд' })).toBeInTheDocument()
+    expect(screen.getAllByText('Заявки').length).toBeGreaterThan(0)
+    expect(screen.getByText('Мои ученики')).toBeInTheDocument()
   })
 
   it('shows booking data from mock', async () => {
@@ -47,19 +55,14 @@ describe('AdminDashboard', () => {
     expect(screen.getByText('Новая')).toBeInTheDocument()
   })
 
-  it('shows blog post count', async () => {
+  it('flags new bookings in the header', async () => {
     await renderAsync(AdminDashboard)
-    // 2 posts total, 1 published
-    expect(screen.getByText(/2.*статей|статей.*2/i)).toBeInTheDocument()
+    expect(screen.getByText(/1 новых заявок/)).toBeInTheDocument()
   })
 
-  it('renders sign out button', async () => {
+  it('renders link to the students page', async () => {
     await renderAsync(AdminDashboard)
-    expect(screen.getByRole('button', { name: 'Выйти' })).toBeInTheDocument()
-  })
-
-  it('renders link to blog management', async () => {
-    await renderAsync(AdminDashboard)
-    expect(screen.getByRole('link', { name: /управление/i, hidden: false })).toBeInTheDocument()
+    const links = screen.getAllByRole('link').map(l => l.getAttribute('href'))
+    expect(links).toContain('/bigbos/students')
   })
 })

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -97,7 +98,7 @@ export default function DocumentsPage() {
           </ul>
         </section>
 
-        <a href="/" className="text-sm text-purple-600 hover:text-purple-800 transition-colors">← Вернуться на главную</a>
+        <Link href="/" className="text-sm text-purple-600 hover:text-purple-800 transition-colors">← Вернуться на главную</Link>
       </div>
     </div>
   )

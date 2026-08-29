@@ -1,6 +1,6 @@
 'use client'
 
-import { updateBookingStatus } from '@/app/actions'
+import { updateBookingStatus, type getBookings } from '@/app/actions'
 import DeleteBookingButton from './DeleteBookingButton'
 import { useAdminTheme } from '@/contexts/AdminThemeContext'
 
@@ -14,7 +14,9 @@ function relativeDate(date: Date | string): string {
   return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
 }
 
-export default function BookingRow({ b, idx }: { b: any; idx: number }) {
+type Booking = Awaited<ReturnType<typeof getBookings>>[number]
+
+export default function BookingRow({ b, idx }: { b: Booking; idx: number }) {
   const isNew = b.status === 'Новая'
   const isZebra = idx % 2 === 1
   const { theme } = useAdminTheme()

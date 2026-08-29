@@ -6,19 +6,23 @@ const mockPush = jest.fn()
 const mockRefresh = jest.fn()
 
 jest.mock('next-auth/react', () => ({
-  signIn: (...args: any[]) => mockSignIn(...args),
+  signIn: (...args: unknown[]) => mockSignIn(...args),
 }))
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush, refresh: mockRefresh }),
 }))
 
-beforeEach(() => jest.clearAllMocks())
+beforeEach(() => {
+  jest.clearAllMocks()
+  // После верного пароля страница спрашивает, включён ли TOTP.
+  global.fetch = jest.fn().mockResolvedValue({ json: async () => ({ enabled: false }) }) as unknown as typeof fetch
+})
 
 describe('LoginPage', () => {
   it('renders login form with all fields', () => {
     render(<LoginPage />)
-    expect(screen.getByText('Вход в панель')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Добро пожаловать' })).toBeInTheDocument()
     expect(screen.getByLabelText('Логин')).toBeInTheDocument()
     expect(screen.getByLabelText('Пароль')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Войти' })).toBeInTheDocument()
@@ -30,7 +34,7 @@ describe('LoginPage', () => {
 
     fireEvent.change(screen.getByLabelText('Логин'), { target: { value: 'admin' } })
     fireEvent.change(screen.getByLabelText('Пароль'), { target: { value: 'wrongpass' } })
-    fireEvent.submit(screen.getByRole('button').closest('form')!)
+    fireEvent.submit(screen.getByRole('button', { name: 'Войти' }).closest('form')!)
 
     await waitFor(() => {
       expect(screen.getByText('Неверный логин или пароль')).toBeInTheDocument()
@@ -38,12 +42,12 @@ describe('LoginPage', () => {
   })
 
   it('redirects to /bigbos on successful login', async () => {
-    mockSignIn.mockResolvedValueOnce({ error: null })
+    mockSignIn.mockResolvedValueOnce({ error: null, ok: true })
     render(<LoginPage />)
 
     fireEvent.change(screen.getByLabelText('Логин'), { target: { value: 'admin' } })
     fireEvent.change(screen.getByLabelText('Пароль'), { target: { value: 'correctpass' } })
-    fireEvent.submit(screen.getByRole('button').closest('form')!)
+    fireEvent.submit(screen.getByRole('button', { name: 'Войти' }).closest('form')!)
 
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/bigbos')
@@ -51,12 +55,12 @@ describe('LoginPage', () => {
   })
 
   it('calls signIn with credentials provider', async () => {
-    mockSignIn.mockResolvedValueOnce({ error: null })
+    mockSignIn.mockResolvedValueOnce({ error: null, ok: true })
     render(<LoginPage />)
 
     fireEvent.change(screen.getByLabelText('Логин'), { target: { value: 'admin' } })
     fireEvent.change(screen.getByLabelText('Пароль'), { target: { value: 'pass' } })
-    fireEvent.submit(screen.getByRole('button').closest('form')!)
+    fireEvent.submit(screen.getByRole('button', { name: 'Войти' }).closest('form')!)
 
     await waitFor(() => {
       expect(mockSignIn).toHaveBeenCalledWith('credentials', expect.objectContaining({
@@ -68,13 +72,13 @@ describe('LoginPage', () => {
   })
 
   it('shows loading state during sign-in', async () => {
-    let resolveSignIn: (v: any) => void
+    let resolveSignIn: (v: unknown) => void
     mockSignIn.mockImplementationOnce(
       () => new Promise(res => { resolveSignIn = res })
     )
     render(<LoginPage />)
 
-    fireEvent.submit(screen.getByRole('button').closest('form')!)
+    fireEvent.submit(screen.getByRole('button', { name: 'Войти' }).closest('form')!)
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Вход...' })).toBeDisabled()

@@ -1,7 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import slugify from 'slugify'
+
+const generateSlug = (value: string) =>
+  slugify(value, {
+    lower: true,
+    strict: true,
+    locale: 'ru',
+    trim: true,
+  })
 
 interface SlugInputProps {
   initialTitle?: string
@@ -11,24 +19,18 @@ interface SlugInputProps {
 
 export default function SlugInput({ initialTitle = '', initialSlug = '', onSlugChange }: SlugInputProps) {
   const [title, setTitle] = useState(initialTitle)
-  const [slug, setSlug] = useState(initialSlug)
+  const [slug, setSlug] = useState(() => initialSlug || (initialTitle ? generateSlug(initialTitle) : ''))
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!initialSlug)
 
-  const generateSlug = (value: string) =>
-    slugify(value, {
-      lower: true,
-      strict: true,
-      locale: 'ru',
-      trim: true,
-    })
-
-  useEffect(() => {
-    if (!slugManuallyEdited && title) {
-      const generated = generateSlug(title)
-      setSlug(generated)
-      onSlugChange?.(generated)
-    }
-  }, [title]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Заголовок меняется только здесь, поэтому slug пересчитываем в обработчике,
+  // а не эффектом — иначе получается лишний цикл рендера.
+  const handleTitleChange = (value: string) => {
+    setTitle(value)
+    if (slugManuallyEdited) return
+    const generated = generateSlug(value)
+    setSlug(generated)
+    onSlugChange?.(generated)
+  }
 
   const handleSlugChange = (value: string) => {
     setSlugManuallyEdited(true)
@@ -47,7 +49,7 @@ export default function SlugInput({ initialTitle = '', initialSlug = '', onSlugC
           type="text"
           name="title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => handleTitleChange(e.target.value)}
           required
           placeholder="Название статьи"
           className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"

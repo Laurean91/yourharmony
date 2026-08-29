@@ -65,7 +65,7 @@ export default function FinanceChart({ data }: { data: MonthlyRevenue[] }) {
               borderRadius: 12,
               color: isDark ? '#fff' : '#111827',
             }}
-            formatter={((v: unknown) => v != null ? `${Number(v).toLocaleString('ru-RU')} ₽` : '') as any}
+            formatter={v => v != null ? `${Number(v).toLocaleString('ru-RU')} ₽` : ''}
           />
           <Legend wrapperStyle={{ color: isDark ? 'rgba(167,139,250,0.8)' : '#6b7280' }} />
           <Bar dataKey="individual" name="Индивидуальные" fill="#7c3aed" radius={[4, 4, 0, 0]} />

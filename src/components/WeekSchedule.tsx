@@ -90,7 +90,10 @@ export default function WeekSchedule({
   const touchDragging = useRef(false)
   const touchDraggedEl = useRef<HTMLElement | null>(null)
   const dragOverSlotRef = useRef<{ dateKey: string; hour: number } | null>(null)
-  const [pendingTouchDrop, setPendingTouchDrop] = useState<{ lessonId: string; dateKey: string; hour: number } | null>(null)
+  // Обработчики тача живут в эффекте с пустыми зависимостями, поэтому свежий
+  // список занятий читаем через ref, а не через замыкание.
+  const lessonsRef = useRef(lessons)
+  useEffect(() => { lessonsRef.current = lessons }, [lessons])
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
   const weekEnd = addDays(weekStart, 6)
@@ -100,6 +103,19 @@ export default function WeekSchedule({
     acc[key] = [...(acc[key] ?? []), l]
     return acc
   }, {})
+
+  function applyDrop(lessonId: string, dateKey: string, hour: number) {
+    const lesson = lessonsRef.current.find(l => l.id === lessonId)
+    if (!lesson) return
+    const [year, month, day] = dateKey.split('-').map(Number)
+    const targetDay = new Date(year, month - 1, day)
+    const oldDate = new Date(lesson.date)
+    const newDate = new Date(targetDay)
+    newDate.setHours(hour, oldDate.getMinutes(), 0, 0)
+    setLessons(ls => ls.map(l => l.id === lessonId ? { ...l, date: newDate } : l))
+    setSelected(prev => prev?.id === lessonId ? { ...prev, date: newDate } : prev)
+    moveLessonDate(lessonId, newDate.toISOString())
+  }
 
   function prevWeek() { setWeekStart(d => addDays(d, -7)) }
   function nextWeek() { setWeekStart(d => addDays(d, 7)) }
@@ -203,7 +219,7 @@ export default function WeekSchedule({
       dragOverSlotRef.current = null
       setDragOverSlot(null)
       if (id && slot) {
-        setPendingTouchDrop({ lessonId: id, dateKey: slot.dateKey, hour: slot.hour })
+        applyDrop(id, slot.dateKey, slot.hour)
       }
     }
 
@@ -215,21 +231,7 @@ export default function WeekSchedule({
     }
   }, [])
 
-  useEffect(() => {
-    if (!pendingTouchDrop) return
-    const { lessonId, dateKey, hour } = pendingTouchDrop
-    setPendingTouchDrop(null)
-    const lesson = lessons.find(l => l.id === lessonId)
-    if (!lesson) return
-    const [year, month, day] = dateKey.split('-').map(Number)
-    const targetDay = new Date(year, month - 1, day)
-    const oldDate = new Date(lesson.date)
-    const newDate = new Date(targetDay)
-    newDate.setHours(hour, oldDate.getMinutes(), 0, 0)
-    setLessons(ls => ls.map(l => l.id === lessonId ? { ...l, date: newDate } : l))
-    setSelected(prev => prev?.id === lessonId ? { ...prev, date: newDate } : prev)
-    moveLessonDate(lessonId, newDate.toISOString())
-  }, [pendingTouchDrop, lessons])
+
 
   async function handleAttendance(lessonId: string, studentId: string, attended: boolean) {
     setPendingAttendance(studentId)

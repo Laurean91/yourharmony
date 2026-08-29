@@ -73,11 +73,26 @@ function LibraryPageInner() {
 
   useEffect(() => {
     if (!selected) return
-    setLoading(true)
-    fetch(`/api/library?studentId=${selected}`)
-      .then(r => r.json())
-      .then(data => { setFiles(Array.isArray(data) ? data : []); setLoading(false) })
-      .catch(() => setLoading(false))
+    // cancelled защищает от гонки: при быстром переключении ученика ответ
+    // предыдущего запроса может прийти позже и перезаписать актуальные данные.
+    let cancelled = false
+
+    const load = async () => {
+      setLoading(true)
+      try {
+        const data = await fetch(`/api/library?studentId=${selected}`).then(r => r.json())
+        if (cancelled) return
+        setFiles(Array.isArray(data) ? data : [])
+      } catch {
+        if (cancelled) return
+        // тихо: список остаётся пустым
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    load()
+    return () => { cancelled = true }
   }, [selected])
 
   const categories = Array.from(new Set(files.map(f => f.category ?? 'Другое'))).filter(Boolean)

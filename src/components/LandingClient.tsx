@@ -88,9 +88,9 @@ export function LandingHero({ data = DEFAULT_HERO }: { data?: HeroSettings }) {
     mouseY.set(e.clientY - rect.top - rect.height / 2)
   }
 
-  const students = useCounter(data.studentsCount)
-  const years    = useCounter(data.yearsCount)
-  const rating   = useCounter(Math.round(data.rating * 10), 1.2)
+  const { count: studentsCount, ref: studentsRef } = useCounter(data.studentsCount)
+  const { count: yearsCount, ref: yearsRef } = useCounter(data.yearsCount)
+  const { count: ratingCount, ref: ratingRef } = useCounter(Math.round(data.rating * 10), 1.2)
 
   return (
     <>
@@ -127,16 +127,16 @@ export function LandingHero({ data = DEFAULT_HERO }: { data?: HeroSettings }) {
         {/* Stats bar with counter */}
         <motion.div initial="hidden" animate="visible" variants={fadeUp}
           className="flex flex-wrap justify-center gap-8 mt-10">
-          <div className="text-center" ref={students.ref}>
-            <p className="text-2xl font-extrabold text-purple-600">{students.count}+</p>
+          <div className="text-center" ref={studentsRef}>
+            <p className="text-2xl font-extrabold text-purple-600">{studentsCount}+</p>
             <p className="text-sm text-gray-500">учеников</p>
           </div>
-          <div className="text-center" ref={years.ref}>
-            <p className="text-2xl font-extrabold text-orange-500">{years.count} года</p>
+          <div className="text-center" ref={yearsRef}>
+            <p className="text-2xl font-extrabold text-orange-500">{yearsCount} года</p>
             <p className="text-sm text-gray-500">работаем</p>
           </div>
-          <div className="text-center" ref={rating.ref}>
-            <p className="text-2xl font-extrabold text-yellow-500">★ {(rating.count / 10).toFixed(1)}</p>
+          <div className="text-center" ref={ratingRef}>
+            <p className="text-2xl font-extrabold text-yellow-500">★ {(ratingCount / 10).toFixed(1)}</p>
             <p className="text-sm text-gray-500">средняя оценка</p>
           </div>
         </motion.div>

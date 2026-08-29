@@ -27,7 +27,15 @@ function getLast6Months() {
   return months
 }
 
-function CustomTooltip({ active, payload, label, isDark }: any) {
+interface TooltipEntry { name?: string; value?: number | string; color?: string }
+interface TooltipProps {
+  active?: boolean
+  payload?: TooltipEntry[]
+  label?: string | number
+  isDark: boolean
+}
+
+function CustomTooltip({ active, payload, label, isDark }: TooltipProps) {
   if (!active || !payload?.length) return null
   return (
     <div style={{
@@ -39,7 +47,7 @@ function CustomTooltip({ active, payload, label, isDark }: any) {
       fontSize: 12,
     }}>
       <p style={{ color: isDark ? 'rgba(167,139,250,0.7)' : '#6b7280', marginBottom: 4, fontWeight: 600 }}>{label}</p>
-      {payload.map((p: any) => (
+      {payload.map((p: TooltipEntry) => (
         <p key={p.name} style={{ color: p.color, fontWeight: 600, margin: '2px 0' }}>
           {p.name}: <span style={{ color: isDark ? '#fff' : '#111' }}>{p.value}</span>
         </p>
