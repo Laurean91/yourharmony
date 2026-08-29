@@ -27,6 +27,16 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
+      # Пока не блокируют деплой: в коде 102 ошибки eslint и 28 падающих тестов.
+      # После того как их починим — убрать continue-on-error, чтобы гейт блокировал.
+      - name: ESLint (non-blocking)
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Jest (non-blocking)
+        run: npm test
+        continue-on-error: true
+
   # ── Деплой на VPS ─────────────────────────────────────────────────────────────
   deploy:
     name: Deploy
@@ -50,13 +60,13 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         with:
           host: ${{ secrets.VPS_HOST }}
-          username: deploy
+          username: lau
           key: ${{ secrets.VPS_SSH_KEY }}
           command_timeout: 12m
           envs: POSTGRES_PASSWORD,AUTH_SECRET,ADMIN_USER,ADMIN_PASSWORD,BLOB_READ_WRITE_TOKEN,RESEND_API_KEY,NOTIFICATION_EMAIL,FASTAPI_SECRET_KEY,TELEGRAM_BOT_TOKEN,TELEGRAM_CHAT_ID
           script: |
             set -e
-            cd /home/deploy/yourharmony
+            cd /home/lau/yourharmony
 
             echo "==> Writing .env from CI secrets..."
             printf 'POSTGRES_PASSWORD=%s\nAUTH_SECRET=%s\nADMIN_USER=%s\nADMIN_PASSWORD=%s\nBLOB_READ_WRITE_TOKEN=%s\nRESEND_API_KEY=%s\nNOTIFICATION_EMAIL=%s\nFASTAPI_SECRET_KEY=%s\nTELEGRAM_BOT_TOKEN=%s\nTELEGRAM_CHAT_ID=%s\n' \
