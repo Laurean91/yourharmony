@@ -38,7 +38,12 @@ jest.mock('@prisma/client', () => {
 
 const db = () => new PrismaClient() as unknown as Record<string, Record<string, jest.Mock>>
 
-jest.mock('next/cache', () => ({ revalidatePath: jest.fn() }))
+jest.mock('next/cache', () => ({
+  revalidatePath: jest.fn(),
+  updateTag: jest.fn(),
+  // Кэш данных в тестах прозрачен: возвращаем саму функцию.
+  unstable_cache: (fn: (...args: unknown[]) => unknown) => fn,
+}))
 jest.mock('next/navigation', () => ({ redirect: jest.fn() }))
 jest.mock('@vercel/blob', () => ({
   put: jest.fn().mockResolvedValue({ url: 'https://blob.example.com/test.jpg' }),

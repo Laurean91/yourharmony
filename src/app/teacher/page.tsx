@@ -6,7 +6,10 @@ import Navbar from '../../components/Navbar'
 import Footer from '../../components/Footer'
 import BookingButton from '../../components/BookingButton'
 
-export const revalidate = 300
+// Рендерим по запросу: при сборке образа базы нет, и статический снимок
+// уносил на прод дефолты вместо контента из админки. Чтение данных
+// кэшируется по тегам в actions.ts, поэтому запросов к базе не прибавилось.
+export const dynamic = 'force-dynamic'
 
 import { SITE_URL } from '../../lib/config'
 

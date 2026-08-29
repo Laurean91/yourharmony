@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
+import nextDynamic from 'next/dynamic'
 import { LandingHero, LandingTop } from '../components/LandingClient'
 import BlogPreview from '../components/BlogPreview'
 import TeacherSection from '../components/TeacherSection'
@@ -8,13 +8,16 @@ import Footer from '../components/Footer'
 import { getSectionSettings, getTeacherProfile } from './actions'
 import { SITE_URL } from '../lib/config'
 
-export const revalidate = 3600
+// Рендерим по запросу: при сборке образа базы нет, и статический снимок
+// уносил на прод дефолты вместо контента из админки. Чтение данных
+// кэшируется по тегам в actions.ts, поэтому запросов к базе не прибавилось.
+export const dynamic = 'force-dynamic'
 
-const HowItWorksSection = dynamic(() => import('../components/LandingClient').then(m => ({ default: m.HowItWorksSection })))
-const TestimonialsSection = dynamic(() => import('../components/LandingClient').then(m => ({ default: m.TestimonialsSection })))
-const CtaSection = dynamic(() => import('../components/LandingClient').then(m => ({ default: m.CtaSection })))
-const FAQSection = dynamic(() => import('../components/LandingClient').then(m => ({ default: m.FAQSection })))
-const LandingContacts = dynamic(() => import('../components/LandingClient').then(m => ({ default: m.LandingContacts })))
+const HowItWorksSection = nextDynamic(() => import('../components/LandingClient').then(m => ({ default: m.HowItWorksSection })))
+const TestimonialsSection = nextDynamic(() => import('../components/LandingClient').then(m => ({ default: m.TestimonialsSection })))
+const CtaSection = nextDynamic(() => import('../components/LandingClient').then(m => ({ default: m.CtaSection })))
+const FAQSection = nextDynamic(() => import('../components/LandingClient').then(m => ({ default: m.FAQSection })))
+const LandingContacts = nextDynamic(() => import('../components/LandingClient').then(m => ({ default: m.LandingContacts })))
 
 export default async function HomePage() {
   const [hero, features, formats, contacts, howItWorks, testimonials, cta, faq, teacher] = await Promise.all([

@@ -2,10 +2,17 @@
 
 import { prisma } from '../lib/prisma'
 import { put, del } from '@vercel/blob'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag, unstable_cache } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { Resend } from 'resend'
 import sharp from 'sharp'
+
+// Публичные страницы рендерятся по запросу, а чтение из базы кэшируется по
+// тегам. Так в HTML никогда не попадает сборочный снимок с дефолтами, а нагрузка
+// на базу остаётся прежней: кэш сбрасывается только при сохранении из админки.
+const TAG_SITE_SETTINGS = 'site-settings'
+const TAG_TEACHER = 'teacher-profile'
+const TAG_POSTS = 'posts'
 
 async function notifyIndexNow(slug: string) {
   const key = process.env.INDEXNOW_KEY
@@ -196,14 +203,17 @@ const DEFAULT_TEACHER = {
   badges: 'Сертификат CELTA,Опыт 7 лет,IELTS 8.0,Дети 4–14 лет',
 }
 
+const readTeacherProfile = unstable_cache(
+  async () => prisma.teacherProfile.findUnique({ where: { id: 'singleton' } }),
+  ['teacher-profile'],
+  { tags: [TAG_TEACHER] },
+)
+
 export async function getTeacherProfile() {
   try {
-    return await prisma.teacherProfile.upsert({
-      where: { id: 'singleton' },
-      update: {},
-      create: DEFAULT_TEACHER,
-    })
-  } catch {
+    return (await readTeacherProfile()) ?? DEFAULT_TEACHER
+  } catch (error) {
+    console.error('[getTeacherProfile] профиль не прочитан из базы:', error)
     return DEFAULT_TEACHER
   }
 }
@@ -229,6 +239,7 @@ export async function updateTeacherProfile(formData: FormData) {
     create: { id: 'singleton', name, bio, badges, photoUrl },
   })
 
+  updateTag(TAG_TEACHER)
   revalidatePath('/')
   revalidatePath('/teacher')
   revalidatePath('/bigbos')
@@ -301,6 +312,7 @@ export async function updateTeacherPageContent(formData: FormData) {
     }),
   ])
 
+  updateTag(TAG_TEACHER)
   revalidatePath('/teacher')
   revalidatePath('/bigbos/teacher')
 }
@@ -310,8 +322,8 @@ export async function updateTeacherPageContent(formData: FormData) {
 const POST_PAGE_SIZE = 6
 
 // 6. Список опубликованных постов (с пагинацией, для читателей)
-export async function getPosts(page = 1) {
-  try {
+const readPosts = unstable_cache(
+  async (page: number) => {
     const skip = (page - 1) * POST_PAGE_SIZE
     const posts = await prisma.post.findMany({
       where: { isPublished: true },
@@ -322,17 +334,32 @@ export async function getPosts(page = 1) {
     })
     const total = await prisma.post.count({ where: { isPublished: true } })
     return { posts, total, totalPages: Math.ceil(total / POST_PAGE_SIZE) }
-  } catch {
+  },
+  ['posts-page'],
+  { tags: [TAG_POSTS] },
+)
+
+export async function getPosts(page = 1) {
+  try {
+    return await readPosts(page)
+  } catch (error) {
+    console.error(`[getPosts] страница ${page} не прочитана из базы:`, error)
     return { posts: [], total: 0, totalPages: 0 }
   }
 }
 
 // 7. Пост по slug (для страницы статьи)
-export async function getPostBySlug(slug: string) {
-  return await prisma.post.findUnique({
+const readPostBySlug = unstable_cache(
+  async (slug: string) => prisma.post.findUnique({
     where: { slug },
     include: { category: true },
-  })
+  }),
+  ['post-by-slug'],
+  { tags: [TAG_POSTS] },
+)
+
+export async function getPostBySlug(slug: string) {
+  return await readPostBySlug(slug)
 }
 
 // 8. Все посты для административной таблицы
@@ -384,6 +411,7 @@ export async function createPost(formData: FormData) {
     throw new Error('Ошибка при сохранении статьи. Попробуйте ещё раз.')
   }
 
+  updateTag(TAG_POSTS)
   revalidatePath('/')
   revalidatePath('/blog')
   revalidatePath('/bigbos/blog')
@@ -425,6 +453,7 @@ export async function updatePost(id: string, formData: FormData) {
     },
   })
 
+  updateTag(TAG_POSTS)
   revalidatePath('/')
   revalidatePath('/blog')
   revalidatePath(`/blog/${post.slug}`)
@@ -439,6 +468,7 @@ export async function deletePost(id: string) {
   if (post?.coverImage && isBlobEnabled()) {
     await del(post.coverImage).catch(() => null)
   }
+  updateTag(TAG_POSTS)
   revalidatePath('/')
   revalidatePath('/blog')
   revalidatePath('/bigbos/blog')
@@ -450,6 +480,7 @@ export async function togglePostStatus(id: string, currentValue: boolean) {
     where: { id },
     data: { isPublished: !currentValue },
   })
+  updateTag(TAG_POSTS)
   revalidatePath('/')
   revalidatePath('/blog')
   revalidatePath(`/blog/${post.slug}`)
@@ -490,12 +521,24 @@ export async function createCategory(name: string, slug: string) {
 import type { SectionKey } from '../lib/landingTypes'
 import { SECTION_DEFAULTS } from '../lib/landingTypes'
 
+const readSectionSettings = unstable_cache(
+  async (key: SectionKey) => {
+    const row = await prisma.siteSettings.findUnique({ where: { key } })
+    return row?.value ?? null
+  },
+  ['section-settings'],
+  { tags: [TAG_SITE_SETTINGS] },
+)
+
 export async function getSectionSettings<K extends SectionKey>(key: K): Promise<typeof SECTION_DEFAULTS[K]> {
   try {
-    const row = await prisma.siteSettings.findUnique({ where: { key } })
-    if (!row) return SECTION_DEFAULTS[key]
-    return JSON.parse(row.value) as typeof SECTION_DEFAULTS[K]
-  } catch {
+    const value = await readSectionSettings(key)
+    if (!value) return SECTION_DEFAULTS[key]
+    return JSON.parse(value) as typeof SECTION_DEFAULTS[K]
+  } catch (error) {
+    // Молчать здесь нельзя: раньше недоступная база выглядела на сайте как
+    // «контент сбросился к дефолтам», и в логах не было ни следа.
+    console.error(`[getSectionSettings] секция "${key}" не прочитана из базы:`, error)
     return SECTION_DEFAULTS[key]
   }
 }
@@ -506,6 +549,7 @@ export async function updateSectionSettings(key: SectionKey, data: unknown) {
     update: { value: JSON.stringify(data) },
     create: { key, value: JSON.stringify(data) },
   })
+  updateTag(TAG_SITE_SETTINGS)
   revalidatePath('/')
   revalidatePath('/bigbos/landing')
 }
