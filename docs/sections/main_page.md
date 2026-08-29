@@ -1,6 +1,6 @@
 # YourHarmony — Публичные страницы
 
-> Смотри также: `seo.md` — ISR, Schema.org, IndexNow для всех публичных страниц  
+> Смотри также: `seo.md` — кэширование публичных страниц, Schema.org, IndexNow  
 > Смотри также: `admin_panel.md` — управление лендингом из `/bigbos/landing`
 
 ---
@@ -12,7 +12,7 @@
 - Каждую секцию можно отключить из CMS
 - `src/lib/landingTypes.ts` — типы и дефолты всех секций
 - `FAQSection` — FAQPage JSON-LD schema
-- ISR: главная `revalidate = 3600`, блог `revalidate = 60`, статья `revalidate = 300`
+- Рендер по запросу (`force-dynamic`) + кэш данных по тегам; ISR отменён 2026-08-29 — см. `seo.md`, раздел «Кэширование публичных страниц»
 
 ---
 
