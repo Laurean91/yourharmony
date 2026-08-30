@@ -30,6 +30,8 @@ from sqlalchemy.ext.asyncio import (
 # Set test env before importing app modules
 os.environ.setdefault("ADMIN_USER", "admin")
 os.environ.setdefault("ADMIN_PASSWORD", "testpass")
+os.environ.setdefault("BLOG_BOT_USER", "blogbot")
+os.environ.setdefault("BLOG_BOT_PASSWORD", "blogbotpass")
 os.environ.setdefault("FASTAPI_SECRET_KEY", "test-secret-key-for-pytest-only")
 os.environ.setdefault("FASTAPI_DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
@@ -89,6 +91,18 @@ async def auth_headers(client: AsyncClient) -> dict:
     resp = await client.post(
         "/api/v1/auth/login",
         json={"username": "admin", "password": "testpass"},
+    )
+    assert resp.status_code == 200, f"Login failed: {resp.text}"
+    token = resp.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+async def blog_bot_auth_headers(client: AsyncClient) -> dict:
+    """Obtain valid JWT auth headers for the blog_bot service identity."""
+    resp = await client.post(
+        "/api/v1/auth/login",
+        json={"username": "blogbot", "password": "blogbotpass"},
     )
     assert resp.status_code == 200, f"Login failed: {resp.text}"
     token = resp.json()["access_token"]

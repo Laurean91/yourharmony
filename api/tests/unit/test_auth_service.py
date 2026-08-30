@@ -9,25 +9,42 @@ from jose import jwt
 
 os.environ.setdefault("ADMIN_USER", "admin")
 os.environ.setdefault("ADMIN_PASSWORD", "testpass")
+os.environ.setdefault("BLOG_BOT_USER", "blogbot")
+os.environ.setdefault("BLOG_BOT_PASSWORD", "blogbotpass")
 os.environ.setdefault("FASTAPI_SECRET_KEY", "test-secret-key-for-pytest-only")
 os.environ.setdefault("FASTAPI_DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 
+from api.config import settings
 from api.services.auth import AuthService  # noqa: E402
 
 
 class TestAuthenticate:
-    def test_correct_credentials_returns_true(self):
-        assert AuthService.authenticate("admin", "testpass") is True
+    def test_correct_admin_credentials_returns_admin_subject(self):
+        assert AuthService.authenticate("admin", "testpass") == "admin"
 
-    def test_wrong_password_returns_false(self):
-        assert AuthService.authenticate("admin", "wrongpass") is False
+    def test_correct_blog_bot_credentials_returns_blog_bot_subject(self):
+        assert AuthService.authenticate("blogbot", "blogbotpass") == "blog_bot"
 
-    def test_wrong_username_returns_false(self):
-        assert AuthService.authenticate("root", "testpass") is False
+    def test_wrong_password_returns_none(self):
+        assert AuthService.authenticate("admin", "wrongpass") is None
 
-    def test_empty_credentials_returns_false(self):
-        assert AuthService.authenticate("", "") is False
+    def test_wrong_username_returns_none(self):
+        assert AuthService.authenticate("root", "testpass") is None
+
+    def test_empty_credentials_returns_none(self):
+        assert AuthService.authenticate("", "") is None
+
+    def test_admin_password_does_not_authenticate_as_blog_bot_username(self):
+        assert AuthService.authenticate("blogbot", "testpass") is None
+
+    def test_blog_bot_password_does_not_authenticate_as_admin_username(self):
+        assert AuthService.authenticate("admin", "blogbotpass") is None
+
+    def test_unset_blog_bot_credentials_do_not_authenticate_empty_login(self, monkeypatch):
+        monkeypatch.setattr(settings, "BLOG_BOT_USER", "")
+        monkeypatch.setattr(settings, "BLOG_BOT_PASSWORD", "")
+        assert AuthService.authenticate("", "") is None
 
 
 class TestCreateAccessToken:

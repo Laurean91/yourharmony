@@ -81,6 +81,24 @@ class TestBlogAdminEndpoints:
         assert body["isPublished"] is False
         assert "id" in body
 
+    async def test_create_post_success_with_blog_bot_identity(
+        self, client: AsyncClient, blog_bot_auth_headers: dict
+    ):
+        resp = await client.post(
+            "/api/v1/blog/posts",
+            json={
+                "title": "Bot Draft",
+                "slug": "bot-draft",
+                "content": "Content of the post",
+                "isPublished": False,
+            },
+            headers=blog_bot_auth_headers,
+        )
+        assert resp.status_code == 201
+        body = resp.json()
+        assert body["slug"] == "bot-draft"
+        assert body["isPublished"] is False
+
     async def test_create_post_invalid_slug_returns_422(
         self, client: AsyncClient, auth_headers: dict
     ):

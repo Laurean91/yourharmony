@@ -38,7 +38,7 @@ class Post(Base):
     )
     createdAt = Column("createdAt", DateTime(timezone=True), server_default=func.now())
     updatedAt = Column(
-        "updatedAt", DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+        "updatedAt", DateTime(timezone=True), default=func.now(), onupdate=func.now()
     )
 
     category = relationship("Category", back_populates="posts", lazy="raise")

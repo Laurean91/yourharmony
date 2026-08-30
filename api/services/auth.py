@@ -8,12 +8,23 @@ from ..config import settings
 
 class AuthService:
     @staticmethod
-    def authenticate(username: str, password: str) -> bool:
-        """Validate credentials against env-configured admin user."""
-        return (
-            username == settings.ADMIN_USER
-            and password == settings.ADMIN_PASSWORD
-        )
+    def authenticate(username: str, password: str) -> str | None:
+        """Validate credentials against env-configured identities.
+
+        Returns the matched identity's token subject, or None if no
+        identity matches. Two identities never share a subject, so a
+        leaked BLOG_BOT credential cannot mint an "admin" token.
+        """
+        if username == settings.ADMIN_USER and password == settings.ADMIN_PASSWORD:
+            return "admin"
+        if (
+            settings.BLOG_BOT_USER
+            and settings.BLOG_BOT_PASSWORD
+            and username == settings.BLOG_BOT_USER
+            and password == settings.BLOG_BOT_PASSWORD
+        ):
+            return "blog_bot"
+        return None
 
     @staticmethod
     def create_access_token(subject: str = "admin") -> str:

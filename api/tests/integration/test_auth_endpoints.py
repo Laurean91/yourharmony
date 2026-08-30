@@ -34,6 +34,14 @@ class TestLogin:
         resp = await client.post("/api/v1/auth/login", json={})
         assert resp.status_code == 422
 
+    async def test_login_blog_bot_credentials_returns_tokens(self, client: AsyncClient):
+        resp = await client.post(
+            "/api/v1/auth/login",
+            json={"username": "blogbot", "password": "blogbotpass"},
+        )
+        assert resp.status_code == 200
+        assert "access_token" in resp.json()
+
     async def test_login_empty_password_returns_422(self, client: AsyncClient):
         resp = await client.post(
             "/api/v1/auth/login",
@@ -77,3 +85,24 @@ class TestRefresh:
             json={"refresh_token": "not.a.valid.token"},
         )
         assert resp.status_code == 401
+
+    async def test_refresh_preserves_blog_bot_identity(self, client: AsyncClient):
+        """A blog_bot refresh must not silently mint an admin-subject token."""
+        from jose import jwt
+
+        login_resp = await client.post(
+            "/api/v1/auth/login",
+            json={"username": "blogbot", "password": "blogbotpass"},
+        )
+        refresh_token = login_resp.json()["refresh_token"]
+
+        resp = await client.post(
+            "/api/v1/auth/refresh",
+            json={"refresh_token": refresh_token},
+        )
+        assert resp.status_code == 200
+        new_access_token = resp.json()["access_token"]
+        payload = jwt.decode(
+            new_access_token, "test-secret-key-for-pytest-only", algorithms=["HS256"]
+        )
+        assert payload["sub"] == "blog_bot"
